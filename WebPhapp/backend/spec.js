@@ -28,7 +28,7 @@ describe('loading express', function () {
     .expect(function didGetThreeList(res){
       var lst = res.body;
       if (lst.length !== 3)
-          throw new Error("Body did not contain list of three elements");
+        throw new Error("Body did not contain list of three elements");
     })
     .end(done);
   });
@@ -49,8 +49,8 @@ describe('loading express', function () {
     
         // assert all fields return some value
         Object.values(pres).forEach(v => {
-          if (v === null || v === '')
-              throw new Error('prescription field empty');
+          if (v === null)
+            throw new Error('prescription field empty');
         });
       })
       .end(done);
@@ -72,8 +72,8 @@ describe('loading express', function () {
     request(server)
       .get('/api/v1/prescriptions/01')
       .expect(function (res){
-          // TODO
-          return true;
+        // TODO
+        return true;
       })
       .end(done);
     });
@@ -82,8 +82,8 @@ describe('loading express', function () {
     request(server)
       .get('/api/v1/prescriptions/012345678909876543234567')
       .expect(function (res){
-          // TODO
-          null;
+        // TODO
+        null;
       })
       .end(done);
     });
