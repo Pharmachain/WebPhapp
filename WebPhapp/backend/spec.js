@@ -21,7 +21,7 @@ describe('loading express', function () {
 
   // Specify all server test functions below...
 
-  // unitttest for the basic list return route.
+  // unit test for the basic list return route.
   it('responds with a list to /api/v1/list', function (done) {
   request(server)
     .get('/api/v1/list')
