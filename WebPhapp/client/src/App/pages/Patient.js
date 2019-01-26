@@ -31,7 +31,7 @@ class Patient extends Component {
 
   // displayPrescription() displays the properties of a prescription using PrescriptionRow
   // @return: returns all prescriptions for a patient id
-  displayPrescription = () =>
+  displayPrescriptions = () =>
     this.state.prescription.map(prescription => (
       <PrescriptionRow
         // unique identifier or key is the prescription ID
@@ -63,7 +63,7 @@ class Patient extends Component {
         {prescription ? (
           <div>
             {/* Render the prescription */}
-            {this.displayPrescription()}
+            {this.displayPrescriptions()}
           </div>
         ) : (
           <div>

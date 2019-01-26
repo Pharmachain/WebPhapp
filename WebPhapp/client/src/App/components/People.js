@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 class People extends Component {
 
-  // Displays all the people in a table
+  // Displays all the people in a table with clickable links to each patient.
   displayPeople = () => {
     return this.props.patientList.map(person => {
       return(
