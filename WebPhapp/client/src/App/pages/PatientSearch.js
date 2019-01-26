@@ -11,24 +11,31 @@ class PatientSearch extends Component {
     lastName:""
   };
 
+  componentDidMount() {
+    // Loads all patients by default
+    axios
+      .get("/api/v1/patients?first=&last=")
+      .then(results => results.data)
+      .then(people => this.setState({ people }));
+  }
+
+  // Updating text in the first name state
   onKeyDownFirstName = event => {
     this.setState({firstName: event.target.value});
   }
 
+  // Updating text in the first last state
   onKeyDownLastName = event => {
     this.setState({lastName: event.target.value});
   }
 
+  // Search query for patient lookup via names
   onSearchPatients = () => {
     const firstName = this.state.firstName;
     const lastName = this.state.lastName;
-    var searchQuery= "/api/v1/patients?";
-    if(!firstName && lastName)
-      return;
-    if(firstName !== '')
-      searchQuery = searchQuery + `first=${firstName}`;
-    if(lastName !== '')
-      searchQuery = searchQuery + `last=${lastName}`;
+
+    // string interpolation
+    var searchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
 
     axios
       .get(searchQuery)
@@ -36,15 +43,13 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people }));
   }
 
-  // displayPrescription() displays the properties of a prescription using PrescriptionRow
-  // @return: returns all prescriptions for a patient id
-
   render() {
 
     return (
       <div className="App">
         <h1>Patient Search </h1>
         <form>
+
           <label>
             First Name: &nbsp;
           </label>
@@ -53,6 +58,7 @@ class PatientSearch extends Component {
             value={this.state.firstName}
             onChange={this.onKeyDownFirstName}
           />
+
           <label>
             &nbsp; Last Name: &nbsp;
           </label>
@@ -62,9 +68,11 @@ class PatientSearch extends Component {
             onChange={this.onKeyDownLastName}
           />
         </form>
+
           <button onClick={this.onSearchPatients}>
             Search
           </button>
+
         <People patientList={this.state.people}/>
       </div>
     );

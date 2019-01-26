@@ -3,22 +3,29 @@ import PropTypes from "prop-types";
 
 class People extends Component {
 
-
+  // Displays all the people in a table
   displayPeople = () => {
     return this.props.patientList.map(person => {
       return(
         <tr key={person.patient_id}>
           <td>
-          {person.patient_id}
+          <a href = {"/patient?ID=" + person.patient_id}>
+          {person.patient_id}</a>
           </td>
           <td>
-          {person.first}
+            <a href = {"/patient?ID=" + person.patient_id}>
+              {person.first}
+            </a>
           </td>
           <td>
-          {person.last}
+            <a href = {"/patient?ID=" + person.patient_id}>
+              {person.last}
+            </a>
           </td>
           <td>
-          {person.dob}
+            <a href = {"/patient?ID=" + person.patient_id}>
+              {person.dob}
+            </a>
           </td>
         </tr>
       );
@@ -37,12 +44,14 @@ class People extends Component {
         </tr>
 
         {this.displayPeople()}
+
       </tbody>
       </table>
     );
   }
 }
 
+// Just the form of each person
 People.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
