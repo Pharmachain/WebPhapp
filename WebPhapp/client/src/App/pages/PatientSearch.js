@@ -46,7 +46,7 @@ class PatientSearch extends Component {
   render() {
 
     return (
-      <div className="App">
+      <div className="form-group">
         <h1>Patient Search </h1>
         <form>
 
@@ -69,7 +69,7 @@ class PatientSearch extends Component {
           />
         </form>
 
-          <button onClick={this.onSearchPatients}>
+          <button type="button" class="btn btn-info" onClick={this.onSearchPatients}>
             Search
           </button>
 

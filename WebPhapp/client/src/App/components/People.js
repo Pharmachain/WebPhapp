@@ -13,7 +13,7 @@ class People extends Component {
           {person.patient_id}</a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id}>
+            <a href = {"/patient?ID=" + person.patient_id} target="_blank">
               {person.first}
             </a>
           </td>
@@ -34,13 +34,13 @@ class People extends Component {
 
   render() {
     return (
-      <table>
+      <table class="table table-hover">
       <tbody>
-        <tr>
-          <th>ID</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Date Of Birth</th>
+        <tr class="table-primary">
+          <th scope="col">ID</th>
+          <th scope="col" >First Name</th>
+          <th scope="col" >Last Name</th>
+          <th scope="col">Date Of Birth</th>
         </tr>
 
         {this.displayPeople()}
