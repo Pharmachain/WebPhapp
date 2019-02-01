@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import PrescriptionRow from "../components/PrescriptionTable";
+import PrescriptionRow from "../components/PrescriptionRow";
 import qs from 'qs';
 
 class Patient extends Component {

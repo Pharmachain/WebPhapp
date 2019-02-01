@@ -13,7 +13,7 @@ class People extends Component {
           {person.patientID}</a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patientID} target="_blank">
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.first}
             </a>
           </td>

@@ -19,6 +19,11 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people }));
   }
 
+    // Updating text in the patient id state
+    onKeyDownPatientID = event => {
+      this.setState({patientID: event.target.value});
+    }
+
   // Updating text in the first name state
   onKeyDownFirstName = event => {
     this.setState({firstName: event.target.value});
@@ -31,14 +36,17 @@ class PatientSearch extends Component {
 
   // Search query for patient lookup via names
   onSearchPatients = () => {
+    const patientID = this.state.patientID;
     const firstName = this.state.firstName;
     const lastName = this.state.lastName;
 
     // String interpolation
-    var searchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var idSearchQuery = `/api/v1/patients/${patientID}`;
+    var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
 
     axios
-      .get(searchQuery)
+      .get(idSearchQuery)
+      .get(nameSearchQuery)
       .then(results => results.data)
       .then(people => this.setState({ people }));
   }
@@ -46,6 +54,7 @@ class PatientSearch extends Component {
   render() {
 
     return (
+        // Returns a navigation bar styled according to the Argon style system
         <div className="form-group">
           <nav className="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
             <div className="container">
@@ -99,8 +108,26 @@ class PatientSearch extends Component {
             </div>
         </nav>
         <br/>
+
+        {/* Returns a text fields to search patients styled according to the Argon style system */}
         <form role="form">
+      
           <div class="form-group mb-3">
+            <div class="input-group input-group-alternative">
+              <div class="input-group-prepend">
+                <span class="input-group-text"></span>
+              </div>
+              <input 
+                class="form-control" 
+                placeholder="Patient ID" 
+                type="p"
+                value={this.state.patientID}
+                onChange={this.onKeyDownPatientID}
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
             <div class="input-group input-group-alternative">
               <div class="input-group-prepend">
                 <span class="input-group-text"></span>
@@ -114,6 +141,7 @@ class PatientSearch extends Component {
               />
             </div>
           </div>
+
           <div class="form-group">
             <div class="input-group input-group-alternative">
               <div class="input-group-prepend">
@@ -128,6 +156,7 @@ class PatientSearch extends Component {
               />
             </div>
           </div>
+
           <div class="text-center">
             <button type="button" className="btn btn-primary my-4"
               onClick={this.onSearchPatients}>
@@ -135,6 +164,7 @@ class PatientSearch extends Component {
             </button>
           </div>
         </form>
+
         <People patientList={this.state.people}/>
       </div>
     );
