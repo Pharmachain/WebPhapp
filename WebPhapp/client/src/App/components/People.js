@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-// import argon from "argon-design-system-free";
 
 class People extends Component {
 
@@ -35,27 +34,23 @@ class People extends Component {
 
   render() {
     return (
-      <div className="table-responsive">
-        <br/>
-        <table className="table align-items-center">
-        <thead className="thead-light">
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">First Name</th>
-            <th scope="col">Last Name</th>
-            <th scope="col">Date Of Birth</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.displayPeople()}
-        </tbody>
-        </table>
-      </div>
+      // Returns a table of patients styled according to the Argon style system
+      <table class="table table-hover">
+      <tbody>
+        <tr class="table-primary">
+          <th scope="col">ID</th>
+          <th scope="col" >First Name</th>
+          <th scope="col" >Last Name</th>
+          <th scope="col">Date Of Birth</th>
+        </tr>
+        {this.displayPeople()}
+      </tbody>
+      </table>
     );
   }
 }
 
-// Just the form of each person
+// The properties of each person patient id, first name, last name, and data of birth
 People.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
