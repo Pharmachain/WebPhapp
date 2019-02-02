@@ -19,7 +19,7 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people }));
   }
 
-    // Updating text in the patient id state
+  // Updating text in the patient id state
   onKeyDownPatientID = event => {
       this.setState({patientID: event.target.value});
     }

@@ -35,7 +35,11 @@ class People extends Component {
   render() {
     return (
       // Returns a table of patients styled according to the Argon style system
+<<<<<<< HEAD
       <table className="table table-hover">
+=======
+      <table class="table table-hover">
+>>>>>>> 39cc3af411b803b2b57d809acf93df8e389ffdc6
       <tbody>
         <tr className="table-primary">
           <th scope="col">ID</th>
