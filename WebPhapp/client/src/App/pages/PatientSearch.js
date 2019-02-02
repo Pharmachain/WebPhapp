@@ -45,7 +45,7 @@ class PatientSearch extends Component {
     var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
 
     axios
-      .get(idSearchQuery)
+      // .get(idSearchQuery)
       .get(nameSearchQuery)
       .then(results => results.data)
       .then(people => this.setState({ people }));
