@@ -1,8 +1,13 @@
 const express = require('express');
 const path = require('path');
+var bodyParser = require('body-parser');
 var fs = require("fs");
 
 const app = express();
+app.use(bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
 
 // JSON reader to read in dummy data
 function readJsonFileSync(filepath, encoding){
@@ -42,6 +47,40 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     res.json(toSend);
     console.log('Sent ' + toSend.length.toString() +
                 ' prescription(s) for patient ID ' + patientID.toString());
+});
+
+/*
+About:
+Attempts to add a prescription for a user, while also doing validation.
+Expects an object such as:
+{patientID,
+drugID,
+quantity,
+daysValid,
+refills,
+prescriberID,
+dispensorID
+}
+    Directly in terminal:
+        By both first and last name:
+            >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":"","daysValid":0,"refills":0,"prescriberID":0,"dispensorID":0}
+  To be used in Axois call:
+        .post("/api/v1/prescription/add",{
+            patientID: 0,
+            ....
+        }
+*/
+
+app.post('/api/v1/prescriptions/add',(req,res) => {
+  const prescription = req.body;
+  //TODO
+  /*
+    Validate all of the data coming in:
+      - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
+      - Validate the drugID, dispensorID, patient all exist.
+    Add the prescription to the blockchain and index this prescription.
+  */
+
 });
 
 // An api endpoint that returns the prescription associated with a
@@ -102,7 +141,7 @@ app.get('/api/v1/patients', (req,res) => {
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
 
-    // Searching for substrings 
+    // Searching for substrings
     var matchingPatients = all_patients.filter(function(elem) {
         if( last === undefined ){
             return (elem.first.includes(first.toLowerCase()));

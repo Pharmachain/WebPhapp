@@ -47,19 +47,23 @@ class PrescriptionAdd extends Component {
     this.setState({dispensorID: event.target.value});
   }
 
-  // Search query for patient lookup via names
+  // Sending the prescription to be added
   onSendPrecription = () => {
-    const firstName = this.state.firstName;
-    const lastName = this.state.lastName;
 
-    // string interpolation
-    var searchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var prescriptionAddQuery= `/api/v1/prescriptions/add`;
 
     /* Send a message back for an error or a success */
     axios
-      .get(searchQuery)
-      .then(results => results.data)
-      .then(people => this.setState({ people }));
+      .post(prescriptionAddQuery,{
+        "patientID": this.state.patientID,
+        "drugID": this.state.drugID,
+        "quantity": this.state.quantity,
+        "daysValid": this.state.daysValid,
+        "refills": this.state.refills,
+        "prescriberID": this.state.prescriberID,
+        "dispensorID": this.state.dispensorID
+      });
+
   }
 
   render() {
