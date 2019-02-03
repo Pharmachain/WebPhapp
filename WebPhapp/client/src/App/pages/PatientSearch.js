@@ -48,7 +48,7 @@ class PatientSearch extends Component {
       axios
       .get(idSearchQuery)
       .then(results => results.data)
-      .then(people => this.setState({ people }));
+      .then(people => this.setState({ people: [people] }));
     }
 
     else if (firstName || lastName) {
