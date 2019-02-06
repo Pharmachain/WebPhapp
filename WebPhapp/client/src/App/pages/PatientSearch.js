@@ -7,6 +7,7 @@ class PatientSearch extends Component {
   // Initialize the state
   state = {
     people: [],
+    patientID: "",
     firstName: "",
     lastName:""
   };
@@ -21,7 +22,7 @@ class PatientSearch extends Component {
 
   // Updating text in the patient id state
   onKeyDownPatientID = event => {
-      this.setState({patientID: event.target.value});
+      this.setState({patientID: String(event.target.value)});
     }
 
   // Updating text in the first name state
@@ -128,7 +129,7 @@ class PatientSearch extends Component {
               <input 
                 className="form-control" 
                 placeholder="Patient ID" 
-                type="p"
+                type="text"
                 value={this.state.patientID}
                 onChange={this.onKeyDownPatientID}
               />
@@ -181,4 +182,4 @@ class PatientSearch extends Component {
   }
 }
 
-export default PatientSearch;
+export default PatientSearch; 
