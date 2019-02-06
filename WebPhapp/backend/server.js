@@ -73,6 +73,7 @@ dispensorID
 
 app.post('/api/v1/prescriptions/add',(req,res) => {
   const prescription = req.body;
+  console.log(prescription);
   //TODO
   /*
     Validate all of the data coming in:
