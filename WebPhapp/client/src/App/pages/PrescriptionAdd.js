@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import axios from "axios";
-import People from '../components/People'
 
 
 class PrescriptionAdd extends Component {

@@ -7,23 +7,23 @@ class People extends Component {
   displayPeople = () => {
     return this.props.patientList.map(person => {
       return(
-        <tr key={person.patient_id}>
+        <tr key={person.patientID}>
           <td>
-          <a href = {"/patient?ID=" + person.patient_id}>
-          {person.patient_id}</a>
+          <a href = {"/patient?ID=" + person.patientID}>
+              {person.patientID}</a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id} target="_blank">
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.first}
             </a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id}>
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.last}
             </a>
           </td>
           <td>
-            <a href = {"/patient?ID=" + person.patient_id}>
+            <a href = {"/patient?ID=" + person.patientID}>
               {person.dob}
             </a>
           </td>
@@ -34,9 +34,10 @@ class People extends Component {
 
   render() {
     return (
-      <table class="table table-hover">
+      // Returns a table of patients styled according to the Argon style system
+      <table className="table table-hover">
       <tbody>
-        <tr class="table-primary">
+        <tr className="table-primary">
           <th scope="col">ID</th>
           <th scope="col" >First Name</th>
           <th scope="col" >Last Name</th>
@@ -51,11 +52,11 @@ class People extends Component {
   }
 }
 
-// Just the form of each person
+// The properties of each person patient id, first name, last name, and data of birth
 People.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
-        patient_id: PropTypes.number.isRequired,
+        patientID: PropTypes.number.isRequired,
         first: PropTypes.string,
         last: PropTypes.string,
         dob: PropTypes.string
@@ -64,3 +65,4 @@ People.propTypes = {
 }
 
 export default People;
+

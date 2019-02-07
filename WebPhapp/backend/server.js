@@ -2,12 +2,44 @@ const express = require('express');
 const path = require('path');
 var bodyParser = require('body-parser');
 var fs = require("fs");
+var conn = require('./connections.js') // private file not under VC.
 
 const app = express();
 app.use(bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
+
+// establish a connection to the remote MySQL DB
+if(conn.MySQL){
+    var mysql = require('mysql')
+    var connection = mysql.createConnection(conn.MySQL);
+}
+
+/*
+Given a list of drugIDs, looks up drug names in the MySQL DB.
+Args: drugIDs list <(int or string)>
+Returns: Promise.
+    Upon resolution, returns (answer) which is a list of rows.
+    Answer can be unpacked in a call to .then((answer) => { ... })
+    Each row contains:
+        row.ID (int)  the drugID in the pharmacopeia
+        row.NAME (string) the name of the drug
+*/
+function getDrugNamesFromIDs(drugIDs){
+    var q = `
+        SELECT ID, NAME
+        FROM seniordesign1.pharmacopeia
+        WHERE ID IN (` + drugIDs.toString() + `)
+    `;
+
+    return new Promise((resolve, reject) => {
+        connection.query(q, (error, rows, fields) => {
+            if (error) reject(error);
+            resolve({rows, fields});
+        });
+    });
+}
 
 // JSON reader to read in dummy data
 function readJsonFileSync(filepath, encoding){
@@ -29,23 +61,72 @@ app.get('/api/v1/list', (req,res) => {
     console.log('Sent list of items');
 });
 
-// An api endpoint that returns all of the prescriptions
-// associated with a patient ID
-// example: http://localhost:5000/api/v1/prescriptions/01
+/*
+An api endpoint that returns all of the prescriptions associated with a patient ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/1")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates, 
+        writtenDate, quantity, daysFor, refillsLeft, 
+        prescriberID, dispenserID, cancelled, cancelDate, drugName
+    ]
+*/
 app.get('/api/v1/prescriptions/:patientID', (req,res) => {
-    var patientID = req.params.patientID;
+    var patientID = parseInt(req.params.patientID);
     var prescriptions = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
     var toSend = [];
     prescriptions.forEach(prescription => {
-        if ( prescription.patientID === patientID ){
-            toSend.push(prescription);
+        if (prescription.patientID === patientID) toSend.push(prescription);
+    });
+
+    // if no prescriptions for a patient ID, return early
+    var msg = 'Sent ' + toSend.length.toString() + 
+                ' prescription(s) for patient ID ' + patientID.toString();
+    if (toSend.length === 0) {
+        console.log(msg);
+        res.json([]);
+        return;
+    }
+
+    // if no connection string (Travis testing), fill drugName with dummy info
+    if (!conn.MySQL) {
+        for (var i = 0; i < toSend.length; i++){
+            toSend[i].drugName = "drugName";
         }
+        res.json(toSend);
+        return;
+    }
+
+    // Look up the drug names given the list of drugIDs in MySQL
+    var drugIDs = toSend.map((prescription) => {
+        return prescription.drugID;
+    })
+
+    getDrugNamesFromIDs(drugIDs)
+    .then((answer) => {
+        for (var i = 0; i < toSend.length; i++){
+            var drug = answer.rows.filter((row) => {
+                return (row.ID === toSend[i].drugID);
+            })[0];
+            toSend[i].drugName = drug.NAME;
+        }
+
+        console.log(msg);
+        res.json(toSend);
+    })
+    .catch((error) => {
+        console.log("/api/v1/prescriptions: error: ", error);
+        res.json({});
     });
 
     res.json(toSend);
-    console.log('Sent ' + toSend.length.toString() +
+    console.log('Sent ' + toSend.length.toString() + 
                 ' prescription(s) for patient ID ' + patientID.toString());
 });
 
@@ -88,23 +169,44 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 // given prescription ID.
 // example: http://localhost:5000/api/v1/prescriptions/single/0002
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
-    var prescriptionID = req.params.prescriptionID;
-    var pres = readJsonFileSync(
+    var prescriptionID = parseInt(req.params.prescriptionID);
+    var prescriptions = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
-    var p = pres.find( function(elem) {
+    var prescription = prescriptions.find( function(elem) {
         return elem.prescriptionID === prescriptionID;
     });
 
     // '==' catches both null and undefined
-    if (p == null) {
-        console.log('Sent empty prescription: no ID match');
-        p = {};
-    } else {
-        console.log("Sent single prescription with ID " + prescriptionID);
+    if (prescription == null) {
+        console.log('/api/v1/prescriptions/single: No ID match');
+        res.json({});
+        return;
+    }
+    
+    // if no connection string (Travis testing), fill drugName with dummy info
+    if (!conn.MySQL) {
+        prescription.drugName = "drugName";
+        res.json(prescription);
+        return;
     }
 
-    res.json(p);
+    // Look up the drug name given the ID in MySQL
+    getDrugNamesFromIDs([prescription.drugID])
+    .then((answer) => {
+        if (answer.rows.length === 0) {
+            prescription.drugName = '';
+        } else {
+            prescription.drugName = answer.rows[0].NAME;
+        }
+        
+        console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+        res.json(prescription);
+    })
+    .catch((error) => {
+        console.log("/api/v1/prescriptions/single: error: ", error);
+        res.json({});
+    });
 });
 
 /*
@@ -129,7 +231,15 @@ Examples:
 
 Returns:
     List of patients with all personal information:
-    [{"first":"jacob","last":"krantz","patient_id":"01","dob":"10-05-1996"}, { ... }]
+    [
+        {
+            "first": "jacob",
+            "last": "krantz",
+            "patientID": 1,
+            "dob": "10-05-1996"
+        },
+        ... 
+    ]
 
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
@@ -142,9 +252,12 @@ app.get('/api/v1/patients', (req,res) => {
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
 
-    // Searching for substrings
+    // Searching for substrings 
     var matchingPatients = all_patients.filter(function(elem) {
-        if( last === undefined ){
+        if( first === undefined && last === undefined ){
+            // if no query given, return all patients
+            return true;
+        } else if( last === undefined ){
             return (elem.first.includes(first.toLowerCase()));
         }
         else if( first === undefined ){
@@ -163,9 +276,48 @@ app.get('/api/v1/patients', (req,res) => {
     res.json(matchingPatients);
 });
 
-// get the index
-app.get('/', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/../client/build/index.html'));
+/*
+About:
+    An api endpoint that returns the info about a patient given a specific
+    patient ID. Patient data temporarily includes date of birth, first and 
+    last name, and patient ID. 
+    TODO: restrict query to a single prescriber.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/patients/1"
+    To be used in Axois call:
+        .get("/api/v1/patients/1")
+Returns:
+    Patient info object with all personal information:
+    {
+        "first": "jacob",
+        "last": "krantz",
+        "patientID": 1,
+        "dob": "10-05-1996"
+    }
+*/
+app.get('/api/v1/patients/:patientID', (req,res) => {
+    var patientID = parseInt(req.params.patientID);
+
+    // will be replaced with DB call once we determine user auth.
+    var all_patients = readJsonFileSync(
+        __dirname + '/' + "dummy_data/patients.json").patients;
+
+    var matchingPatient = all_patients.find(function(patient){
+        return patient.patientID === patientID;
+    })
+
+    // log the backend process to the terminal
+    var msg = '/api/v1/patients/:patientID: ';
+    if(matchingPatient === undefined){
+        msg += 'Returning no patient. No patientID matching \'' + patientID.toString() + '\'';
+        matchingPatient = {};
+    } else {
+        msg += 'Returning patient info for patientID \'' + patientID.toString() + '\'';
+    }
+
+    console.log(msg);
+    res.json(matchingPatient);
 });
 
 // Handles any requests that don't match the ones above
