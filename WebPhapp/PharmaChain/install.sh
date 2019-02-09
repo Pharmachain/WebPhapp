@@ -52,4 +52,6 @@ cd ~/build/Pharmachain/WebPhapp/WebPhapp/client
 sudo npm install
 cd ~/build/Pharmachain/WebPhapp/WebPhapp/PharmaChain
 
+cd ~/build/Pharmachain/WebPhapp/WebPhapp/quorum-maker/
+./setup.sh
 
