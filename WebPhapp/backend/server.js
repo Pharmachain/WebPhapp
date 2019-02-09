@@ -151,16 +151,61 @@ dispensorID
             ....
         }
 */
-
 app.post('/api/v1/prescriptions/add',(req,res) => {
   const prescription = req.body;
   console.log(prescription);
   //TODO
   /*
-    Validate all of the data coming in:
-      - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
-      - Validate the drugID, dispensorID, patient all exist.
+    Incoming data fields:
+        patientID (int),
+        drugID (int),
+        quantity (int),
+        daysFor (int),
+        refillsLeft (int),
+        prescriberID (int), not sure how to handle this yet
+        dispenserID (int) not sure how to handle this yet
+
+    Validation we need to do here:
+    - patientID (integer)
+        need a table in MySQL that has all patient info
+    - drugID (integer)
+        table exists in MySQL. Check that the drugID exists in it.
+    - prescriberID
+        When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
+    - dispenserID
+    - fields that must not be null (other than the ones above):
+        a
+    - fields that must be filled:
+        writtenDate
+
+    Fill out these fields:
+    - FillDates
+        var fillDates = [];
+    - writtenDate
+        d = Date(); // get current datetime
+        var integerDate = Date.parse(d); // ms since 1970. We will store this.
+        var stringDateFromInt = Date(integerDate).toString()
+    - cancelled
+        var cancelled = false;
+    - cancelDate
+        var cancelDate = -1; // need to know that -1 means null.
+
     Add the prescription to the blockchain and index this prescription.
+    Fields:
+    {
+      "prescriptionID": (int),
+      "patientID": (int),
+      "drugID": (int),
+      "fillDates": (list of int- empty),
+      "writtenDate": (datetime as int),
+      "quantity": (int),
+      "daysFor": (int),
+      "refillsLeft": (int),
+      "prescriberID": (int),
+      "dispenserID": (int),
+      "cancelled": (Bool- false),
+      "cancelDate": (int- empty)
+    }
   */
 
 });
