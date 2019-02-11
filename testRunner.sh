@@ -75,7 +75,7 @@ if $c_option; then
     # Turn on the Quorum Network
     cd ./WebPhapp/quorum-maker/TestNetwork
     sudo docker-compose up -d
-    sleep 1m
+    sleep 2m
 
     # Open the nodes up to be used
     sudo ./modular.sh
