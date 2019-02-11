@@ -73,9 +73,11 @@ if $c_option; then
     echo "Running blockchain tests..."
 
     # Turn on the Quorum Network
-    cd ./WebPhapp/quorum-maker/TestNetwork
+    cd ./WebPhapp
+    git clone https://github.com/Pharmachain/quorum-maker
+    cd ./quorum-maker/TestNetwork
     sudo docker-compose up -d
-    sleep 2m
+    sleep 1m
 
     # Open the nodes up to be used
     sudo ./modular.sh
