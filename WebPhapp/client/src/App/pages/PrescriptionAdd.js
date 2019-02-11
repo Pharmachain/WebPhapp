@@ -69,55 +69,141 @@ class PrescriptionAdd extends Component {
 
     return (
       <div className="form-group">
-        <h1>Add Prescription </h1>
+          <nav className="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
+            <div className="container">
+                <a className="navbar-brand" href="#">Add Prescription</a>
+                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+                <div className="collapse navbar-collapse" id="navbar-default">
+                    <div className="navbar-collapse-header">
+                      <div className="row">
+                          <div className="col-6 collapse-brand">
+                              <a href="../../index.html">
+                                  {/* <img src="../../../public/assets/img/brand/blue.png"/> */}
+                              </a>
+                          </div>
+                          <div className="col-6 collapse-close">
+                              <button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
+                                  <span></span>
+                                  <span></span>
+                              </button>
+                          </div>
+                      </div>
+                    </div>
+                    <ul className="navbar-nav ml-lg-auto">
+                        <li className="nav-item">
+                            <a className="nav-link nav-link-icon" href="#">
+                                <i className="ni ni-favourite-28"></i>
+                                <span className="nav-link-inner--text d-lg-none">Discover</span>
+                            </a>
+                        </li>
+                        <li className="nav-item">
+                            <a className="nav-link nav-link-icon" href="#">
+                                <i className="ni ni-notification-70"></i>
+                                <span className="nav-link-inner--text d-lg-none">Profile</span>
+                            </a>
+                        </li>
+                        <li className="nav-item dropdown">
+                            <a className="nav-link nav-link-icon" href="#" id="navbar-default_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i className="ni ni-settings-gear-65"></i>
+                                <span className="nav-link-inner--text d-lg-none">Settings</span>
+                            </a>
+                            <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-default_dropdown_1">
+                                <a className="dropdown-item" href="#">Action</a>
+                                <a className="dropdown-item" href="#">Another action</a>
+                                <div className="dropdown-divider"></div>
+                                <a className="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <br/>
+
         <form>
-
-          <label>
-            Patient ID
-          </label>
-          <input
-            type="p"
-            value={this.state.patientID}
-            onChange={this.onKeyDownPatientID}
-          />
-
-          <label>
-            &nbsp; Drug&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.drugID}
-            onChange={this.onKeyDownDrugID}
-          />
-          <label>
-            &nbsp; Quantity&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.quantity}
-            onChange={this.onKeyDownQuantity}
-          />
-          <label>
-            &nbsp; Days Valid&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.daysValid}
-            onChange={this.onKeyDownDaysValid}
-          />
-          <label>
-            &nbsp; Dispensor ID&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.dispensorID}
-            onChange={this.onKeyDownDispensorID}
-          />
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Patient ID"
+                // value={this.state.patientID}
+                onChange={this.onKeyDownPatientID}/> 
+              </div>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Drug"
+                // value={this.state.drugtID}
+                onChange={this.onKeyDownDrugID}/> 
+              </div>
+            </div>
+          </div> 
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Quantity"
+                // value={this.state.quantity}
+                onChange={this.onKeyDownQuantity}/> 
+              </div>
+            </div>
+          </div> 
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Days Valid"
+                // value={this.state.daysValid}
+                onChange={this.onKeyDownDaysValid}/> 
+              </div>
+            </div>
+          </div> 
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Quantity"
+                // value={this.state.quantity}
+                onChange={this.onKeyDownQuantity}/> 
+              </div>
+            </div>
+          </div> 
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Dispenser ID"
+                // value={this.state.dispensorID}
+                onChange={this.onKeyDownDispensorID}/> 
+              </div>
+            </div>
+          </div> 
         </form>
+        
+        <button 
+          type="button" 
+          class="btn btn-primary my-4 offset-5" 
+          onClick={this.onSendPrecription}>
+          Add Prescription
+        </button>
 
-          <button type="button" class="btn btn-info" onClick={this.onSendPrecription}>
-            Add Prescription
-          </button>
       </div>
     );
   }
