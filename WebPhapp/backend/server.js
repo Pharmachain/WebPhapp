@@ -133,81 +133,79 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 /*
 About:
 Attempts to add a prescription for a user, while also doing validation.
-Expects an object such as:
-{patientID,
-drugID,
-quantity,
-daysValid,
-refills,
-prescriberID,
-dispensorID
+Status of 200 if successful, 400 otherwise.
+Expects an object with all integer fields:
+{
+    patientID,
+    drugID,
+    quantity,
+    daysValid,
+    refills,
+    prescriberID,
+    dispensorID
 }
     Directly in terminal:
-        By both first and last name:
-            >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":"","daysValid":0,"refills":0,"prescriberID":0,"dispensorID":0}
-  To be used in Axois call:
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+    To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
             ....
         }
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {
-  const prescription = req.body;
-  console.log(prescription);
-  //TODO
-  /*
-    Incoming data fields:
-        patientID (int),
-        drugID (int),
-        quantity (int),
-        daysFor (int),
-        refillsLeft (int),
-        prescriberID (int), not sure how to handle this yet
-        dispenserID (int) not sure how to handle this yet
+app.post('/api/v1/prescriptions/add',(req,res) => {    
+    const prescription = req.body;
 
-    Validation we need to do here:
-    - patientID (integer)
-        need a table in MySQL that has all patient info
-    - drugID (integer)
-        table exists in MySQL. Check that the drugID exists in it.
-    - prescriberID
-        When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
-    - dispenserID
-    - fields that must not be null (other than the ones above):
-        a
-    - fields that must be filled:
-        writtenDate
-
-    Fill out these fields:
-    - FillDates
-        var fillDates = [];
-    - writtenDate
-        d = Date(); // get current datetime
-        var integerDate = Date.parse(d); // ms since 1970. We will store this.
-        var stringDateFromInt = Date(integerDate).toString()
-    - cancelled
-        var cancelled = false;
-    - cancelDate
-        var cancelDate = -1; // need to know that -1 means null.
-
-    Add the prescription to the blockchain and index this prescription.
-    Fields:
-    {
-      "prescriptionID": (int),
-      "patientID": (int),
-      "drugID": (int),
-      "fillDates": (list of int- empty),
-      "writtenDate": (datetime as int),
-      "quantity": (int),
-      "daysFor": (int),
-      "refillsLeft": (int),
-      "prescriberID": (int),
-      "dispenserID": (int),
-      "cancelled": (Bool- false),
-      "cancelDate": (int- empty)
+    // validate fields exist that should
+    fields = [
+        prescription.patientID,
+        prescription.drugID,
+        prescription.quantity,
+        prescription.daysValid,
+        prescription.refills,
+        prescription.prescriberID,
+        prescription.dispenserID
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        res.status(400).json(false);
+        return;
     }
-  */
 
+    // validate fields are of proper type
+    field_count = 0;
+    for (var key in prescription){
+        field_count += 1;
+        if( !Number.isInteger(prescription[key]) ){
+            console.log("Prescription field '" + key + "' should be of type Integer.");
+            res.status(400).json(false);
+            return;
+        }
+    }
+
+    // validate there are no extraneous fields
+    if(field_count > fields.length){
+        console.log("Prescription input has too many fields.");
+        res.status(400).json(false);
+        return;
+    }
+
+    // other validation here should include:
+    //  - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
+    //  - Validate the drugID, dispensorID, patient all exist.
+    // we are ignoring this for now and will come back to it.
+
+    // Add derived fields to the prescription
+    prescription.fillDates = [];
+    prescription.writtenDate = new Date().getTime(); // time is in milliseconds since 1970 epoch.
+    prescription.cancelled = false;
+    prescription.cancelDate = -1;
+
+    // TODO: query blockchain to get current highest prescriptionID
+    prescription.prescriptionID = -1;
+
+    // Add the prescription to the blockchain and index this prescription.
+    res.status(200).json(true);
+    return;
 });
 
 // An api endpoint that returns the prescription associated with a
