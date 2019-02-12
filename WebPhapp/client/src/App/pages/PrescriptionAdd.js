@@ -141,9 +141,21 @@ class PrescriptionAdd extends Component {
                 <input 
                 type="p" 
                 className="form-control" 
-                placeholder="Drug"
+                placeholder="Drug ID"
                 // value={this.state.drugtID}
                 onChange={this.onKeyDownDrugID}/> 
+              </div>
+            </div>
+          </div> 
+          <div className="row">
+            <div className="col-md-6 center">
+              <div className="form-group">
+                <input 
+                type="p" 
+                className="form-control" 
+                placeholder="Dispenser ID"
+                // value={this.state.dispensorID}
+                onChange={this.onKeyDownDispensorID}/> 
               </div>
             </div>
           </div> 
@@ -177,21 +189,9 @@ class PrescriptionAdd extends Component {
                 <input 
                 type="p" 
                 className="form-control" 
-                placeholder="Quantity"
-                // value={this.state.quantity}
-                onChange={this.onKeyDownQuantity}/> 
-              </div>
-            </div>
-          </div> 
-          <div className="row">
-            <div className="col-md-6 center">
-              <div className="form-group">
-                <input 
-                type="p" 
-                className="form-control" 
-                placeholder="Dispenser ID"
+                placeholder="Number of Refills"
                 // value={this.state.dispensorID}
-                onChange={this.onKeyDownDispensorID}/> 
+                onChange={this.onKeyDownRefills}/> 
               </div>
             </div>
           </div> 
@@ -199,7 +199,7 @@ class PrescriptionAdd extends Component {
         
         <button 
           type="button" 
-          class="btn btn-primary my-4 offset-5" 
+          class="btn btn-primary my-4 center" 
           onClick={this.onSendPrecription}>
           Add Prescription
         </button>
