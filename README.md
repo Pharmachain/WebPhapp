@@ -98,7 +98,7 @@ node update_prescription.js 0 1 2 4 true 8
 rpc call eth_coinbase() on http://localhost:22000: Post http://localhost:22000: dial tcp 127.0.0.1:22000: connect: connection refused
 ```
 
-Reclone the quorum-maker folder, and reclone it.
+Delete the quorum-maker folder, and reclone it.
 ```
 cd WebPhapp/
 sudo rm -r quorum-maker
