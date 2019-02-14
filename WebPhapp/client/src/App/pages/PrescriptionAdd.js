@@ -51,11 +51,6 @@ class PrescriptionAdd extends Component {
     this.setState({dispenserID: event.target.value});
   }
 
-  // Updating value in the dispenserID state
-  onKeyDownDispenserID = event => {
-    this.setState({dispenserID: event.target.value});
-  }
-
   // Sending the prescription to be added
   onSendPrecription = () => {
 
