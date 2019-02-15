@@ -20,9 +20,9 @@ describe("loading express", function() {
   });
 
 
-  // ------------------------------------------------------
-  //             Tests: /api/vi/prescriptions
-  // ------------------------------------------------------
+  // // ------------------------------------------------------
+  // //             Tests: /api/vi/prescriptions
+  // // ------------------------------------------------------
 
 
   // ensure that given a prescription ID, the get request
@@ -213,7 +213,7 @@ describe("loading express", function() {
     .send({
       patientID: 0,
       drugID: 0,
-      quantity:0,
+      quantity:"0",
       daysValid:0,
       refills:0,
       prescriberID:0,
@@ -232,7 +232,7 @@ describe("loading express", function() {
     .send({
       patientID: 0,
       drugID: 0,
-      quantity:0,
+      quantity:"0",
       daysValid:0,
       refills:0,
       prescriberID:0,
@@ -252,7 +252,7 @@ describe("loading express", function() {
     .send({
       patientID: "this should not be a string",
       drugID: 0,
-      quantity:0,
+      quantity:"0",
       daysValid:0,
       refills:0,
       prescriberID:0,
@@ -270,7 +270,7 @@ describe("loading express", function() {
     .post("/api/v1/prescriptions/add")
     .send({
       drugID: 0,
-      quantity:0,
+      quantity:"0",
       daysValid:0,
       refills:0,
       prescriberID:0,

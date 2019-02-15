@@ -164,6 +164,13 @@ Expects an object with all integer fields:
 app.post('/api/v1/prescriptions/add',(req,res) => {    
     const prescription = req.body;
 
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
     // validate fields exist that should
     fields = [
         prescription.patientID,
@@ -176,26 +183,23 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
-        res.status(400).json(false);
-        return;
+        return finish("Required prescription field(s) are null or undefined.", false)
     }
 
     // validate fields are of proper type
-    field_count = 0;
     for (var key in prescription){
-        field_count += 1;
-        if( !Number.isInteger(prescription[key]) ){
-            console.log("Prescription field '" + key + "' should be of type Integer.");
-            res.status(400).json(false);
-            return;
+        if(key === "quantity"){
+            if(typeof prescription[key] !== "string"){
+                return finish("Prescription field '" + key + "' should be of type String.", false);
+            }
+        } else if( !Number.isInteger(prescription[key]) ){
+            return finish("Prescription field '" + key + "' should be of type Integer.", false);
         }
     }
 
     // validate there are no extraneous fields
-    if(field_count > fields.length){
-        console.log("Prescription input has too many fields.");
-        res.status(400).json(false);
-        return;
+    if(Object.keys(prescription).length > fields.length){
+        return finish("Prescription input has too many fields.", false);
     }
 
     // other validation here should include:
@@ -204,17 +208,15 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     // we are ignoring this for now and will come back to it.
 
     // Add derived fields to the prescription
-    prescription.fillDates = [];
+    prescription.fillDates = []; // array of integer dates filled by the dispenser.
     prescription.writtenDate = new Date().getTime(); // time is in milliseconds since 1970 epoch.
-    prescription.cancelled = false;
-    prescription.cancelDate = -1;
+    prescription.cancelDate = -1; // -1 means no date- not cancelled.
 
     // TODO: query blockchain to get current highest prescriptionID
     prescription.prescriptionID = -1;
 
     // Add the prescription to the blockchain and index this prescription.
-    res.status(200).json(true);
-    return;
+    return finish("TODO: build prescription add to blockchain", true);
 });
 
 // An api endpoint that returns the prescription associated with a

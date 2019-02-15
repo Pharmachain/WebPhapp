@@ -6,12 +6,11 @@
       "drugID": 12,
       "fillDates": [1538697600000],
       "writtenDate": 1537574400000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 7,
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     },
     {
@@ -20,12 +19,11 @@
       "drugID": 13,
       "fillDates": [],
       "writtenDate": 1541289600000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 14,
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     },
     {
@@ -34,12 +32,11 @@
       "drugID": 14,
       "fillDates": [1539993600000, 1541548800000],
       "writtenDate": 1539388800000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 14,
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     },
     {
@@ -48,12 +45,11 @@
       "drugID": 15,
       "fillDates": [1546560000000],
       "writtenDate": 1546416000000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 7,
       "refillsLeft": 0,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     },
     {
@@ -62,12 +58,11 @@
       "drugID": 16,
       "fillDates": [1546646400000],
       "writtenDate": 1546416000000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 20,
       "refillsLeft": 1,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     },
     {
@@ -76,12 +71,11 @@
       "drugID": 17,
       "fillDates": [],
       "writtenDate": 1546387200000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 30,
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 2,
-      "cancelled": true,
       "cancelDate": 1546560000000
     },
     {
@@ -90,12 +84,11 @@
       "drugID": 11,
       "fillDates": [1540252800000],
       "writtenDate": 1539993600000,
-      "quantity": 1,
+      "quantity": "1",
       "daysFor": 7,
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelled": false,
       "cancelDate": -1
     }
   ]
