@@ -1,28 +1,45 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-
+  
 class PrescriptionTable extends Component {
     // Displays all prescriptions for a patient
     displayPrescriptions = () => {
         return this.props.prescriptions.map(prescription => {
+            var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
+            var cancel = prescription.cancelled ? "Yes" : "No";
+            var cancelDate = prescription.cancelDate === "" ? "TBD" : prescription.cancelDate; 
+
             return(
                 <tr key={prescription.prescriptionID}>
                     <td> {prescription.prescriptionID} </td>
                     <td> {prescription.patientID} </td>
                     <td> {prescription.drugID} </td>
-                    <td> {prescription.fillDates} </td>
+                    <td>
+                        <button 
+                            type="button" 
+                            className="btn btn-primary"
+                            data-container="body"
+                            data-toggle="popover"
+                            data-trigger="hover"
+                            title="Fill Dates"
+                            data-placement="top"
+                            data-content={fillDates}>
+                            <span className="btn-inner--icon"><i className="ni ni-calendar-grid-58"></i></span>
+                        </button>
+                    </td>
                     <td> {prescription.writtenDate} </td>
                     <td> {prescription.quantity} </td>
                     <td> {prescription.daysFor} </td>
                     <td> {prescription.refillsLeft} </td>
                     <td> {prescription.prescriberID} </td>
                     <td> {prescription.dispenserID} </td>
-                    <td> {prescription.cancelled} </td>
-                    <td> {prescription.cancelDate} </td>
+                    <td> {cancel} </td>
+                    <td> {cancelDate} </td>
                 </tr>
             )
         })
     }
+
     render() {
         return(
             <table className="table table-hover">
