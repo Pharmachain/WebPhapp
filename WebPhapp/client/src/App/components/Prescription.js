@@ -13,17 +13,29 @@ class Prescription extends Component {
                 <div className="card card-stats mb-4" key={prescription.prescriptionID}>
                     <div className="card-body">
                         <div className="row">
-                            <div className="col-lg">
-                                <h5 className="card-title text-uppercase text-muted mb-0">Prescription:</h5>
-                                <span className="h2 font-weight-bold mb-0">{prescription.prescriptionID}</span>
+                            <div className="col">
+                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription: &nbsp;
+                                    <span className="h2 font-weight-bold mb-0">{prescription.prescriptionID}</span>
+                                </h5>
+                                <p class="mt-3 mb-0 text-muted text-sm text-left">
+                                    <span class="text-nowrap">
+                                        Date Written: {prescription.writtenDate}
+                                        <br></br>
+                                        Quantity: {prescription.quantity}
+                                        <br></br>
+                                        Days For: {prescription.daysFor}
+                                        <br></br>
+                                        Refills Left: {prescription.refillsLeft}
+                                    </span> 
+                                </p>
                             </div>
                             <div className="col-auto">
-                                <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                <div className="icon icon-shape bg-default text-white rounded-circle shadow left">
                                     <i class="fas fa-file-prescription"></i>
                                 </div>
                             </div>
-                            <a href="#" class="btn btn-primary">More</a>
                         </div>
+                        {/* <a href="#" class="btn btn-primary">More</a> */}
                     </div>
                 </div>
                 // <tr key={prescription.prescriptionID}>
@@ -75,14 +87,13 @@ class Prescription extends Component {
             //     <th scope="col" >Cancel Date</th>
             //   </tr>
             
-            // <div style="width: 18rem;">
-            //     {this.displayPrescriptions()}
-            // </div>
-
+            <div className="container-fluid">
+            <div className="header-body">
             <div className="card-columns">
                 {this.displayPrescriptions()}
             </div>
-      
+            </div>
+            </div>
             // </tbody>
             // </table>  
         );
