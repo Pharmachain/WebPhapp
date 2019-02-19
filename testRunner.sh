@@ -85,6 +85,7 @@ if $c_option; then
     # Run the test contracts
     cd ../../PharmaChain
     sudo truffle version
+    sudo truffle migrate
     sudo truffle test
     cd ../../
 fi
