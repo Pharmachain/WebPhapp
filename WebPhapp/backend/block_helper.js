@@ -24,9 +24,9 @@ var valuesToPrescription = function(values, prescriptionID) {
 module.exports = {
 
     /*
-    This function takes an index and returns a prescription from the drugChain.
+    This function takes an index and returns a prescription from the blockchain.
     Args:
-        index: (int), idnex of prescription on the blockchain
+        index: (int), index of prescription on the blockchain
     Returns:
         { prescription }
     */

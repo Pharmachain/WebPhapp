@@ -179,8 +179,13 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
                 });
 
                 // Could be undefined on return
-                if(drug.length !== 0)
-                prescriptions[i].drugName = drug[0].NAME;
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+                
             }
 
             console.log(msg);
@@ -284,7 +289,7 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
             handlePrescriptionCallback(answer.prescription);
         }).catch((error) => {
             console.log('error: ', error);
-            res.status(400).send('Prescription not found.');
+            res.status(400).send('Error searching for prescription by prescriptionID.');
         });
     }
     else { // load prescription from dummy data
