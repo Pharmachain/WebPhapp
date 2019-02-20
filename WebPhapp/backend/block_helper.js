@@ -27,7 +27,8 @@ Can be customized for different users down the road.
 Returns:
     {
         patient (web3 contract),
-        account (web3 account)
+        account (web3 account),
+        web3 (general web3 object)
     }
 */
 var connectToChain = async function() {
