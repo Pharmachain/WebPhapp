@@ -94,8 +94,6 @@ class Prescription extends Component {
             </div>
             </div>
             </div>
-            // </tbody>
-            // </table>  
         );
     }
 }
