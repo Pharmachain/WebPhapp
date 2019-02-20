@@ -8,7 +8,7 @@ export class Header extends React.Component {
         <div className="form-group">
           <nav className="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
             <div className="container">
-                <a className="navbar-brand" href="#">PharmaChain EPS</a>
+                <a className="navbar-brand" href="./">PharmaChain EPS</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -30,15 +30,15 @@ export class Header extends React.Component {
                     </div>
                     <ul className="navbar-nav ml-lg-auto">
                         <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-favourite-28"></i>
-                                <span className="nav-link-inner--text d-lg-none">Discover</span>
+                            <a className="nav-link nav-link-icon" href="./patientSearch">
+                                <i className="fas fa-search"></i>
+                                <span className="nav-link-inner--text d-lg-none">Search</span>
                             </a>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-notification-70"></i>
-                                <span className="nav-link-inner--text d-lg-none">Profile</span>
+                            <a className="nav-link nav-link-icon" href="./">
+                                <i className="fas fa-home"></i>
+                                <span className="nav-link-inner--text d-lg-none">Home</span>
                             </a>
                         </li>
                         <li className="nav-item dropdown">
@@ -48,7 +48,6 @@ export class Header extends React.Component {
                             </a>
                             <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-default_dropdown_1">
                                 <a className="dropdown-item" href="#">Action</a>
-                                <a className="dropdown-item" href="#">Another action</a>
                                 <div className="dropdown-divider"></div>
                                 <a className="dropdown-item" href="#">Something else here</a>
                             </div>
