@@ -15,8 +15,8 @@ class Prescription extends Component {
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
-                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription: &nbsp;
-                                    <span className="h2 font-weight-bold mb-0">{prescription.prescriptionID}</span>
+                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription {prescription.prescriptionID} &nbsp;
+                                    <span className="h2 font-weight-bold mb-0">{prescription.drugName}</span>
                                 </h5>
                                 <p className="mt-3 mb-0 text-muted text-sm text-left">
                                     <span className="text-nowrap">
