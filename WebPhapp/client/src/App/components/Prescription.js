@@ -10,7 +10,7 @@ class Prescription extends Component {
             var cancelDate = prescription.cancelDate === "" ? "TBD" : prescription.cancelDate; 
 
             return(
-                <div className="card card-stats mb-4" key={prescription.prescriptionID}>
+                <div className="card card-stats mb-4 ml-4" key={prescription.prescriptionID}>
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
@@ -29,15 +29,59 @@ class Prescription extends Component {
                                     </span> 
                                 </p>
                             </div>
-                            <div className="col-auto">
-                                <div className="icon icon-shape bg-default text-white rounded-circle shadow left">
-                                    <i class="fas fa-file-prescription"></i>
+                            <div className="col">
+                                <div className="icon icon-shape bg-default text-white rounded-circle shadow lg">
+                                    <i className="fas fa-file-prescription"></i>
                                 </div>
                             </div>
                         </div>
-                        {/* <a href="#" class="btn btn-primary">More</a> */}
+                        <br></br>
+                        <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal">
+                            <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
+                            <span className="btn-inner--text">More Info</span>
+                        </button>
+
+
+                        <div class="col-md-4">
+                        <div class="modal fade" id="prescription-modal">
+                        <div class="modal-dialog modal- modal-dialog-centered modal" role="document">
+                            <div class="modal-content">
+          
+                            <div class="card-body px-lg-5 py-lg-5">
+                            <div class="text-center text-muted mb-4">
+                                <small>Or sign in with credentials</small>
+                            </div>
+                            <form role="form">
+                                <div class="form-group mb-3">
+                                    <div class="input-group input-group-alternative">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                                        </div>
+                                        <input class="form-control" placeholder="Email" type="email"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group input-group-alternative">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                                        </div>
+                                        <input class="form-control" placeholder="Password" type="password"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-primary my-4">Sign in</button>
+                                </div>
+                            </form>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        </div>
+                    
                     </div>
                 </div>
+
                 // <tr key={prescription.prescriptionID}>
                 //     <td> {prescription.prescriptionID} </td>
                 //     <td> {prescription.patientID} </td>
@@ -86,12 +130,9 @@ class Prescription extends Component {
             //     <th scope="col" >Cancelled</th>
             //     <th scope="col" >Cancel Date</th>
             //   </tr>
-            
-            <div className="container-fluid">
-            <div className="header-body">
-            <div className="card-columns">
-                {this.displayPrescriptions()}
-            </div>
+            <div className="container">
+            <div className="masonry align-items-left">
+                    {this.displayPrescriptions()}
             </div>
             </div>
         );
