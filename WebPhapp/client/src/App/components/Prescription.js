@@ -9,23 +9,24 @@ class Prescription extends Component {
             var cancel = prescription.cancelled ? "Yes" : "No";
             var cancelDate = prescription.cancelDate === "" ? "TBD" : prescription.cancelDate; 
 
+            var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
             return(
-                <div className="card card-stats mb-4 ml-4" key={prescription.prescriptionID}>
+                <div className="card card-stats mb-4 ml-4" key={prescription.prescriptionID} style={{width: '21rem' }} >
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
                                 <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription: &nbsp;
                                     <span className="h2 font-weight-bold mb-0">{prescription.prescriptionID}</span>
                                 </h5>
-                                <p class="mt-3 mb-0 text-muted text-sm text-left">
-                                    <span class="text-nowrap">
-                                        Date Written: {prescription.writtenDate}
-                                        <br></br>
+                                <p className="mt-3 mb-0 text-muted text-sm text-left">
+                                    <span className="text-nowrap">
                                         Quantity: {prescription.quantity}
                                         <br></br>
                                         Days For: {prescription.daysFor}
                                         <br></br>
                                         Refills Left: {prescription.refillsLeft}
+                                        <br></br>
+                                        Date Written: {writtenDate}
                                     </span> 
                                 </p>
                             </div>
@@ -42,35 +43,35 @@ class Prescription extends Component {
                         </button>
 
 
-                        <div class="col-md-4">
-                        <div class="modal fade" id="prescription-modal">
-                        <div class="modal-dialog modal- modal-dialog-centered modal" role="document">
-                            <div class="modal-content">
+                        <div className="col-md-4">
+                        <div className="modal fade" id="prescription-modal">
+                        <div className="modal-dialog modal- modal-dialog-centered modal" role="document">
+                            <div className="modal-content">
           
-                            <div class="card-body px-lg-5 py-lg-5">
-                            <div class="text-center text-muted mb-4">
+                            <div className="card-body px-lg-5 py-lg-5">
+                            <div className="text-center text-muted mb-4">
                                 <small>Or sign in with credentials</small>
                             </div>
                             <form role="form">
-                                <div class="form-group mb-3">
-                                    <div class="input-group input-group-alternative">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                                <div className="form-group mb-3">
+                                    <div className="input-group input-group-alternative">
+                                        <div className="input-group-prepend">
+                                            <span className="input-group-text"><i className="ni ni-email-83"></i></span>
                                         </div>
-                                        <input class="form-control" placeholder="Email" type="email"/>
+                                        <input className="form-control" placeholder="Email" type="email"/>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <div class="input-group input-group-alternative">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                                <div className="form-group">
+                                    <div className="input-group input-group-alternative">
+                                        <div className="input-group-prepend">
+                                            <span className="input-group-text"><i className="ni ni-lock-circle-open"></i></span>
                                         </div>
-                                        <input class="form-control" placeholder="Password" type="password"/>
+                                        <input className="form-control" placeholder="Password" type="password"/>
                                     </div>
                                 </div>
                                 
-                                <div class="text-center">
-                                    <button type="button" class="btn btn-primary my-4">Sign in</button>
+                                <div className="text-center">
+                                    <button type="button" className="btn btn-primary my-4">Sign in</button>
                                 </div>
                             </form>
                             </div>
