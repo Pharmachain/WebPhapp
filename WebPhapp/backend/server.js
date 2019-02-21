@@ -39,6 +39,9 @@ function convertDatesToString(prescription){
     prescription.writtenDate = new Date(prescription.writtenDate).toString();
     prescription.fillDates = prescription.fillDates.filter(dateInt => dateInt > 0);
     prescription.fillDates = prescription.fillDates.map(dateInt => new Date(dateInt).toString());
+    if(prescription.cancelDate > 0){
+        prescription.cancelDate = new Date(prescription.cancelDate).toString();
+    }
     return prescription;
 }
 
@@ -566,6 +569,198 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
     res.json(matchingPatient);
 });
 
+// ------------------------
+//       dispensers
+// ------------------------
+
+/*
+About:
+    An api endpoint that returns all related prescriptions for a given dispenserID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/1"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/prescriptions/1")
+Returns:
+    list<Prescription>
+*/
+app.get('/api/v1/dispensers/prescriptions/:dispenserID', (req, res) => {
+    var dispenserID = parseInt(req.params.dispenserID);
+
+    // Error if dispenser ID is null or undefined
+    if(dispenserID == null) {
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: No ID match');
+        res.status(400).send([]);
+        return;
+    }
+
+    if(conn.Blockchain) {
+        console.log('Error searching for prescriptions by dispenser: not implemented.');
+        res.status(400).send([]);
+        return;
+    }
+    else { // search from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.dispenserID === dispenserID) {
+                toSend.push(convertDatesToString(prescription));
+            }
+        });
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
+                        + toSend.length.toString() + 'prescriptions.');
+        res.json(toSend);
+        return;
+    }
+});
+
+/*
+About:
+    An api endpoint that returns all historical prescriptions for a given dispenserID.
+    A prescription is historical if it is either cancelled or has no refills left.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/historical/1"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/prescriptions/historical/1")
+Returns:
+    list<Prescription>
+*/
+app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) => {
+    var dispenserID = parseInt(req.params.dispenserID);
+
+    // Error if dispenser ID is null or undefined
+    if(dispenserID == null) {
+        console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
+        res.status(400).send([]);
+        return;
+    }
+
+    if(conn.Blockchain) {
+        console.log('Error searching for prescriptions by dispenser: not implemented.');
+        res.status(400).send([]);
+        return;
+    }
+    else { // search from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.dispenserID !== dispenserID) {
+                return;
+            } 
+            // check if refills are empty, check if cancelled
+            if (prescription.refills < 1 || prescription.cancelDate > 0) {
+                toSend.push(convertDatesToString(prescription));
+            }
+        });
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
+                        + toSend.length.toString() + ' open prescriptions.');
+        res.json(toSend);
+        return;
+    }
+});
+
+/*
+About:
+    An api endpoint that returns all open prescriptions for a given dispenserID.
+    A prescription is open if it can be fulfilled (not cancelled and can be refilled).
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/open/1"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/prescriptions/open/1")
+Returns:
+    list<Prescription>
+*/
+app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
+    var dispenserID = parseInt(req.params.dispenserID);
+
+    // Error if dispenser ID is null or undefined
+    if(dispenserID == null) {
+        console.log('/api/v1/dispensers/prescriptions/open/:dispenserID: No ID match');
+        res.status(400).send([]);
+        return;
+    }
+
+    if(conn.Blockchain) {
+        console.log('Error searching for prescriptions by dispenser: not implemented.');
+        res.status(400).send([]);
+        return;
+    }
+    else { // search from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            // match on dispenserID, check if refills are possible, check if not cancelled
+            if (prescription.dispenserID === dispenserID
+                    && prescription.refills > 0
+                    && prescription.cancelDate <= 0) {
+                toSend.push(convertDatesToString(prescription));
+            }
+        });
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
+                        + toSend.length.toString() + ' open prescriptions.');
+        res.json(toSend);
+        return;
+    }
+});
+
+/*
+About:
+    An api endpoint that returns a list of all dispensers given a name to match on.
+    String matching is case insensitive.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/walgreens"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/walgreens")
+Returns:
+    [
+        {
+            dispenserID (int),
+            name (string),
+            location (string),
+            phone (int)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/dispensers/:name', (req, res) => {
+    var name = req.params.name;
+
+    // if dispenser ID is null or undefined, return all
+    if(name == null) {
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning all dispensers');
+        res.status(200).send([]);
+        return;
+    }
+
+    var dispensers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+    dispensers = dispensers.filter(function(elem) {
+        // if no query given, return all dispensers
+        if(name === undefined) return true;
+
+        // case insensitive: match substrings in dispenser name
+        return elem.name.toLowerCase().includes(name.toLowerCase());
+    });
+
+    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
+                    + dispensers.length.toString() + ' dispensers.');
+    res.status(200).send(dispensers);
+});
+
+// ------------------------
+//          Misc
+// ------------------------
+
 // Handles any requests that don't match the ones above
 app.get('*', (req,res) => {
     res.status(404).send('Not found');
@@ -573,8 +768,8 @@ app.get('*', (req,res) => {
 
 // use the environment variable if set, otherwise use port 5000
 var server = app.listen(process.env.PORT || 5000, function () {
-        var port = server.address().port;
-        console.log('App is listening on port ' + port);
-    });
+    var port = server.address().port;
+    console.log('App is listening on port ' + port);
+});
 
 module.exports = server;

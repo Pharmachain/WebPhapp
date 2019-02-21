@@ -284,6 +284,47 @@ describe("loading express", function() {
   });
 
   // ------------------------------------------------------
+  //             Tests: /api/vi/dispensers
+  // ------------------------------------------------------
+
+  it("test-route-dispensers-name", function(done) {
+    request(server)
+    .get("/api/v1/dispensers/walgreens")
+    .expect(200)
+    .expect(function(res) {
+      var fields;
+      for(var i = 0; i < res.body.length; i++){
+        fields = new Set([res.body[i].dispenserID, res.body[i].phone, res.body[i].name, res.body[i].location]);
+        if(fields.has(undefined)){
+          throw new Error('Dispenser fields should be not empty for name "walgreens"');
+        }
+      }
+      return true;
+    })
+    .end(done);
+  });
+
+  it("test-route-dispensers-name-bad", function(done) {
+    request(server)
+    .get("/api/v1/dispensers/thisismostdefinitelynotadispensername")
+    .expect(200)
+    .expect(function(res) {
+      var fields;
+      for(var i = 0; i < res.body.length; i++){
+        fields = new Set([res.body[i].dispenserID, res.body[i].phone, res.body[i].name, res.body[i].location]);
+        if(fields.length > 1){
+          throw new Error('Should not have any dispenser fields for bad dispenserID.');
+        }
+        if(!fields.has(undefined)){
+          throw new Error('Dispenser fields should be empty for bad dispenserID');
+        }
+      }
+      return true;
+    })
+    .end(done);
+  });
+
+  // ------------------------------------------------------
   //             Tests: other
   // ------------------------------------------------------
 
