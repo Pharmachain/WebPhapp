@@ -5,45 +5,20 @@ var fs = require("fs");
 var conn = require('./connections.js') // private file not under VC.
 
 const app = express();
-app.use(bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.json() );        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
 // establish a connection to the remote MySQL DB
-if(conn.MySQL){
-    var mysql = require('mysql2');
-    var connection = mysql.createConnection(conn.MySQL);
+if(conn.MySQL) {
+    var connection = require('mysql2').createConnection(conn.MySQL);
+    var mysql = require('./mysql_helper.js');
 }
 
-/*
-Given a list of drugIDs, looks up drug names in the MySQL DB.
-Args: drugIDs list <(int or string)>
-Returns: Promise.
-    Upon resolution, returns (answer) which is a list of rows.
-    Answer can be unpacked in a call to .then((answer) => { ... })
-    Each row contains:
-        row.ID (int)  the drugID in the pharmacopeia
-        row.NAME (string) the name of the drug
-*/
-function getDrugNamesFromIDs(drugIDs){
-
-    /*Example of a prepared statement.
-    Use the question mark(?) to denote the values you want to replace.
-    Then, as a second parameter, include an array of the values to replace.
-    */
-    var q = `
-        SELECT ID, NAME
-        FROM seniordesign1.pharmacopeia
-        WHERE ID IN (?)
-    `;
-
-    return new Promise((resolve, reject) => {
-        connection.query(q,[drugIDs.toString()], (error, rows, fields) => {
-            if (error) reject(error);
-            resolve({rows, fields});
-        });
-    });
+// use functions for interacting with Blockchain
+if(conn.Blockchain) {
+    var block_helper = require('./block_helper.js')
 }
 
 // JSON reader to read in dummy data
@@ -55,6 +30,18 @@ function readJsonFileSync(filepath, encoding){
     return JSON.parse(file);
 }
 
+/*
+    given a prescription, replaces all date integers with strings.
+    Returns updated prescription.
+    Assumes that all fields are properly filled.
+*/
+function convertDatesToString(prescription){
+    prescription.writtenDate = new Date(prescription.writtenDate).toString();
+    prescription.fillDates = prescription.fillDates.filter(dateInt => dateInt > 0);
+    prescription.fillDates = prescription.fillDates.map(dateInt => new Date(dateInt).toString());
+    return prescription;
+}
+
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -64,6 +51,24 @@ app.get('/api/v1/list', (req,res) => {
     var list = ["item1", "item2", "item3"];
     res.json(list);
     console.log('Sent list of items');
+});
+
+// An api endpoint that cancels the prescription associated with a
+// given prescription ID.
+// example: http://localhost:5000/api/v1/prescriptions/cancel/2
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+    //TODO Check for auth to do this.
+    //TODO Check for valid prescriptionID
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
+    //TODO Cancel the prescription on the blockchain
+    return finish("TODO: build prescription cancel to blockchain", true);
 });
 
 /*
@@ -140,6 +145,59 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 });
 
 /*
+Edits a prescription for a given prescription ID. The prescriptionID is used in order to get the rest of the data for the prescription. The rest of the data points are alterable values.
+
+ Expects on object of shape:
+{
+  prescriptionID,
+  quantity,
+  daysFor,
+  refillsLeft,
+  dispenserID
+}
+
+  Directly in terminal:
+    >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 3,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"dispenserID":0}'
+
+    To be used in an axios call:
+        .post("/api/v1/prescription/edit",{
+            prescriptionID: 0,
+            ....
+        }
+*/
+
+app.post('/api/v1/prescriptions/edit',(req,res) => {
+
+    //TODO auth check needed here with cookie that goes with request headers
+    const changedPrescription = req.body;
+
+    // Should become actuall, non-static data
+    var prescriptions = readJsonFileSync(
+        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+    var prescription = prescriptions.find( function(elem) {
+        return elem.prescriptionID === changedPrescription.prescriptionID;
+    });
+
+    // finish takes a string message and a boolean (true if successful)
+    function finish(msg, success){
+        console.log(msg);
+        res.status(success ? 200 : 400).json(success);
+        return;
+    }
+
+    // Ensures that a filled or cancelled prescription cannot be altered.
+    if(prescription.cancelDate !== -1 || prescription.fillDates.length !== 0){
+      res.send({})
+      return finish('Attempt at cancelling fixed prescription', false);
+    }
+
+
+    //TODO Go into blockchain to call changing functions...The data for this is in the changedPrescription data.
+    return finish("TODO: build prescription edit to blockchain", true);
+});
+
+/*
 About:
 Attempts to add a prescription for a user, while also doing validation.
 Status of 200 if successful, 400 otherwise.
@@ -161,7 +219,7 @@ Expects an object with all integer fields:
             ....
         }
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {    
+app.post('/api/v1/prescriptions/add',(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -215,52 +273,186 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     // TODO: query blockchain to get current highest prescriptionID
     prescription.prescriptionID = -1;
 
-    // Add the prescription to the blockchain and index this prescription.
+    // Add the prescription to the blockchain and index this prescription in MySQL.
     return finish("TODO: build prescription add to blockchain", true);
 });
 
-// An api endpoint that returns the prescription associated with a
-// given prescription ID.
-// example: http://localhost:5000/api/v1/prescriptions/single/0002
-app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
-    var prescriptionID = parseInt(req.params.prescriptionID);
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+/*
+An api endpoint that returns all of the prescriptions associated with a patient ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/1")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates,
+        writtenDate, quantity, daysFor, refillsLeft,
+        prescriberID, dispenserID, cancelDate, drugName
+    ]
+*/
+app.get('/api/v1/prescriptions/:patientID', (req,res) => {
+    var patientID = parseInt(req.params.patientID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        var msg = 'Sent ' + prescriptions.length.toString() +
+                    ' prescription(s) for patient ID ' + patientID.toString();
 
-    var prescription = prescriptions.find( function(elem) {
-        return elem.prescriptionID === prescriptionID;
-    });
-
-    // '==' catches both null and undefined
-    if (prescription == null) {
-        console.log('/api/v1/prescriptions/single: No ID match');
-        res.json({});
-        return;
-    }
-
-    // if no connection string (Travis testing), fill drugName with dummy info
-    if (!conn.MySQL) {
-        prescription.drugName = "drugName";
-        res.json(prescription);
-        return;
-    }
-
-    // Look up the drug name given the ID in MySQL
-    getDrugNamesFromIDs([prescription.drugID])
-    .then((answer) => {
-        if (answer.rows.length === 0) {
-            prescription.drugName = '';
-        } else {
-            prescription.drugName = answer.rows[0].NAME;
+        // if no prescriptions for a patient ID, return early
+        if (prescriptions.length === 0) {
+            console.log(msg);
+            res.json([]);
+            return;
         }
 
-        console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
-        res.json(prescription);
-    })
-    .catch((error) => {
-        console.log("/api/v1/prescriptions/single: error: ", error);
-        res.json({});
-    });
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            for (var i = 0; i < prescriptions.length; i++){
+                prescriptions[i].drugName = "drugName";
+            }
+            res.json(prescriptions);
+            return;
+        }
+
+        // Look up the drug names given the list of drugIDs in MySQL
+        var drugIDs = prescriptions.map((prescription) => {
+            return prescription.drugID;
+        })
+
+        mysql.getDrugNamesFromIDs(drugIDs, connection)
+        .then((answer) => {
+            for (var i = 0; i < prescriptions.length; i++){
+                var drug = answer.rows.filter((row) => {
+                    return (row.ID === prescriptions[i].drugID);
+                });
+
+                // Could be undefined on return
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+                
+            }
+
+            console.log(msg);
+            res.json(prescriptions);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions: error: ", error);
+            res.status(400).send({});
+        });
+    };
+
+    if(conn.Blockchain){
+        var field_patientID = 0;
+        block_helper.read_by_value(field_patientID, patientID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        }).catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching patientID.');
+        });
+    }
+    else { // search prescriptions from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.patientID === patientID) toSend.push(prescription);
+        });
+        handlePrescriptionsCallback(toSend);
+    }
+});
+
+/*
+An api endpoint that returns a single prescription given a prescription ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/single/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/single/1")
+Returns:
+    A prescription object each with fields: [
+        prescriptionID,
+        patientID,
+        drugID,
+        fillDates,
+        writtenDate,
+        quantity,
+        daysFor,
+        refillsLeft,
+        prescriberID,
+        dispenserID,
+        cancelDate,
+        drugName
+    ]
+Warning:
+    no validation exists for blockchain index yet. See Issue #32 on GitHub.
+*/
+app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
+    var prescriptionID = parseInt(req.params.prescriptionID);
+    var handlePrescriptionCallback = function(prescription) {
+        // '==' catches both null and undefined
+        if (prescription == null) {
+            console.log('/api/v1/prescriptions/single: No ID match');
+            res.status(400).send({});
+            return;
+        }
+
+        // Convert date integers to strings
+        prescription = convertDatesToString(prescription);
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescription.drugName = "drugName";
+            console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+            res.json(prescription);
+            return;
+        }
+
+        // Look up the drug name given the ID in MySQL
+        mysql.getDrugNamesFromIDs([prescription.drugID], connection) // prescription.drugID
+        .then((answer) => {
+            if (answer.rows.length === 0) {
+                prescription.drugName = 'drugName not found in Pharmacopoeia';
+            } else {
+                prescription.drugName = answer.rows[0].NAME;
+            }
+
+            console.log("/api/v1/prescriptions/single: Sent prescription with ID " + prescriptionID);
+            res.json(prescription);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions/single: error: ", error);
+            res.json({});
+        });
+    };
+
+    if(conn.Blockchain){
+        block_helper.read(prescriptionID)
+        .then((answer) => {
+            handlePrescriptionCallback(answer.prescription);
+        }).catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error searching for prescription by prescriptionID.');
+        });
+    }
+    else { // load prescription from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+
+        var prescription = prescriptions.find( function(elem) {
+            return elem.prescriptionID === prescriptionID;
+        });
+        handlePrescriptionCallback(prescription);
+    }
 });
 
 /*

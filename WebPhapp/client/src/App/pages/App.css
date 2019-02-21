@@ -31,7 +31,13 @@
   }
 }
 
+<<<<<<< HEAD
 .masonry { 
   display: flex;
   flex-flow: row wrap;
+=======
+/*Greys out disabled table data*/
+.disabled td {
+  color: #b9b9b9;
+>>>>>>> 0eab4ac7b1221a4fccbaadfed416f0bb3a2011db
 }
