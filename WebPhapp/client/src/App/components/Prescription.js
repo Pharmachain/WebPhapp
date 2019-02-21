@@ -9,7 +9,8 @@ class Prescription extends Component {
             var cancel = prescription.cancelled ? "Yes" : "No";
             var cancelDate = prescription.cancelDate === "" ? "TBD" : prescription.cancelDate; 
 
-            var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
+            // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
+            var writtenDate = prescription.writtenDate;
             return(
                 <div className="card card-stats mb-4 ml-4" key={prescription.prescriptionID} style={{width: '21rem' }} >
                     <div className="card-body">
@@ -45,35 +46,23 @@ class Prescription extends Component {
 
                         <div className="col-md-4">
                         <div className="modal fade" id="prescription-modal">
-                        <div className="modal-dialog modal- modal-dialog-centered modal" role="document">
+                        <div className="modal-dialog modal-lg modal-dialog-centered modal">
                             <div className="modal-content">
-          
-                            <div className="card-body px-lg-5 py-lg-5">
-                            <div className="text-center text-muted mb-4">
-                                <small>Or sign in with credentials</small>
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modal-title-default">Prescription: {prescription.drugName}</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
                             </div>
-                            <form role="form">
-                                <div className="form-group mb-3">
-                                    <div className="input-group input-group-alternative">
-                                        <div className="input-group-prepend">
-                                            <span className="input-group-text"><i className="ni ni-email-83"></i></span>
-                                        </div>
-                                        <input className="form-control" placeholder="Email" type="email"/>
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <div className="input-group input-group-alternative">
-                                        <div className="input-group-prepend">
-                                            <span className="input-group-text"><i className="ni ni-lock-circle-open"></i></span>
-                                        </div>
-                                        <input className="form-control" placeholder="Password" type="password"/>
-                                    </div>
-                                </div>
-                                
-                                <div className="text-center">
-                                    <button type="button" className="btn btn-primary my-4">Sign in</button>
-                                </div>
-                            </form>
+                            <div className="card-body">
+                            <hr></hr>
+                            <div class="row justify-content-center text-sm font-weight-light">
+                                <div class="col-auto"><i className="fas fa-file-prescription"></i> Prescription ID: {prescription.prescriptionID}</div>
+                                <div class="col-auto"><i className="fas fa-capsules"></i> Drug ID: {prescription.drugID}</div>
+                                <div class="col-auto"><i class="fas fa-user"></i> Patient ID: {prescription.patientID}</div>
+                                <div class="col-auto"><i class="fas fa-user-md"></i> Prescriber ID: {prescription.prescriberID}</div>
+                                <div class="col-auto"><i class="fas fa-hospital"></i> Dispenser ID: {prescription.dispenserID}</div>
+                            </div>
                             </div>
                             </div>
                         </div>
@@ -82,33 +71,6 @@ class Prescription extends Component {
                     
                     </div>
                 </div>
-
-                // <tr key={prescription.prescriptionID}>
-                //     <td> {prescription.prescriptionID} </td>
-                //     <td> {prescription.patientID} </td>
-                //     <td> {prescription.drugID} </td>
-                //     <td>
-                //         <button 
-                //             type="button" 
-                //             className="btn btn-primary"
-                //             data-container="body"
-                //             data-toggle="popover"
-                //             data-trigger="hover"
-                //             title="Fill Dates"
-                //             data-placement="top"
-                //             data-content={fillDates}>
-                //             <span className="btn-inner--icon"><i className="ni ni-calendar-grid-58"></i></span>
-                //         </button>
-                //     </td>
-                //     <td> {prescription.writtenDate} </td>
-                //     <td> {prescription.quantity} </td>
-                //     <td> {prescription.daysFor} </td>
-                //     <td> {prescription.refillsLeft} </td>
-                //     <td> {prescription.prescriberID} </td>
-                //     <td> {prescription.dispenserID} </td>
-                //     <td> {cancel} </td>
-                //     <td> {cancelDate} </td>
-                // </tr>
             )
         })
     }
@@ -119,22 +81,25 @@ class Prescription extends Component {
             // <tbody>
             //   <tr className="table-primary">
             //     <th scope="col">Prescription ID</th>
-            //     <th scope="col" >Patient ID</th>
-            //     <th scope="col" >Drug ID</th>
-            //     <th scope="col" >Filled Dates</th>
-            //     <th scope="col">Written Date</th>
-            //     <th scope="col" >Quantity</th>
-            //     <th scope="col" >Days For</th>
-            //     <th scope="col" >Refills Left</th>
-            //     <th scope="col" >Prescriber ID</th>
-            //     <th scope="col" >Dispenser ID</th>
-            //     <th scope="col" >Cancelled</th>
-            //     <th scope="col" >Cancel Date</th>
+            //     <th scope="col">Patient ID</th>
+            //     <th scope="col">Drug ID</th>
+            //     <th scope="col">Prescriber ID</th>
+            //     <th scope="col">Dispenser ID</th>
+            
+            //     <th scope="col">Quantity</th>
+            //     <th scope="col">Days For</th>
+            //     <th scope="col">Refills Left</th>
+
+            //     <th scope="col">Filled Dates</th>
+            //     <th scope="col"> Written Date</th>
+
+            //     <th scope="col">Cancelled</th>
+            //     <th scope="col">Cancel Date</th>
             //   </tr>
             <div className="container">
-            <div className="masonry align-items-left">
-                    {this.displayPrescriptions()}
-            </div>
+                <div className="masonry align-items-left">
+                        {this.displayPrescriptions()}
+                </div>
             </div>
         );
     }
