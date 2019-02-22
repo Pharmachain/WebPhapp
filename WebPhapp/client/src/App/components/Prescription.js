@@ -41,34 +41,31 @@ class Prescription extends Component {
                         <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal">
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
-                        </button>
-
-
+                        </button>     
                         <div className="col-md-4">
                         <div className="modal fade" id="prescription-modal">
                         <div className="modal-dialog modal-lg modal-dialog-centered modal">
                             <div className="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="modal-title-default">Prescription: {prescription.drugName}</h4>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <div className="modal-header">
+                                <h4 className="modal-title" id="modal-title-default">Prescription: {prescription.drugName}</h4>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">×</span>
                                 </button>
                             </div>
                             <div className="card-body">
                             <hr></hr>
-                            <div class="row justify-content-center text-sm font-weight-light">
-                                <div class="col-auto"><i className="fas fa-file-prescription"></i> Prescription ID: {prescription.prescriptionID}</div>
-                                <div class="col-auto"><i className="fas fa-capsules"></i> Drug ID: {prescription.drugID}</div>
-                                <div class="col-auto"><i class="fas fa-user"></i> Patient ID: {prescription.patientID}</div>
-                                <div class="col-auto"><i class="fas fa-user-md"></i> Prescriber ID: {prescription.prescriberID}</div>
-                                <div class="col-auto"><i class="fas fa-hospital"></i> Dispenser ID: {prescription.dispenserID}</div>
+                            <div className="row justify-content-center text-sm font-weight-light">
+                                <div className="col-auto"><i className="fas fa-file-prescription"></i> Prescription ID: {prescription.prescriptionID} </div>
+                                <div className="col-auto"><i className="fas fa-capsules"></i> Drug ID: {prescription.drugID}</div>
+                                <div className="col-auto"><i className="fas fa-user"></i> Patient ID: {prescription.patientID}</div>
+                                <div className="col-auto"><i className="fas fa-user-md"></i> Prescriber ID: {prescription.prescriberID}</div>
+                                <div className="col-auto"><i className="fas fa-hospital"></i> Dispenser ID: {prescription.dispenserID}</div>
                             </div>
                             </div>
                             </div>
                         </div>
                         </div>
-                        </div>
-                    
+                        </div>               
                     </div>
                 </div>
             )
