@@ -74,7 +74,7 @@ class PatientSearch extends Component {
           </div>
           <div className="card-body text-left">
           <div className="form-group">
-          <form role="form">
+          <form>
             <div className="form-group mb-3">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
@@ -82,6 +82,7 @@ class PatientSearch extends Component {
                 </div>
                 <input
                   className="form-control"
+                  id="patient_id"
                   placeholder="Patient ID"
                   type="text"
                   value={this.state.patientID}
@@ -89,7 +90,7 @@ class PatientSearch extends Component {
                 />
               </div>
             </div>
-            <hr class="my-4"></hr>
+            <hr className="my-4"></hr>
             <div className="form-group">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
@@ -97,6 +98,7 @@ class PatientSearch extends Component {
                 </div>
                 <input
                   className="form-control"
+                  id="first_name"
                   placeholder="First Name"
                   type="p"
                   value={this.state.firstName}
@@ -112,6 +114,7 @@ class PatientSearch extends Component {
                 </div>
                 <input
                   className="form-control"
+                  id="last_name"
                   placeholder="Last Name"
                   type="p"
                   value={this.state.lastName}
@@ -121,13 +124,11 @@ class PatientSearch extends Component {
             </div>
 
             <div className="text-center">
-              <button type="button" className="btn btn-icon btn-3 btn-primary"
-                onClick={this.onSearchPatients}>
-                <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
-                <span class="btn-inner--text">Search</span>
+              <button type="button" id="patient_search_button" className="btn btn-icon btn-3 btn-primary" onClick={this.onSearchPatients}>
+                <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
+                <span className="btn-inner--text">Search</span>
               </button>
             </div>
-
           </form>
           <br></br>
           <People patientList={this.state.people}/>

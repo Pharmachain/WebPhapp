@@ -39,15 +39,44 @@
       <!-- Core -->
       <script src="/assets/vendor/jquery/dist/jquery.min.js"></script>
       <script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-      <button type="button" className="btn btn-primary" data-container="body" data-toggle="popover" title="Fill Dates" data-placement="Top"> </button>
-      <script>
-        $( function () 
-        {
-          $("[data-toggle='popover']").popover();
-        });
-      </script>
       <!-- Argon JS -->
       <script src="/assets/js/argon.min.js"></script>
   </body>
+  
+  <script>
+    var input = document.getElementById("patient_id");
+    if (input) {
+      input.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+       event.preventDefault();
+       document.getElementById("patient_search_button").click();
+      }
+    });
+    }
+  </script>
+
+  <script>
+    var input = document.getElementById("first_name");
+    if (input) {
+      input.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+       event.preventDefault();
+       document.getElementById("patient_search_button").click();
+      }
+    });
+    }
+  </script>
+
+  <script>
+    var input = document.getElementById("last_name");
+    if (input) {
+      input.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+       event.preventDefault();
+       document.getElementById("patient_search_button").click();
+      }
+    });
+    }
+  </script>
+
 </html>
