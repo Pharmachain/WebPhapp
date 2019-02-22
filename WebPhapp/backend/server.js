@@ -75,79 +75,6 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
 });
 
 /*
-An api endpoint that returns all of the prescriptions associated with a patient ID
-Examples:
-    Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/prescriptions/1"
-    To be used in Axois call:
-        .get("api/v1/prescriptions/1")
-Returns:
-    A list of prescription objects each with fields: [
-        prescriptionID, patientID, drugID, fillDates,
-        writtenDate, quantity, daysFor, refillsLeft,
-        prescriberID, dispenserID, cancelled, cancelDate, drugName
-    ]
-*/
-app.get('/api/v1/prescriptions/:patientID', (req,res) => {
-    var patientID = parseInt(req.params.patientID);
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-    var toSend = [];
-    prescriptions.forEach(prescription => {
-        if (prescription.patientID === patientID) toSend.push(prescription);
-    });
-
-    // if no prescriptions for a patient ID, return early
-    var msg = 'Sent ' + toSend.length.toString() +
-                ' prescription(s) for patient ID ' + patientID.toString();
-    if (toSend.length === 0) {
-        console.log(msg);
-        res.json([]);
-        return;
-    }
-
-    // if no connection string (Travis testing), fill drugName with dummy info
-    if (!conn.MySQL) {
-        for (var i = 0; i < toSend.length; i++){
-            toSend[i].drugName = "drugName";
-        }
-        res.json(toSend);
-        return;
-    }
-
-    // Look up the drug names given the list of drugIDs in MySQL
-    var drugIDs = toSend.map((prescription) => {
-        return prescription.drugID;
-    })
-
-
-    getDrugNamesFromIDs(drugIDs)
-    .then((answer) => {
-        for (var i = 0; i < toSend.length; i++){
-            var drug = answer.rows.filter((row) => {
-                return (row.ID === toSend[i].drugID);
-            });
-
-            // Could be undefined on return
-            if(drug.length !== 0)
-              toSend[i].drugName = drug[0].NAME;
-        }
-
-        console.log(msg);
-
-    })
-    .catch((error) => {
-        console.log("/api/v1/prescriptions: error: ", error);
-        res.json({});
-    });
-
-    res.json(toSend);
-    console.log('Sent ' + toSend.length.toString() +
-                ' prescription(s) for patient ID ' + patientID.toString());
-});
-
-/*
 Edits a prescription for a given prescription ID. The prescriptionID is used in order to get the rest of the data for the prescription. The rest of the data points are alterable values.
 
  Expects on object of shape:
@@ -340,7 +267,6 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
                 else {
                     prescriptions[i].drugName = "drugName";
                 }
-                
             }
 
             console.log(msg);
@@ -586,7 +512,21 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/:dispenserID', (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        // take only prescriptions with matching dispenserID
+        prescriptions = prescriptions.filter(
+            prescription => prescription.dispenserID === dispenserID
+        );
 
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        console.log('Sending ' + prescriptions.length.toString()
+                        + ' prescription(s) related to dispenserID ' + dispenserID.toString());
+        res.status(200).send(prescriptions);
+    }
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
         console.log('/api/v1/dispensers/prescriptions/:dispenserID: No ID match');
@@ -595,24 +535,20 @@ app.get('/api/v1/dispensers/prescriptions/:dispenserID', (req, res) => {
     }
 
     if(conn.Blockchain) {
-        console.log('Error searching for prescriptions by dispenser: not implemented.');
-        res.status(400).send([]);
-        return;
+        var field_dispenserID = 2;
+        block_helper.read_by_value(field_dispenserID, dispenserID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        })
+        .catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+        });
     }
     else { // search from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-        var toSend = [];
-        prescriptions.forEach(prescription => {
-            if (prescription.dispenserID === dispenserID) {
-                toSend.push(convertDatesToString(prescription));
-            }
-        });
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
-                        + toSend.length.toString() + 'prescriptions.');
-        res.json(toSend);
-        return;
+        handlePrescriptionsCallback(prescriptions);
     }
 });
 
@@ -630,7 +566,24 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        // only take historical prescriptions with dispenserID
+        prescriptions = prescriptions.filter(
+            prescription =>
+                prescription.dispenserID === dispenserID &&
+                (prescription.cancelDate > 0 || prescription.refillsLeft < 1)
+        );
 
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        console.log('Sending ' + prescriptions.length.toString()
+                        + ' historical prescription(s) related to dispenserID ' + dispenserID.toString());
+        res.status(200).send(prescriptions);
+    }
+    
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
         console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
@@ -639,28 +592,20 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
     }
 
     if(conn.Blockchain) {
-        console.log('Error searching for prescriptions by dispenser: not implemented.');
-        res.status(400).send([]);
-        return;
+        var field_dispenserID = 2;
+        block_helper.read_by_value(field_dispenserID, dispenserID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        })
+        .catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+        });
     }
     else { // search from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-        var toSend = [];
-        prescriptions.forEach(prescription => {
-            if (prescription.dispenserID !== dispenserID) {
-                return;
-            } 
-            // check if refills are empty, check if cancelled
-            if (prescription.refills < 1 || prescription.cancelDate > 0) {
-                toSend.push(convertDatesToString(prescription));
-            }
-        });
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
-                        + toSend.length.toString() + ' open prescriptions.');
-        res.json(toSend);
-        return;
+        handlePrescriptionsCallback(prescriptions);
     }
 });
 
@@ -678,6 +623,24 @@ Returns:
 */
 app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        // only take open prescriptions with dispenserID
+        prescriptions = prescriptions.filter(
+            prescription => 
+                prescription.dispenserID === dispenserID
+                && prescription.refillsLeft > 0
+                && prescription.cancelDate < 1
+        );
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        console.log('Sending ' + prescriptions.length.toString()
+                        + ' open prescription(s) related to dispenserID ' + dispenserID.toString());
+        res.status(200).send(prescriptions);
+    }
 
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
@@ -687,27 +650,20 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
     }
 
     if(conn.Blockchain) {
-        console.log('Error searching for prescriptions by dispenser: not implemented.');
-        res.status(400).send([]);
-        return;
+        var field_dispenserID = 2;
+        block_helper.read_by_value(field_dispenserID, dispenserID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        })
+        .catch((error) => {
+            console.log('error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+        });
     }
     else { // search from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-        var toSend = [];
-        prescriptions.forEach(prescription => {
-            // match on dispenserID, check if refills are possible, check if not cancelled
-            if (prescription.dispenserID === dispenserID
-                    && prescription.refills > 0
-                    && prescription.cancelDate <= 0) {
-                toSend.push(convertDatesToString(prescription));
-            }
-        });
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: sent '
-                        + toSend.length.toString() + ' open prescriptions.');
-        res.json(toSend);
-        return;
+        handlePrescriptionsCallback(prescriptions);
     }
 });
 
