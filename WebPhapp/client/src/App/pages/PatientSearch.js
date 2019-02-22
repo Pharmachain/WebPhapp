@@ -106,7 +106,6 @@ class PatientSearch extends Component {
                 />
               </div>
             </div>
-
             <div className="form-group">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
@@ -122,7 +121,6 @@ class PatientSearch extends Component {
                 />
               </div>
             </div>
-
             <div className="text-center">
               <button type="button" id="patient_search_button" className="btn btn-icon btn-3 btn-primary" onClick={this.onSearchPatients}>
                 <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
