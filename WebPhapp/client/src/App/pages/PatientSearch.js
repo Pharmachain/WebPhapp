@@ -36,14 +36,16 @@ class PatientSearch extends Component {
   }
 
   // Search query for patient lookup via names
-  onSearchPatients = () => {
+  onSearchPatients = e => {
+    e.preventDefault()
     const patientID = this.state.patientID;
     const firstName = this.state.firstName;
     const lastName = this.state.lastName;
 
     // String interpolation
     var idSearchQuery = `/api/v1/patients/${patientID}`;
-    var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var nameSearchQuery = `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var defaultQuery = `/api/v1/patients?first=&last=`;
 
     if (patientID) {
       axios
@@ -52,11 +54,25 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people: [people] }));
     }
 
-    else if (firstName || lastName) {
+    else if (firstName) {
       axios
       .get(nameSearchQuery)
       .then(results => results.data)
       .then(people => this.setState({ people }));
+    }
+
+    else if (lastName) {
+      axios
+      .get(nameSearchQuery)
+      .then(results => results.data)
+      .then(people => this.setState({ people }));
+    }
+
+    else {
+      axios
+        .get(defaultQuery)
+        .then(results => results.data)
+        .then(people => this.setState({ people }));
     }
   }
 
@@ -74,7 +90,7 @@ class PatientSearch extends Component {
           </div>
           <div className="card-body text-left">
           <div className="form-group">
-          <form>
+          <form onSubmit={this.onSearchPatients}>
             <div className="form-group mb-3">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
@@ -122,7 +138,7 @@ class PatientSearch extends Component {
               </div>
             </div>
             <div className="text-center">
-              <button type="button" id="patient_search_button" className="btn btn-icon btn-3 btn-primary" onClick={this.onSearchPatients}>
+              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
                 <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
                 <span className="btn-inner--text">Search</span>
               </button>
