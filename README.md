@@ -73,25 +73,29 @@ sudo truffle test
 ```
 node deploy.js
 ```
+- Deploy dummy data to blockchain, if the blockchain is empty.
+```
+sudo node load_data.js
+```
 
 - Write prescription to blockchain example:
 ```
-node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0
+sudo node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0
 ```
 
 - Read prescription by index example:
 ```
-node read_prescrip_index.js 0
+sudo node read_prescrip_index.js 0
 ```
 
 - Read prescription of a specific type, value. For example, return prescriptions with patientID = 0:
 ```
-node read_prescription_type_value.js 0 0
+sudo node read_prescription_type_value.js 0 0
 ```
 
 - Update prescription with new values:
 ```
-node update_prescription.js 0 1 2 4 true 8
+sudo node update_prescription.js 0 1 2 4 true 8
 ``` 
 **Troubleshooting Blockchain**
 - If you see the following code:

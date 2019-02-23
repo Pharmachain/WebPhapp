@@ -87,5 +87,7 @@ if $c_option; then
     sudo truffle version
     sudo truffle migrate
     sudo truffle test
+    sudo node deploy.js
+    sudo node load_data.js
     cd ../../
 fi

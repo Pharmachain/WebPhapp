@@ -3,7 +3,10 @@ let Web3 = require("web3");
 let net = require("net");
 
 
-//Returns the number of prescriptions on the blockchain.
+/* Helper script to check if dummy data exists on the blockchain
+ * If it exists do nothing, else upload json dummy data in ../backend/dummy_data/prescriptions.json
+ * Usage: sudo node load_data.js
+ */
 async function loadPrescriptions(){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
@@ -29,7 +32,6 @@ async function loadPrescriptions(){
     if(length == 0){
 	console.log("No prescriptions found, adding dummy data.");
 	var obj = JSON.parse(fs.readFileSync('../backend/dummy_data/prescriptions.json', 'utf8'));
-	//console.log(obj.prescriptions)
 	for (var j = 0; j < obj.prescriptions.length; j++){
 	    p = obj.prescriptions[j];
 	    let transaction = await Patient.methods.addPrescription(
