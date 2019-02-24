@@ -54,9 +54,12 @@ contract TestPrescriptionData is PrescriptionBase{
 
 	//Test ability to update a prescription
     function testUpdate() public{
-		uint index = pContract.updatePrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
+		uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
         data.isCancelled, data.cancelDate);
+	p.updatePrescription(index, (data.dispenserID + 1), data.drugQuantity, data.fulfillmentDates, data.daysValid, data.isCancelled, data.cancelDate);
+
+	
         
 
         uint256 patientID;
@@ -73,8 +76,8 @@ contract TestPrescriptionData is PrescriptionBase{
 
 
          //Max local args is 16, limit reached. So last values are not compared
-        (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , ) = pContract.getPrescription(index);
-        Assert.equal(patientID, data.patientID, "PatientID error....");
+        (patientID, prescriberID, dispenserID, , , , , , , , ) = p.getPrescription(index);
+        Assert.equal(uint (dispenserID), uint (data.dispenserID + 1), "dispenserID not updated error....");
 	}
     
     // Tests the results of an improper access for a prescription. 
