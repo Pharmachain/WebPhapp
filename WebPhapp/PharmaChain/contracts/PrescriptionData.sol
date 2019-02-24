@@ -20,18 +20,21 @@ contract PrescriptionData is PrescriptionBase {
     
     function updatePrescription(uint chainIndex, uint128 dispenserID,string drugQuantity, uint64[16] fulfillmentDates, 
             uint16 daysValid, bool isCancelled, uint64 cancelDate) public returns(uint) {
-        Prescription updated_p = drugChain[chainIndex];
-        updated_p.dispenserID = dispenserID;
-        updated_p.drugQuantity = drugQuantity;
-        updated_p.fulfillmentDates = fulfillmentDates;
-        updated_p.daysValid = daysValid;
-        updated_p.isCancelled = isCancelled;
-        updated_p.cancelDate = cancelDate;
+		if(drugChain[chainIndex].isCancelled = true){
+			//Prescription cancelled, cannot edit, error
+			return 1;
+		}
+        drugChain[chainIndex].dispenserID = dispenserID;
+        drugChain[chainIndex].drugQuantity = drugQuantity;
+        drugChain[chainIndex].fulfillmentDates = fulfillmentDates;
+        drugChain[chainIndex].daysValid = daysValid;
+        drugChain[chainIndex].isCancelled = isCancelled;
+        drugChain[chainIndex].cancelDate = cancelDate;
 
         return 0;
 
     }
-     function addPrescription(
+	function addPrescription(
         uint256 patientID,
         uint128 prescriberID,
         uint128 dispenserID,
@@ -49,4 +52,20 @@ contract PrescriptionData is PrescriptionBase {
         drugChain.push(p);
         return drugChain.length -1;
     }
+	function cancelPrescription(uint chainIndex) public returns (uint){
+		Prescription storage p = drugChain[chainIndex];
+		if(p.isCancelled){
+			//Prescription already cancelled, error
+			return 1;
+		} else {
+			drugChain[chainIndex].isCancelled = true;
+		}
+		return 0;
+	}
+	/*
+	function redeemPrescription(chainIndex, date) public returns (uint){
+		Prescription 
+
+	}
+	*/
 }

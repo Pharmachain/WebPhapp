@@ -65,14 +65,6 @@ contract TestPrescriptionData is PrescriptionBase{
         uint256 patientID;
         uint128 prescriberID;
         uint128 dispenserID;
-        uint64 drugID;
-        string memory drugQuantity;
-        uint64[16] memory fulfillmentDates;
-        uint64 dateWritten;
-
-        uint16 daysValid;
-        bool isCancelled;
-        uint64 cancelDate;
 
 
          //Max local args is 16, limit reached. So last values are not compared

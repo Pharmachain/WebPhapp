@@ -18,7 +18,7 @@ async function update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate
     account = account[0];
 
     // Sets up deployment requirements
-    let source = fs.readFileSync('/home/osboxes/PharmaChain/build/contracts/Patient.json'); 
+    let source = fs.readFileSync('./build/contracts/Patient.json'); 
     let contracts = JSON.parse(source);
     let code = contracts.bytecode;
     let abi = contracts.abi;
