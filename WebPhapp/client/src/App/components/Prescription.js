@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";  
 
+//todo: map fillDates array to table
+//generate correct data per modal: solns: destroy + rerender or lookup how to load dynamic data
 class Prescription extends Component {
     constructor(props){
         super(props);
@@ -32,7 +34,6 @@ class Prescription extends Component {
             
             var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
             // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
-
 
             var writtenDate = "Sat Feb 23 2019";
             var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
@@ -73,7 +74,7 @@ class Prescription extends Component {
                 
 
                     <div className="col-md-4" key={prescription.prescriptionID}>
-                        <div className="modal fade" id="prescription-modal">
+                        <div className="modal fade" tabindex="-1" id="prescription-modal">
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document">
                             <div className="modal-content">
                             <div className="modal-header">
@@ -86,7 +87,7 @@ class Prescription extends Component {
                             <div className="modal-body">
                             <div className="row">
                                 <div className="col-auto">
-                                    <div className="card card-stats mb-4 mb-lg-0" style={{ width: '18rem' }}>
+                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
                                         <div className="card-body">
                                             <div className="row">
                                                 <div className="col">
@@ -102,7 +103,7 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br></br>
-                                    <div className="card card-stats mb-4 mb-lg-0" style={{ width: '18rem' }}>
+                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
                                         <div className="card-body">
                                             <div className="row">
                                                 <div className="col">
@@ -118,7 +119,7 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br></br>
-                                    <div className="card card-stats mb-4 mb-lg-0" style={{ width: '18rem' }}>
+                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
                                         <div className="card-body">
                                             <div className="row">
                                                 <div className="col">
@@ -134,7 +135,7 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br></br>
-                                    <div className="card card-stats mb-4 mb-lg-0" style={{ width: '18rem' }}>
+                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
                                         <div className="card-body">
                                             <div className="row">
                                                 <div className="col">
@@ -150,7 +151,7 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br></br>
-                                    <div className="card card-stats mb-4 mb-lg-0" style={{ width: '18rem' }}>
+                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
                                         <div className="card-body">
                                             <div className="row">
                                                 <div className="col">
@@ -170,13 +171,13 @@ class Prescription extends Component {
                                 <div className="col">
                                     <div className="card shadow">
                                         <div className="card-header border-0">
-                                        <h4 className="mb-0 text-left">Refilled Dates</h4>
+                                        <h4 className="mb-0 text-left">Past Refill Dates</h4>
                                         </div>
                                         <div className="table-responsive">
                                         <table className="table align-items-center table-flush">
                                             <thead className="thead-light">
                                             <tr>
-                                                <th scope="col">Refills Left</th>
+                                                <th scope="col">Refill Number</th>
                                                 <th scope="col">Date</th>
                                             </tr>
                                             </thead>
@@ -203,33 +204,37 @@ class Prescription extends Component {
                                         <div className="form-group">
                                         {prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
                                             <div>
-                                            <button type = "button"
+                                            <button type = "button" 
                                                 className = "btn btn-danger"
+                                                style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
                                                 onClick = {this.onCancelClick}>
-                                                <span className="btn-inner--icon"><i className="ni-lg ni ni-fat-remove"></i></span>
-                                                <span class="btn-inner--text"> Cancel</span>
+                                                <span className="btn-inner--text">Cancel </span>
+                                                <span><i className="fas fa-user-times"></i></span>
                                             </button>
                                             <button type = "button"
                                                 className = "btn btn-success"
+                                                style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
                                                 onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
-                                                <span className="btn-inner--icon"><i className="fas fa-pencil-alt"></i></span>
-                                                <span class="btn-inner--text"> Edit</span>
+                                                <span className="btn-inner--text">Edit </span>
+                                                <span><i class="fas fa-edit"></i></span>
                                             </button>
                                             <button type = "button"
                                                 className = "btn btn-primary"
+                                                style={{width: '8rem'}}
                                                 data-dismiss="modal">
-                                                <span className="btn-inner--icon"><i className="fas fa-sign-out-alt"></i></span>
-                                                <span class="btn-inner--text"> Dismiss</span>
+                                                <span className="btn-inner--text">Dismiss </span>
+                                                <span><i className="fas fa-external-link-alt"></i></span>
                                             </button>
                                             </div>
                                         : 
                                             <button type = "button"
                                                 className = "btn btn-primary"
+                                                style={{width: '8rem'}}
                                                 data-dismiss="modal">
-                                                <span className="btn-inner--icon"><i className="fas fa-sign-out-alt"></i></span>
-                                                <span class="btn-inner--text"> Dismiss</span>
+                                                <span className="btn-inner--text">Dismiss </span>
+                                                <span><i className="fas fa-external-link-alt"></i></span>
                                             </button>
                                         }
                                         </div>
