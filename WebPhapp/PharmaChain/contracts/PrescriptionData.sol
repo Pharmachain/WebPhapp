@@ -26,19 +26,16 @@ contract PrescriptionData is PrescriptionBase {
         return 1;
     }
 
-    function updatePrescription(uint chainIndex, uint128 dispenserID,string drugQuantity, uint64[16] fulfillmentDates, 
-            uint16 daysValid, bool isCancelled, uint64 cancelDate) public returns(uint) {
+    function updatePrescription(uint chainIndex, uint128 dispenserID, string drugQuantity, 
+            uint16 daysValid) public returns(uint) {
 	Prescription storage p = drugChain[chainIndex];
-	if(p.isCancelled = true){
+	if(p.isCancelled == true){
 	    //Prescription cancelled, cannot edit, error
 	    return 1;
         }
         p.dispenserID = dispenserID;
         p.drugQuantity = drugQuantity;
-        p.fulfillmentDates = fulfillmentDates;
         p.daysValid = daysValid;
-        p.isCancelled = isCancelled;
-        p.cancelDate = cancelDate;
 
         return 0;
 

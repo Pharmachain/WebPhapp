@@ -4,11 +4,11 @@ let net = require("net");
 
 /*  This function updates an existing prescription on the drugChain
     User input: prescription arguments
-    Argument list: drugChainIndex, dispenserID, drugQuantity, daysValid, isCancelled, cancelDate
-    Example usage: node update_prescription.js 0 1 2 4 true 8    
+    Argument list: drugChainIndex, dispenserID, drugQuantity, daysValid
+    Example usage: node update_prescription.js 0 1 2 4   
 */
 
-async function update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate, daysValid, isCancelled, cancelDate){
+async function update( drugChainIndex, dispenserID, drugQuantity, daysValid){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -28,8 +28,7 @@ async function update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate
 
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.updatePrescription(drugChainIndex, dispenserID,drugQuantity, 
-                                                        fulfillmentDate, daysValid, isCancelled, cancelDate);
+    let transaction = await Patient.methods.updatePrescription(drugChainIndex, dispenserID, drugQuantity, daysValid);
     
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
@@ -51,10 +50,6 @@ let args = process.argv
 let drugChainIndex= args[2];
 let dispenserID = args[3];
 let drugQuantity = args[4]; 
-// Must be a 16 element int array in order to work. 
-let fulfillmentDate = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
-let daysValid = args[5];
-let isCancelled = args[6];
-let cancelDate = args[7];
+let daysValid = args[5]
 
-update(drugChainIndex, dispenserID, drugQuantity, fulfillmentDate, daysValid, isCancelled, cancelDate);
+update(drugChainIndex, dispenserID, drugQuantity, daysValid);
