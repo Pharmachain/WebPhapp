@@ -91,7 +91,7 @@ sudo node load_data.js
 
 - Write prescription to blockchain example:
 ```
-sudo node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0
+sudo node write_prescription.js 0 1 2 14 '300MG' 1542357074 200 8 false 0
 ```
 
 - Read prescription by index example:

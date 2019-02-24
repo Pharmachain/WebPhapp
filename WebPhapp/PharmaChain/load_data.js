@@ -34,13 +34,22 @@ async function loadPrescriptions(){
 	var obj = JSON.parse(fs.readFileSync('../backend/dummy_data/prescriptions.json', 'utf8'));
 	for (var j = 0; j < obj.prescriptions.length; j++){
 	    p = obj.prescriptions[j];
+            
+            //Temp variable to store fillDates
+            let fillDates = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            for (var i = 0; i < p.fillDates.length; i++){
+	        if(p.fillDates[i] > 0){
+	            fillDates[i] = p.fillDates[i]
+                }	
+	    }
+
 	    let transaction = await Patient.methods.addPrescription(
 		p.patientID,
 		p.prescriberID,
 		p.dispenserID,
 		p.drugID,
 		p.quantity,
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], //p.fillDates,
+		fillDates, //p.fillDates,
 		p.writtenDate,
 		p.daysFor,
 		p.refillsLeft,
