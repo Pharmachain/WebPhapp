@@ -10,6 +10,9 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+// Serve the static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
+
 // establish a connection to the remote MySQL DB
 if(conn.MySQL) {
     var connection = require('mysql2').createConnection(conn.MySQL);
@@ -39,22 +42,14 @@ function convertDatesToString(prescription){
     prescription.writtenDate = new Date(prescription.writtenDate).toString();
     prescription.fillDates = prescription.fillDates.filter(dateInt => dateInt > 0);
     prescription.fillDates = prescription.fillDates.map(dateInt => new Date(dateInt).toString());
+
+    // if cancelDate is -1 or 0, then there is no cancel date.
+    // if a cancelDate exists, then convert it to a string representation.
     if(prescription.cancelDate > 0){
         prescription.cancelDate = new Date(prescription.cancelDate).toString();
     }
     return prescription;
 }
-
-// Serve the static files from the React app
-app.use(express.static(path.join(__dirname, '../client/build')));
-
-// An api endpoint that returns a short list of items.
-// Used for frontend testing. To be removed when ready.
-app.get('/api/v1/list', (req,res) => {
-    var list = ["item1", "item2", "item3"];
-    res.json(list);
-    console.log('Sent list of items');
-});
 
 // An api endpoint that cancels the prescription associated with a
 // given prescription ID.
@@ -148,6 +143,8 @@ Expects an object with all integer fields:
             patientID: 0,
             ....
         }
+Note on daysValid field:
+https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
 app.post('/api/v1/prescriptions/add',(req,res) => {
     const prescription = req.body;
@@ -384,6 +381,10 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     }
 });
 
+// ------------------------
+//        patients
+// ------------------------
+
 /*
 About:
     An api endpoint that returns a list of patients given a first and
@@ -504,13 +505,13 @@ About:
     An api endpoint that returns all related prescriptions for a given dispenserID.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/1"
+        >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/all/1"
     To be used in Axois call:
         .get("/api/v1/dispensers/prescriptions/1")
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
     var handlePrescriptionsCallback = function(prescriptions) {
         // take only prescriptions with matching dispenserID
@@ -571,7 +572,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
         prescriptions = prescriptions.filter(
             prescription =>
                 prescription.dispenserID === dispenserID &&
-                (prescription.cancelDate > 0 || prescription.refillsLeft < 1)
+                (prescription.cancelDate > 0 || prescription.refillsLeft < 1) // there is no cancel date if cancelDate is 0 or -1
         );
 
         // Convert date integers to strings
@@ -629,7 +630,7 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
             prescription => 
                 prescription.dispenserID === dispenserID
                 && prescription.refillsLeft > 0
-                && prescription.cancelDate < 1
+                && prescription.cancelDate < 1 // there is no cancel date if cancelDate is 0 or -1
         );
 
         // Convert date integers to strings

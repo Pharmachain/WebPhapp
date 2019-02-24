@@ -299,7 +299,7 @@ describe("loading express", function() {
   //             Tests: /api/vi/dispensers
   // ------------------------------------------------------
 
-  // /api/v1/dispensers/prescriptions/:dispenserID
+  // /api/v1/dispensers/prescriptions/historical/:dispenserID
   it("test-route-dispensers-prescriptions-historical", function(done) {
     request(server)
     .get("/api/v1/dispensers/prescriptions/historical/2")
@@ -321,7 +321,7 @@ describe("loading express", function() {
     .end(done);
   });
 
-  // /api/v1/dispensers/prescriptions/:dispenserID
+  // /api/v1/dispensers/prescriptions/open/:dispenserID
   it("test-route-dispensers-prescriptions-open", function(done) {
     request(server)
     .get("/api/v1/dispensers/prescriptions/open/1")
@@ -349,10 +349,10 @@ describe("loading express", function() {
     .end(done);
   });
 
-    // /api/v1/dispensers/prescriptions/:dispenserID
+    // /api/v1/dispensers/prescriptions/all/:dispenserID
 it("test-route-dispensers-prescriptions", function(done) {
   request(server)
-  .get("/api/v1/dispensers/prescriptions/1")
+  .get("/api/v1/dispensers/prescriptions/all/1")
   .expect(200)
   .expect(function(res) {
     if(res.body.length < 1) throw new Error('Returned 0 prescriptions. Is this right?');
