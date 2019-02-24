@@ -41,7 +41,8 @@ async function deploy(){
     return contractInstance.options.address;
 }
 
-/*  This function creates a new prescription on the drugChain
+/*  DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+    This function creates a new prescription on the drugChain
     User input: prescription arguments
     Argument list: patientID, prescriberID, dispenserID, drugID, drugQuantity, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate
     Example usage: node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0   
@@ -129,7 +130,8 @@ async function read(index_value){
 }
 
 
-/*  This function takes a type and a value, and returns prescriptions
+/*  DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+    This function takes a type and a value, and returns prescriptions
     that have a type, of the first index and, a value of the second index.
     
 
