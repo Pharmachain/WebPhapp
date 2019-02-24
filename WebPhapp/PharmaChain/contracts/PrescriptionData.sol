@@ -27,7 +27,7 @@ contract PrescriptionData is PrescriptionBase {
     }
 
     function updatePrescription(uint chainIndex, uint128 dispenserID, string drugQuantity, 
-            uint16 daysValid) public returns(uint) {
+            uint16 daysValid,uint8 refillsLeft) public returns(uint) {
 	Prescription storage p = drugChain[chainIndex];
 	if(p.isCancelled == true){
 	    //Prescription cancelled, cannot edit, error
@@ -36,6 +36,7 @@ contract PrescriptionData is PrescriptionBase {
         p.dispenserID = dispenserID;
         p.drugQuantity = drugQuantity;
         p.daysValid = daysValid;
+	p.refillsLeft = refillsLeft;
 
         return 0;
 

@@ -207,6 +207,49 @@ module.exports = {
         });
     },
 
-   
+    /*
+    This function cancels a prescription on the blockchain,
+        preventing it from being updated or altered
+    Args:
+        index_value
+        date
+    Returns:
+        Transaction object
+    Example:
+        cancel(0)
+    */
+    cancel: async function(index_value, date) {
+        var blockchain = await connectToChain();
+        var error;
+        try {
+            let result = await blockchain.patient.methods.cancelPrescription(index_value, date).call({from: blockchain.account});
+        }a
+        catch(err) {
+            error = err;
+        }
 
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+        });
+    },
+
+    update: async function(index_value, dispenserID, drugQuantity, daysValid) {
+        var blockchain = await connectToChain();
+        var error;
+        try {
+            let update = await blockchain.patient.methods.updatePrescription(
+                index_value,
+                dispenserID,
+                drugQuantity,
+                daysValid
+            );
+    
+        }
+        catch(err) {
+            error = err;
+        }
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+        });
+    }
 }

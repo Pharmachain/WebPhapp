@@ -57,7 +57,7 @@ contract TestPrescriptionData is PrescriptionBase{
 		uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
         data.isCancelled, data.cancelDate);
-	p.updatePrescription(index, 3, data.drugQuantity, data.daysValid);
+	p.updatePrescription(index, 3, data.drugQuantity, data.daysValid, data.refillsLeft);
 
 	
         

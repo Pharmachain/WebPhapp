@@ -4,11 +4,11 @@ let net = require("net");
 
 /*  This function updates an existing prescription on the drugChain
     User input: prescription arguments
-    Argument list: drugChainIndex, dispenserID, drugQuantity, daysValid
-    Example usage: node update_prescription.js 0 1 2 4   
+    Argument list: drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft
+    Example usage: node update_prescription.js 0 1 2 4 8
 */
 
-async function update( drugChainIndex, dispenserID, drugQuantity, daysValid){
+async function update( drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -28,7 +28,7 @@ async function update( drugChainIndex, dispenserID, drugQuantity, daysValid){
 
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.updatePrescription(drugChainIndex, dispenserID, drugQuantity, daysValid);
+    let transaction = await Patient.methods.updatePrescription(drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft);
     
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
@@ -50,6 +50,7 @@ let args = process.argv
 let drugChainIndex= args[2];
 let dispenserID = args[3];
 let drugQuantity = args[4]; 
-let daysValid = args[5]
+let daysValid = args[5];
+let refillsLeft - args[6];
 
-update(drugChainIndex, dispenserID, drugQuantity, daysValid);
+update(drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft);
