@@ -195,8 +195,10 @@ module.exports = {
     redeem: async function(index_value, date) {
         var blockchain = await connectToChain();
         var error;
+        var result;
+
         try {
-            let result = await blockchain.patient.methods.redeemPrescription(index_value, date).call({from: blockchain.account});
+            result = await blockchain.patient.methods.redeemPrescription(index_value, date).call({from: blockchain.account});
         }
         catch(err) {
             error = err;
@@ -204,6 +206,7 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             if(error) reject(error);
+            resolve(result);
         });
     },
 
@@ -221,23 +224,27 @@ module.exports = {
     cancel: async function(index_value, date) {
         var blockchain = await connectToChain();
         var error;
+        var result;
+
         try {
-            let result = await blockchain.patient.methods.cancelPrescription(index_value, date).call({from: blockchain.account});
-        }a
+            result = await blockchain.patient.methods.cancelPrescription(index_value, date).call({from: blockchain.account});
+        }
         catch(err) {
             error = err;
         }
 
         return new Promise((resolve, reject) => {
             if(error) reject(error);
+            resolve(result);
         });
     },
 
     update: async function(index_value, dispenserID, drugQuantity, daysValid) {
         var blockchain = await connectToChain();
         var error;
+        var update;
         try {
-            let update = await blockchain.patient.methods.updatePrescription(
+            update = await blockchain.patient.methods.updatePrescription(
                 index_value,
                 dispenserID,
                 drugQuantity,
@@ -250,6 +257,7 @@ module.exports = {
         }
         return new Promise((resolve, reject) => {
             if(error) reject(error);
+            resolve(update);
         });
     }
 }
