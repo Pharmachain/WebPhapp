@@ -53,8 +53,6 @@ contract TestPrescriptionData is PrescriptionBase{
     }
 
 	//Test ability to update a prescription
-	//TODO Fix
-	/*
     function testUpdate() public{
 		uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
@@ -74,7 +72,6 @@ contract TestPrescriptionData is PrescriptionBase{
 
         Assert.equal(uint (dispenserID), uint (data.dispenserID + 1), "dispenserID not updated error....");
     }
-	*/
 
     //Tests adding then cancelling a prescription
     function testCancel() public{

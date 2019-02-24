@@ -182,7 +182,8 @@ module.exports = {
     },
 
     /*
-    This function redeems a prescription on the blockchain
+    This function redeems a prescription on the blockchain,
+	decrementing refills left, and adding a new date to fulfillmentDates
     Args:
         index_value
         date
@@ -204,6 +205,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
             if(error) reject(error);
         });
-    }   
+    },
+
+   
 
 }
