@@ -57,4 +57,4 @@ let daysValid = args[5];
 let isCancelled = args[6];
 let cancelDate = args[7];
 
-update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate, daysValid, isCancelled, cancelDate);
+update(drugChainIndex, dispenserID, drugQuantity, fulfillmentDate, daysValid, isCancelled, cancelDate);

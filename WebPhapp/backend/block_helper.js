@@ -179,5 +179,31 @@ module.exports = {
         
         // Return Transaction object containing transaction hash and other data
         return block;
-    }
+    },
+
+    /*
+    This function redeems a prescription on the blockchain
+    Args:
+        index_value
+        date
+    Returns:
+        Transaction object
+    Example:
+        redeem(0)
+    */
+    redeem: async function(index_value, date) {
+        var blockchain = await connectToChain();
+        var error;
+        try {
+            let result = await blockchain.patient.methods.redeemPrescription(index_value, date).call({from: blockchain.account});
+        }
+        catch(err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+        });
+    }   
+
 }
