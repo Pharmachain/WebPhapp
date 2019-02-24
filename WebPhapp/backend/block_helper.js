@@ -217,9 +217,9 @@ module.exports = {
         index_value
         date
     Returns:
-        Transaction object
+        0 if successful else non-zero integer.
     Example:
-        cancel(0)
+        cancel(0, 123456543)
     */
     cancel: async function(index_value, date) {
         var blockchain = await connectToChain();

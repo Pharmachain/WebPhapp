@@ -57,6 +57,9 @@ app.get('/api/v1/list', (req,res) => {
 // given prescription ID.
 // example: http://localhost:5000/api/v1/prescriptions/cancel/2
 app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+    var prescriptionID = parseInt(req.params.prescriptionID);
+    var date = new Date().getTime();
+
     //TODO Check for auth to do this.
     //TODO Check for valid prescriptionID
 
@@ -67,6 +70,17 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         return;
     }
 
+    if(conn.Blockchain){
+        block_helper.cancel(prescriptionID, date)
+        .then((answer) => {
+            console.log(answer);
+        })
+        .catch((error) => {
+            finish("/api/v1/prescriptions: error: " + error.toString(), false);
+        });
+    } else {
+        null;
+    }
     //TODO Cancel the prescription on the blockchain
     return finish("TODO: build prescription cancel to blockchain", true);
 });
