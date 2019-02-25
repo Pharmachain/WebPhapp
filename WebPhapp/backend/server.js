@@ -53,7 +53,8 @@ function convertDatesToString(prescription){
 
 // An api endpoint that cancels the prescription associated with a
 // given prescription ID.
-// example: http://localhost:5000/api/v1/prescriptions/cancel/2
+// Example: 
+//      >>> curl "http://localhost:5000/api/v1/prescriptions/cancel/0"
 app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
@@ -72,15 +73,14 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         block_helper.cancel(prescriptionID, date)
         .then((answer) => {
             console.log(answer);
+            finish('cancel is WIP ', true);
         })
         .catch((error) => {
-            finish("/api/v1/prescriptions: error: " + error.toString(), false);
+            finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
         });
-    } else {
-        null;
+    } else { // cancel prescription from dummy data
+        finish("cancel tmp: dummy data not changed", true);
     }
-    //TODO Cancel the prescription on the blockchain
-    return finish("TODO: build prescription cancel to blockchain", true);
 });
 
 /*
