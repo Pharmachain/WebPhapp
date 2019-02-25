@@ -31,14 +31,10 @@ class Prescription extends Component {
     displayPrescriptions = () => {
         var prescriptionCount = -1;
         return this.props.prescriptions.map(prescription => {
-            // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
             prescriptionCount += 1;
-            var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
             // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
-
             var writtenDate = "Sat Feb 23 2019";
-            var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
-
+            console.log(prescription.fillDates)
 
             return(
                 <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
@@ -87,8 +83,7 @@ class Prescription extends Component {
 
     render() {
         var prescription = this.state.modalPrescription;
-        console.log(prescription);
-        // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
+        // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates;
         // var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
         var cancelDate = "TBD";
         // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
