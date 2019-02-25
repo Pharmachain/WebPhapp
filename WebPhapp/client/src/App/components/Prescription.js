@@ -1,12 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import axios from "axios";  
+import axios from "axios";
 
-//todo: map fillDates array to table
 class Prescription extends Component {
     constructor(props){
         super(props);
-
         // Check for type of user with some API call.
         const user = 'prescriber';
         this.state={
@@ -21,7 +19,6 @@ class Prescription extends Component {
         axios
         .get(cancelQuery)
         .then(results => results.data);
-
         //Grey out cancelled prescription.
         this.props.getPrescriptions();
     }
@@ -30,12 +27,11 @@ class Prescription extends Component {
     displayPrescriptions = () => {
         var prescriptionCount = -1;
         return this.props.prescriptions.map(prescription => {
+            var writtenDate = prescription.writtenDate.split(" ", 4).join(" ");
             prescriptionCount += 1;
-            // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
-            var writtenDate = "Sat Feb 23 2019";
             return(
                 <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
-                    <div className="card-body">
+                    <div className="card-body" >
                         <div className="row">
                             <div className="col">
                                 <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription {prescription.prescriptionID} &nbsp;
@@ -50,7 +46,7 @@ class Prescription extends Component {
                                         Refills Left: {prescription.refillsLeft}
                                         <br></br>
                                         Date Written: {writtenDate}
-                                    </span> 
+                                    </span>
                                 </p>
                             </div>
                             <div className="col">
@@ -63,46 +59,50 @@ class Prescription extends Component {
                         <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal" id={prescriptionCount} onClick={this.onClickViewPrescription}>
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
-                        </button> 
+                        </button>
                     </div>
                 </div>
             )
         })
     }
 
-    // 
+    // Displays the prescription card modal for "more info" of a prescription
     onClickViewPrescription = (event) => {
-        var prescriptionID = event.target.id;
+        var prescriptionID = event.target.id || event.currentTarget.id;        
         const modalPrescription = this.props.prescriptions[prescriptionID];
-        this.state.modalPrescription = modalPrescription;
-        this.forceUpdate();
+        this.setState({modalPrescription});
     }
 
     render() {
-        var prescription = this.state.modalPrescription;
-        console.log(this.state.modalPrescription)
-        // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates;
-        // var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
-        // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
+        var prescription = this.state.modalPrescription;        
+        var drugName = (prescription && prescription.drugName) || "";
+        var quantity = (prescription && prescription.quantity) || "";
+        var daysFor = (prescription && prescription.daysFor) || "";
+        var refillsLeft = (prescription && prescription.refillsLeft);
+        var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
+        var cancelDate = prescription && (prescription.cancelDate === -1 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
+        // var fillDates = prescription && (Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "" 
+        // : prescription.fillDates.map( fillDate => {
+        //         for (var i = 0; i < fillDates.length; i++) {
+        //             fillDate.split(" ", 4).join(" ");
+        //         })
+        // );
+        
         var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
-        var cancelDate = "T.B.D.";
-        var writtenDate = "Sat Feb 23 2019";
-
         return(
             <div className="container">
                 <div className="masonry align-items-left">
                       {this.displayPrescriptions()}
-                      {this.state.modalPrescription && <div className="col-md-4">
+                      {<div className="col-md-4">
                         <div className="modal fade" tabIndex="-1" id="prescription-modal">
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document">
                             <div className="modal-content">
                             <div className="modal-header">
-                                <h3 className="modal-title" id="modal-title-default">Prescription: {prescription.drugName}</h3>
+                                <h3 className="modal-title" id="modal-title-default">Prescription: {drugName}</h3>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
                                 </button>
                             </div>
-                            
                             <div className="modal-body">
                             <div className="row">
                                 <div className="col-auto">
@@ -111,10 +111,10 @@ class Prescription extends Component {
                                             <div className="row">
                                                 <div className="col">
                                                     <h5 className="card-title text-uppercase text-muted mb-0 text-left">Quantity:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{prescription.quantity}</span>
+                                                    <span className="h3 font-weight-bold mb-0">{quantity}</span>
                                                 </div>
                                                 <div className="col-auto">
-                                                <div className="icon icon-shape bg-primary text-white rounded-circle shadow">
+                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                     <i className="fas fa-pills"></i>
                                                 </div>
                                                 </div>
@@ -127,10 +127,10 @@ class Prescription extends Component {
                                             <div className="row">
                                                 <div className="col">
                                                     <h5 className="card-title text-uppercase text-muted mb-0 text-left">Number of Days For:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{prescription.daysFor}</span>
+                                                    <span className="h3 font-weight-bold mb-0">{daysFor}</span>
                                                 </div>
                                                 <div className="col-auto">
-                                                <div className="icon icon-shape bg-success text-white rounded-circle shadow">
+                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                     <i className="ni ni-calendar-grid-58"></i>
                                                 </div>
                                                 </div>
@@ -143,10 +143,10 @@ class Prescription extends Component {
                                             <div className="row">
                                                 <div className="col">
                                                     <h5 className="card-title text-uppercase text-muted mb-0 text-left">Refills Left:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{prescription.refillsLeft}</span>
+                                                    <span className="h3 font-weight-bold mb-0">{refillsLeft}</span>
                                                 </div>
                                                 <div className="col-auto">
-                                                <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">
+                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                     <i className="fas fa-prescription-bottle"></i>
                                                 </div>
                                                 </div>
@@ -162,7 +162,7 @@ class Prescription extends Component {
                                                     <span className="h3 font-weight-bold mb-0">{writtenDate}</span>
                                                 </div>
                                                 <div className="col-auto">
-                                                <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
+                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                     <i className="fas fa-user-edit"></i>
                                                 </div>
                                                 </div>
@@ -178,7 +178,7 @@ class Prescription extends Component {
                                                     <span className="h3 font-weight-bold mb-0">{cancelDate}</span>
                                                 </div>
                                                 <div className="col-auto">
-                                                    <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                                    <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                         <i className="fas fa-ban"></i>
                                                     </div>
                                                 </div>
@@ -186,7 +186,6 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="col">
                                     <div className="card shadow">
                                         <div className="card-header border-0">
@@ -201,55 +200,58 @@ class Prescription extends Component {
                                             </tr>
                                             </thead>
                                             <tbody>
+                                                
                                                 <tr>
                                                     <td>1</td>
-                                                    <td>{fillDates[0]}</td> 
+                                                    <td>{fillDates[0]}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>2</td>
-                                                    <td>{fillDates[1]}</td> 
+                                                    <td>{fillDates[1]}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>3</td>
-                                                    <td>{fillDates[2]}</td> 
+                                                    <td>{fillDates[2]}</td>
                                                 </tr>
+                                              
                                             </tbody>
                                         </table>
                                         </div>
                                     </div>
                                     <br></br>
-
+                                    
                                     <div className="row justify-content-center form-inline">
-                                        <div className="form-group">
-                                        {prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
-                                            <div>
-                                            <button type = "button" 
-                                                className = "btn btn-danger"
+                                        <div className="form-group justify-content-bottom">
+                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
+                                            <div className>
+                                            <button type = "button"
+                                                className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
+                                                data-target="cancel-alert"
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
                                                 <span><i className="fas fa-user-times"></i></span>
                                             </button>
                                             <button type = "button"
-                                                className = "btn btn-success"
+                                                className = "btn btn-outline-success"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
-                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
+                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
                                                 <span className="btn-inner--text">Edit </span>
                                                 <span><i className="fas fa-edit"></i></span>
                                             </button>
                                             <button type = "button"
-                                                className = "btn btn-primary"
+                                                className = "btn btn-outline-primary"
                                                 style={{width: '8rem'}}
                                                 data-dismiss="modal">
                                                 <span className="btn-inner--text">Dismiss </span>
                                                 <span><i className="fas fa-external-link-alt"></i></span>
                                             </button>
                                             </div>
-                                        : 
+                                        :
                                             <button type = "button"
-                                                className = "btn btn-primary"
+                                                className = "btn btn-outline-primary"
                                                 style={{width: '8rem'}}
                                                 data-dismiss="modal">
                                                 <span className="btn-inner--text">Dismiss </span>
@@ -263,11 +265,11 @@ class Prescription extends Component {
                             </div>
                             <div className="modal-footer justify-content-center ">
                                 <div className="row text-xs text-uppercase text-muted mb-0">
-                                    <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {prescription.prescriptionID} </div>
-                                    <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {prescription.drugID}</div>
-                                    <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {prescription.patientID}</div>
-                                    <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {prescription.prescriberID}</div>
-                                    <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {prescription.dispenserID}</div>
+                                    <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {(prescription && prescription.prescriptionID) || ""} </div>
+                                    <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
+                                    <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {(prescription && prescription.patientID) || ""}</div>
+                                    <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {(prescription && prescription.prescriberID) || ""}</div>
+                                    <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
                                 </div>
                             </div>
                             </div>
@@ -276,7 +278,6 @@ class Prescription extends Component {
                         </div>
                       }
                 </div>
-                                
             </div>
         );
     }
