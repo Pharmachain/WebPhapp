@@ -73,6 +73,25 @@ class Prescription extends Component {
         this.setState({modalPrescription});
     }
 
+    // Displays the table body for the fill dates of a prescription
+    displayFillDates(fillDates){
+        if (fillDates == 0) {
+            return (
+                <tr>
+                    <td>{"-"}</td>
+                    <td>{"N/A"}</td>
+                </tr>
+            )
+        } else {
+            return fillDates.map((date, index) => 
+            <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{date}</td>
+            </tr>
+            );
+        }
+    }
+
     render() {
         var prescription = this.state.modalPrescription;        
         var drugName = (prescription && prescription.drugName) || "";
@@ -81,14 +100,14 @@ class Prescription extends Component {
         var refillsLeft = (prescription && prescription.refillsLeft);
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
         var cancelDate = prescription && (prescription.cancelDate === -1 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
-        // var fillDates = prescription && (Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "" 
-        // : prescription.fillDates.map( fillDate => {
-        //         for (var i = 0; i < fillDates.length; i++) {
-        //             fillDate.split(" ", 4).join(" ");
-        //         })
-        // );
-        
-        var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
+        var fillDates = prescription && prescription.fillDates;  
+
+        var fillDatesLength = prescription && prescription.fillDates.length;
+        var formattedDates = [];
+        for (var i = 0; i < fillDatesLength; i++){
+            formattedDates.push(fillDates[i].split(" ", 4).join(" ")); 
+        }
+
         return(
             <div className="container">
                 <div className="masonry align-items-left">
@@ -200,20 +219,7 @@ class Prescription extends Component {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                                
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>{fillDates[0]}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>2</td>
-                                                    <td>{fillDates[1]}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>3</td>
-                                                    <td>{fillDates[2]}</td>
-                                                </tr>
-                                              
+                                                {this.displayFillDates(formattedDates)}
                                             </tbody>
                                         </table>
                                         </div>
@@ -223,7 +229,7 @@ class Prescription extends Component {
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">
                                         { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
-                                            <div className>
+                                            <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
