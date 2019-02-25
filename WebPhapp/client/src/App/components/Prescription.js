@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import axios from "axios";  
 
 //todo: map fillDates array to table
-//generate correct data per modal: solns: destroy + rerender or lookup how to load dynamic data
 class Prescription extends Component {
     constructor(props){
         super(props);
@@ -11,7 +10,8 @@ class Prescription extends Component {
         // Check for type of user with some API call.
         const user = 'prescriber';
         this.state={
-            user: user
+            user: user,
+            clicked: 0
         }
     }
 
@@ -27,19 +27,21 @@ class Prescription extends Component {
         this.props.getPrescriptions();
     }
 
-    // Displays all prescriptions for a patient
+    // Displays all prescription cards for a patient
     displayPrescriptions = () => {
+        var prescriptionCount = -1;
         return this.props.prescriptions.map(prescription => {
             // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
-            
+            prescriptionCount += 1;
             var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
             // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
 
             var writtenDate = "Sat Feb 23 2019";
             var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
 
+
             return(
-                <div className="card card-stats mb-4 ml-4" key={prescription.prescriptionID} style={{width: '21rem'}} >
+                <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
@@ -65,16 +67,40 @@ class Prescription extends Component {
                             </div>
                         </div>
                         <br></br>
-
-                        <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal">
+                        <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal" id={prescriptionCount} onClick={this.onClickViewPrescription}>
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
-                        </button>                   
+                        </button> 
                     </div>
-                
+                </div>
+            )
+        })
+    }
 
-                    <div className="col-md-4" key={prescription.prescriptionID}>
-                        <div className="modal fade" tabindex="-1" id="prescription-modal">
+    // 
+    onClickViewPrescription = (event) => {
+        var prescriptionID = event.target.id;
+        const modalPrescription = this.props.prescriptions[prescriptionID];
+        this.state.modalPrescription = modalPrescription;
+        this.forceUpdate();
+    }
+
+    render() {
+        var prescription = this.state.modalPrescription;
+        console.log(prescription);
+        // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates.toString();
+        // var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
+        var cancelDate = "TBD";
+        // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
+
+        var writtenDate = "Sat Feb 23 2019";
+        var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
+        return(
+            <div className="container">
+                <div className="masonry align-items-left">
+                      {this.displayPrescriptions()}
+                      {this.state.modalPrescription && <div className="col-md-4">
+                        <div className="modal fade" tabIndex="-1" id="prescription-modal">
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document">
                             <div className="modal-content">
                             <div className="modal-header">
@@ -218,7 +244,7 @@ class Prescription extends Component {
                                                 id = {prescription.prescriptionID}
                                                 onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.target.id}`}>
                                                 <span className="btn-inner--text">Edit </span>
-                                                <span><i class="fas fa-edit"></i></span>
+                                                <span><i className="fas fa-edit"></i></span>
                                             </button>
                                             <button type = "button"
                                                 className = "btn btn-primary"
@@ -254,18 +280,10 @@ class Prescription extends Component {
                             </div>
                         </div>
                         </div>
-                        </div> 
+                        </div>
+                      }
                 </div>
-            )
-        })
-    }
-
-    render() {
-        return(
-            <div className="container">
-                <div className="masonry align-items-left">
-                      {this.displayPrescriptions()}
-                </div>
+                                
             </div>
         );
     }
