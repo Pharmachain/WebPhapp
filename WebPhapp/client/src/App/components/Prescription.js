@@ -11,7 +11,6 @@ class Prescription extends Component {
         const user = 'prescriber';
         this.state={
             user: user,
-            clicked: 0
         }
     }
 
@@ -34,8 +33,6 @@ class Prescription extends Component {
             prescriptionCount += 1;
             // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
             var writtenDate = "Sat Feb 23 2019";
-            console.log(prescription.fillDates)
-
             return(
                 <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
                     <div className="card-body">
@@ -83,13 +80,14 @@ class Prescription extends Component {
 
     render() {
         var prescription = this.state.modalPrescription;
+        console.log(this.state.modalPrescription)
         // var fillDates = Array.isArray(prescription.fillDates) && prescription.fillDates.length === 0 ? "Not Yet Filled" : prescription.fillDates;
         // var cancelDate = prescription.cancelDate === -1 ? "T.B.D." : prescription.cancelDate; 
-        var cancelDate = "TBD";
         // var writtenDate = prescription.writtenDate.split(" ", 4).join(" ")
-
-        var writtenDate = "Sat Feb 23 2019";
         var fillDates = ["Sat Feb 23 2019", "Sun Jan 7 2019", "Wed Apr 31 2019"];
+        var cancelDate = "T.B.D.";
+        var writtenDate = "Sat Feb 23 2019";
+
         return(
             <div className="container">
                 <div className="masonry align-items-left">
