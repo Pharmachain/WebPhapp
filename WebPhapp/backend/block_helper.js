@@ -190,45 +190,15 @@ module.exports = {
     Returns:
         Transaction object
     Example:
-        redeem(0)
+        redeem(0, 123456543)
     */
     redeem: async function(index_value, date) {
-        var blockchain = await connectToChain();
-        var error;
-        var result;
-
-        try {
-            result = await blockchain.patient.methods.redeemPrescription(index_value, date).call({from: blockchain.account});
-        }
-        catch(err) {
-            error = err;
-        }
-
-        return new Promise((resolve, reject) => {
-            if(error) reject(error);
-            resolve(result);
-        });
-    },
-
-    /*
-    This function cancels a prescription on the blockchain,
-        preventing it from being updated or altered
-    Args:
-        index_value
-        date
-    Returns:
-        0 if successful else non-zero integer.
-    Example:
-        cancel(0, 123456543)
-    */
-    cancel: async function(index_value, date) {
         var blockchain = await connectToChain();
         var error;
         var block;
 
         try {
-            let transaction = await blockchain.patient.methods.cancelPrescription(index_value, date).call({from: blockchain.account});
-            
+            let transaction = await blockchain.patient.methods.redeemPrescription(index_value, date);
             // Submitting prescription transaction.
             let encoded_transaction = transaction.encodeABI();
             block = await blockchain.web3.eth.sendTransaction({
@@ -248,19 +218,76 @@ module.exports = {
         });
     },
 
-    // missing refills left field
-    update: async function(index_value, dispenserID, drugQuantity, daysValid) {
+    /*
+    This function cancels a prescription on the blockchain,
+        preventing it from being updated or altered
+    Args:
+        index_value
+        date
+    Returns:
+        Transaction object.
+    Example:
+        cancel(0, 123456543)
+    */
+    cancel: async function(index_value, date) {
+        var blockchain = await connectToChain();
+        var error;
+        var block;
+
+        try {
+            let transaction = await blockchain.patient.methods.cancelPrescription(index_value, date);
+            // Submitting prescription transaction.
+            let encoded_transaction = transaction.encodeABI();
+            block = await blockchain.web3.eth.sendTransaction({
+                data: encoded_transaction,
+                from: blockchain.account,
+                to: blockchain.patient.options.address,
+                gas: 50000000
+            });
+        }
+        catch(err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(block);
+        });
+    },
+
+    /*
+    This function updates a prescription on the blockchain,
+        altering its dispenserID, drugQuantity, daysValid, 
+    Args:
+        index_value
+        dispenserID
+        drugQuantity,
+        daysValid,
+        refillsLeft
+    Returns:
+        Transactiono Object.
+    Example:
+        update(0, 2, '300MG', 16)
+    */
+    update: async function(index_value, dispenserID, drugQuantity, daysValid, refillsLeft) {
         var blockchain = await connectToChain();
         var error;
         var update;
         try {
-            update = await blockchain.patient.methods.updatePrescription(
+            let transaction = await blockchain.patient.methods.updatePrescription(
                 index_value,
                 dispenserID,
                 drugQuantity,
                 daysValid
             );
-    
+
+            let encoded_transaction = transaction.encodeABI();
+            block = await blockchain.web3.eth.sendTransaction({
+                data: encoded_transaction,
+                from: blockchain.account,
+                to: blockchain.patient.options.address,
+                gas: 50000000
+            });
         }
         catch(err) {
             error = err;

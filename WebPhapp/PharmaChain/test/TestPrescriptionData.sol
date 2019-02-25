@@ -78,8 +78,8 @@ contract TestPrescriptionData is PrescriptionBase{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
         data.isCancelled, data.cancelDate);
-        uint256 cancelled = p.cancellPrescription(index, 10);
-        Assert.equal(uint256(cancelled),uint64(0), "Prescription not cancelled...");
+        uint256 canceled = p.cancelPrescription(index, 10);
+        Assert.equal(uint256(canceled),uint64(0), "Prescription not cancelled...");
     }
     
     //Tests redeeming a prescription

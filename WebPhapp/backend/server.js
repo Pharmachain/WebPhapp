@@ -55,6 +55,34 @@ function convertDatesToString(prescription){
 // given prescription ID.
 // Example: 
 //      >>> curl "http://localhost:5000/api/v1/prescriptions/cancel/0"
+// app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+//     var prescriptionID = parseInt(req.params.prescriptionID);
+//     var date = new Date().getTime();
+
+//     //TODO Check for auth to do this.
+//     //TODO Check for valid prescriptionID
+
+//     // finish takes a string message and a boolean (true if successful)
+//     function finish(msg, success){
+//         console.log(msg);
+//         res.status(success ? 200 : 400).json(success);
+//         return;
+//     }
+
+//     if(conn.Blockchain){
+//         console.log(prescriptionID, date);
+//         block_helper.cancel(prescriptionID, date
+//         ).then((answer) => {
+//             console.log(answer);
+//             finish('cancel is WIP ', true);
+//         })
+//         .catch((error) => {
+//             finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
+//         });
+//     } else { // cancel prescription from dummy data
+//         finish("cancel tmp: dummy data not changed", true);
+//     }
+// });
 app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
@@ -70,16 +98,17 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
     }
 
     if(conn.Blockchain){
-        block_helper.cancel(prescriptionID, date)
-        .then((answer) => {
+        console.log(prescriptionID, date);
+        block_helper.cancel(prescriptionID, date
+        ).then((answer) => {
             console.log(answer);
-            finish('cancel is WIP ', true);
+            return finish('cancel is WIP ', true);
         })
         .catch((error) => {
-            finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
+            return finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
         });
     } else { // cancel prescription from dummy data
-        finish("cancel tmp: dummy data not changed", true);
+        return finish("cancel tmp: dummy data not changed", true);
     }
 });
 
@@ -133,7 +162,30 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
 
 
     //TODO Go into blockchain to call changing functions...The data for this is in the changedPrescription data.
-    return finish("TODO: build prescription edit to blockchain", true);
+    // finish takes a string message and a boolean (true if successful)
+
+    if(conn.Blockchain){
+        var prescriptionID = changedPrescription.prescriptionID;
+        var dispenserID = changedPrescription.dispenserID;
+        var drugQuantity = changedPrescription.drugQuantity;
+        var daysValid = changedPrescription.daysValid;
+        var refillsLeft = changedPrescription.refillsLeft;
+
+        block_helper.update(prescriptionID,
+            dispenserID,
+            drugQuantity,
+            daysValid,
+            refillsLeft 
+        ).then((answer) => {
+            console.log(answer);
+            return finish('update is WIP ', true);
+        })
+        .catch((error) => {
+            return finish("/api/v1/prescriptions/edit: error: " + error.toString(), false);
+        });
+    } else { // cancel prescription from dummy data
+        return finish("edit tmp: dummy data not changed", true);
+    }
 });
 
 /*
