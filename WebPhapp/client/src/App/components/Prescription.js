@@ -235,9 +235,11 @@ class Prescription extends Component {
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
                                                 data-target="cancel-alert"
+                                                data-toggle="modal" 
+                                                data-target="#cancel-prescription-modal"
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
-                                                <span><i className="fas fa-user-times"></i></span>
+                                                <span><i className="fas fa-trash-alt"></i></span>
                                             </button>
                                             <button type = "button"
                                                 className = "btn btn-outline-success"
@@ -268,7 +270,40 @@ class Prescription extends Component {
                         </div>
                         </div>
                         </div>
-                      }
+                    }
+                    {
+                    <div className="modal fade" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                        <div className="modal-dialog modal-" role="document">
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <br></br>
+                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                <span className="alert-inner--text"><strong> CANCELLED: </strong> Prescription cancelled from Pharmachain.</span>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    
                 </div>
             </div>
         );
