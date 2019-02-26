@@ -2,10 +2,17 @@ let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
 
-/*  This function updates an existing prescription on the drugChain
-    User input: prescription arguments
-    Argument list: drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft
-    Example usage: node update_prescription.js 0 1 2 4 8
+/*  
+This function updates an existing prescription on the drugChain
+User input: prescription arguments
+Args:
+    chainIndex (int)
+    dispenserID (int)
+    drugQuantity (string)
+    daysValid (int)
+    refillsLeft (int)
+Example: 
+    >>> sudo node update_prescription.js 0 1 "1 mg" 4 8
 */
 
 async function update( drugChainIndex, dispenserID, drugQuantity, daysValid, refillsLeft){
@@ -41,11 +48,9 @@ async function update( drugChainIndex, dispenserID, drugQuantity, daysValid, ref
     
     // Return Transaction object containing transaction hash and other data
     return block;
-
 }
 
-// Main: 
-
+// Main:
 let args = process.argv
 let drugChainIndex= args[2];
 let dispenserID = args[3];

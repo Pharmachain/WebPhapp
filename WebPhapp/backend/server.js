@@ -50,45 +50,17 @@ function convertDatesToString(prescription){
     }
     return prescription;
 }
-
-// An api endpoint that cancels the prescription associated with a
-// given prescription ID.
-// Example: 
-//      >>> curl "http://localhost:5000/api/v1/prescriptions/cancel/0"
-// app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
-//     var prescriptionID = parseInt(req.params.prescriptionID);
-//     var date = new Date().getTime();
-
-//     //TODO Check for auth to do this.
-//     //TODO Check for valid prescriptionID
-
-//     // finish takes a string message and a boolean (true if successful)
-//     function finish(msg, success){
-//         console.log(msg);
-//         res.status(success ? 200 : 400).json(success);
-//         return;
-//     }
-
-//     if(conn.Blockchain){
-//         console.log(prescriptionID, date);
-//         block_helper.cancel(prescriptionID, date
-//         ).then((answer) => {
-//             console.log(answer);
-//             finish('cancel is WIP ', true);
-//         })
-//         .catch((error) => {
-//             finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
-//         });
-//     } else { // cancel prescription from dummy data
-//         finish("cancel tmp: dummy data not changed", true);
-//     }
-// });
+/*
+An api endpoint that cancels a prescription associated with a given prescriptionID.
+Example:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/cancel/0"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/cancel/0")
+*/
 app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
-
-    //TODO Check for auth to do this.
-    //TODO Check for valid prescriptionID
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
@@ -97,94 +69,91 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         return;
     }
 
-    if(conn.Blockchain){
-        console.log(prescriptionID, date);
-        block_helper.cancel(prescriptionID, date
-        ).then((answer) => {
-            console.log(answer);
-            return finish('cancel is WIP ', true);
+    //TODO Check for auth to do this.
+    //TODO Check for valid prescriptionID
+
+    if(conn.Blockchain) {
+        block_helper.cancel(prescriptionID, date)
+        .then((answer) => {
+            return finish(answer.toString(), true);
         })
         .catch((error) => {
-            return finish("/api/v1/prescriptions/cancel: error: " + error.toString(), false);
+            return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
         });
     } else { // cancel prescription from dummy data
-        return finish("cancel tmp: dummy data not changed", true);
+        return finish('/api/v1/prescriptions/cancel: tmp: dummy data not changed', true);
     }
 });
 
 /*
-Edits a prescription for a given prescription ID. The prescriptionID is used in order to get the rest of the data for the prescription. The rest of the data points are alterable values.
-
- Expects on object of shape:
-{
-  prescriptionID,
-  quantity,
-  daysFor,
-  refillsLeft,
-  dispenserID
-}
-
-  Directly in terminal:
-    >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 3,"drugID":0,"quantity":1,"daysValid":0,"refills":0,"dispenserID":0}'
-
+Edits a prescription for a given prescriptionID. The prescriptionID indexes the prescription on the blockchain.
+Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int)
+Takes an object of shape:
+    {
+        prescriptionID,
+        quantity,
+        daysValid,
+        refillsLeft,
+        dispenserID
+    }
+Examples:
+    Directly in terminal:
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 3,"quantity":1,"daysValid":0,"refillsLeft":0,"dispenserID":0}'
     To be used in an axios call:
         .post("/api/v1/prescription/edit",{
             prescriptionID: 0,
             ....
         }
+Returns:
+    true (and status code 200) if prescription edited, false (and status code 400) otherwise.
 */
-
 app.post('/api/v1/prescriptions/edit',(req,res) => {
-
     //TODO auth check needed here with cookie that goes with request headers
     const changedPrescription = req.body;
-
-    // Should become actuall, non-static data
-    var prescriptions = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-
-    var prescription = prescriptions.find( function(elem) {
-        return elem.prescriptionID === changedPrescription.prescriptionID;
-    });
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
         console.log(msg);
         res.status(success ? 200 : 400).json(success);
-        return;
+    }
+
+    // Ensure mandatory fields are all provided
+    fields = new Set([
+        changedPrescription.prescriptionID,
+        changedPrescription.quantity,
+        changedPrescription.daysValid,
+        changedPrescription.refillsLeft
+    ]);
+    if(fields.has(undefined) || fields.has(null)) {
+        return finish('/api/v1/prescriptions/edit: One of the mandatory prescription fields is null or undefined.', false);
     }
 
     // Ensures that a filled or cancelled prescription cannot be altered.
     if(prescription.cancelDate !== -1 || prescription.fillDates.length !== 0){
-      res.send({})
-      return finish('Attempt at cancelling fixed prescription', false);
+      return finish('/api/v1/prescriptions/edit: cannot change a cancelled or already filled prescription.', false);
     }
 
-
-    //TODO Go into blockchain to call changing functions...The data for this is in the changedPrescription data.
-    // finish takes a string message and a boolean (true if successful)
-
     if(conn.Blockchain){
-        var prescriptionID = changedPrescription.prescriptionID;
-        var dispenserID = changedPrescription.dispenserID;
-        var drugQuantity = changedPrescription.drugQuantity;
-        var daysValid = changedPrescription.daysValid;
-        var refillsLeft = changedPrescription.refillsLeft;
-
-        block_helper.update(prescriptionID,
-            dispenserID,
-            drugQuantity,
-            daysValid,
-            refillsLeft 
+        block_helper.update(
+            changedPrescription.prescriptionID,
+            changedPrescription.dispenserID,
+            changedPrescription.quantity,
+            changedPrescription.daysValid,
+            changedPrescription.refillsLeft 
         ).then((answer) => {
-            console.log(answer);
-            return finish('update is WIP ', true);
+            return finish(answer.toString(), true);
         })
         .catch((error) => {
-            return finish("/api/v1/prescriptions/edit: error: " + error.toString(), false);
+            return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
         });
     } else { // cancel prescription from dummy data
-        return finish("edit tmp: dummy data not changed", true);
+        var prescriptions = readJsonFileSync(
+            __dirname + '/dummy_data/prescriptions.json').prescriptions;
+
+        var prescription = prescriptions.find( function(elem) {
+            return elem.prescriptionID === changedPrescription.prescriptionID;
+        });
+        return finish('edit tmp: dummy data not changed', true);
     }
 });
 
@@ -237,13 +206,13 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
-        return finish("Required prescription field(s) are null or undefined.", false)
+        return finish('Required prescription field(s) are null or undefined.', false)
     }
 
     // validate fields are of proper type
     for (var key in prescription){
-        if(key === "quantity"){
-            if(typeof prescription[key] !== "string"){
+        if(key === 'quantity'){
+            if(typeof prescription[key] !== 'string'){
                 return finish("Prescription field '" + key + "' should be of type String.", false);
             }
         } else if( !Number.isInteger(prescription[key]) ){
