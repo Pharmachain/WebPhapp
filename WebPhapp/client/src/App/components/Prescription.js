@@ -247,22 +247,8 @@ class Prescription extends Component {
                                                 <span className="btn-inner--text">Edit </span>
                                                 <span><i className="fas fa-edit"></i></span>
                                             </button>
-                                            <button type = "button"
-                                                className = "btn btn-outline-primary"
-                                                style={{width: '8rem'}}
-                                                data-dismiss="modal">
-                                                <span className="btn-inner--text">Dismiss </span>
-                                                <span><i className="fas fa-external-link-alt"></i></span>
-                                            </button>
                                             </div>
-                                        :
-                                            <button type = "button"
-                                                className = "btn btn-outline-primary"
-                                                style={{width: '8rem'}}
-                                                data-dismiss="modal">
-                                                <span className="btn-inner--text">Dismiss </span>
-                                                <span><i className="fas fa-external-link-alt"></i></span>
-                                            </button>
+                                            : ""
                                         }
                                         </div>
                                     </div>
