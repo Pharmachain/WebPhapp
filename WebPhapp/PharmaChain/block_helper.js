@@ -41,7 +41,8 @@ async function deploy(){
     return contractInstance.options.address;
 }
 
-/*  This function creates a new prescription on the drugChain
+/*  DEPRECATED: this function has been moved to WebPhapp/backend/block_helper.js
+    This function creates a new prescription on the drugChain
     User input: prescription arguments
     Argument list: patientID, prescriberID, dispenserID, drugID, drugQuantity, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate
     Example usage: node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0   
@@ -217,6 +218,33 @@ async function update( drugChainIndex, dispenserID,drugQuantity, fulfillmentDate
     
     // Return Transaction object containing transaction hash and other data
     return block;
+
+}
+
+//Returns the number of prescriptions stored on the blockchain.
+async function getChainLength(){
+
+    // Connecting to the node 1. Will want to change to IPC connection eventually. 
+	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
+
+    // Get account information
+    let account = await web3.eth.personal.getAccounts();
+    account = account[0];
+
+    // Sets up contract requirements.
+    let source = fs.readFileSync('./build/contracts/Patient.json'); 
+    let contracts = JSON.parse(source);
+    let code = contracts.bytecode;
+    let abi = contracts.abi
+    let Patient = new web3.eth.Contract(abi, null,{
+        data: code,
+    });
+
+    Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
+
+    let length = await Patient.methods.getDrugChainLength().call({from: account});
+    console.log(values);
+    return values;
 
 }
 
