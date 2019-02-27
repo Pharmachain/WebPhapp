@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import "../style/Alerts.css"
 
 class Prescription extends Component {
     constructor(props){
@@ -272,29 +273,9 @@ class Prescription extends Component {
                         </div>
                     }
                     {
-                    <div className="modal fade" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-                        <div className="modal-dialog modal-" role="document">
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <br></br>
-                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div className="modal fade-up" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-bottom modal-" role="document">
+                            <div className="alert alert-danger alert-dismissible" role="alert">
                                 <span className="alert-inner--text"><strong> CANCELLED: </strong> Prescription cancelled from Pharmachain.</span>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -302,8 +283,7 @@ class Prescription extends Component {
                             </div>
                         </div>
                     </div>
-                    }
-                    
+                    }                    
                 </div>
             </div>
         );

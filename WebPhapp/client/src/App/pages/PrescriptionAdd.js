@@ -76,7 +76,7 @@ class PrescriptionAdd extends Component {
       <div className="App">
 
         <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-            <div className="modal-dialog modal-dialog-centered modal-" role="document">
+            <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
                     <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully added to Pharmachain.</span>
