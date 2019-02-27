@@ -140,7 +140,7 @@ class PrescriptionEdit extends Component {
             <div className="row">
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Quantity</label>
+                  <label className="form-control-label">Quantity: {this.state.quantity}</label>
                   <input
                   type="p"
                   className="form-control"
@@ -151,7 +151,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Days For</label>
+                  <label className="form-control-label">Days For: {this.state.daysFor}</label>
                   <input
                   type="p"
                   className="form-control"
@@ -162,7 +162,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Refills Left</label>
+                  <label className="form-control-label">Refills Left: {this.state.refillsLeft}</label>
                   <input
                   type="p"
                   className="form-control"
@@ -173,7 +173,7 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Dispenser ID</label>
+                  <label className="form-control-label">Dispenser ID: {this.state.dispenserID}</label>
                   <input
                   type="p"
                   className="form-control"
