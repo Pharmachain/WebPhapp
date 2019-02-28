@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import "../style/Alerts.css"
 
 class Prescription extends Component {
     constructor(props){
@@ -99,7 +100,7 @@ class Prescription extends Component {
         var daysFor = (prescription && prescription.daysFor) || "";
         var refillsLeft = (prescription && prescription.refillsLeft);
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
-        var cancelDate = prescription && (prescription.cancelDate === -1 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
+        var cancelDate = prescription && (prescription.cancelDate <= 0 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
         var fillDates = prescription && prescription.fillDates;  
 
         var fillDatesLength = prescription && prescription.fillDates.length;
@@ -228,16 +229,18 @@ class Prescription extends Component {
                                     
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">
-                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === -1 ?
+                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
                                                 data-target="cancel-alert"
+                                                data-toggle="modal" 
+                                                data-target="#cancel-prescription-modal"
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
-                                                <span><i className="fas fa-user-times"></i></span>
+                                                <span><i className="fas fa-trash-alt"></i></span>
                                             </button>
                                             <button type = "button"
                                                 className = "btn btn-outline-success"
@@ -268,7 +271,19 @@ class Prescription extends Component {
                         </div>
                         </div>
                         </div>
-                      }
+                    }
+                    {
+                    <div className="modal fade-up" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-bottom modal-" role="document">
+                            <div className="alert alert-danger alert-dismissible" role="alert">
+                                <span className="alert-inner--text"><strong> CANCELLED: </strong> Prescription cancelled from Pharmachain.</span>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }                    
                 </div>
             </div>
         );
