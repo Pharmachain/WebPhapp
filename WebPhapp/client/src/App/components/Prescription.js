@@ -274,7 +274,7 @@ class Prescription extends Component {
                         </div>
                     }
                     {
-                    <div className="modal fade-up" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                    <div className="modal fade-up" id="cancel-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-bottom modal-" role="document">
                             <div className="alert alert-danger alert-dismissible" role="alert">
                                 <span className="alert-inner--text"><strong> CANCELLED: </strong> Prescription cancelled from Pharmachain.</span>
