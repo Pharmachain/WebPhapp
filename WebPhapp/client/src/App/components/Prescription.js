@@ -236,7 +236,6 @@ class Prescription extends Component {
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
-                                                data-target="cancel-alert"
                                                 data-toggle="modal" 
                                                 data-target="#cancel-prescription-modal"
                                                 onClick = {this.onCancelClick}>
