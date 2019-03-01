@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-
+import { Link } from "react-router-dom";
 
 class PrescriptionAdd extends Component {
   // Initialize the state
@@ -8,10 +8,10 @@ class PrescriptionAdd extends Component {
     patientID: 0,
     drugID:0,
     quantity: "",
-    daysValid: 0,
-    refills: 0,
+    daysFor: 0,
+    refillsLeft: 0,
     prescriberID: 0,
-    dispensorID: 0,
+    dispenserID: 0,
     message: ''
   };
 
@@ -31,19 +31,24 @@ class PrescriptionAdd extends Component {
     this.setState({quantity: event.target.value});
   }
 
-  // Updating value in the days daysValid state
-  onKeyDownDaysValid = event => {
-    this.setState({daysValid: event.target.value});
+  // Updating value in the days daysFor state
+  onKeyDownDaysFor = event => {
+    this.setState({daysFor: event.target.value});
   }
 
-  // Updating value in the refills state
-  onKeyDownRefills = event => {
-    this.setState({refills: event.target.value});
+  // Updating value in the refillsLeft state
+  onKeyDownRefillsLeft = event => {
+    this.setState({refillsLeft: event.target.value});
   }
 
-  // Updating value in the dispensorID state
-  onKeyDownDispensorID = event => {
-    this.setState({dispensorID: event.target.value});
+  // Updating value in the prescriberID state
+  onKeyDownPrescriberID = event => {
+    this.setState({prescriberID: event.target.value});
+  }
+
+  // Updating value in the dispenserID state
+  onKeyDownDispenserID = event => {
+    this.setState({dispenserID: event.target.value});
   }
 
   // Sending the prescription to be added
@@ -57,10 +62,10 @@ class PrescriptionAdd extends Component {
         "patientID": this.state.patientID,
         "drugID": this.state.drugID,
         "quantity": this.state.quantity,
-        "daysValid": this.state.daysValid,
-        "refills": this.state.refills,
+        "daysFor": this.state.daysFor,
+        "refillsLeft": this.state.refillsLeft,
         "prescriberID": this.state.prescriberID,
-        "dispensorID": this.state.dispensorID
+        "dispenserID": this.state.dispenserID
       });
 
   }
@@ -68,57 +73,132 @@ class PrescriptionAdd extends Component {
   render() {
 
     return (
-      <div className="form-group">
-        <h1>Add Prescription </h1>
-        <form>
+      <div className="App">
 
-          <label>
-            Patient ID
-          </label>
-          <input
-            type="p"
-            value={this.state.patientID}
-            onChange={this.onKeyDownPatientID}
-          />
+        <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+            <div className="modal-dialog modal-" role="document">
+                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                    <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully added to Pharmachain.</span>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-          <label>
-            &nbsp; Drug&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.drugID}
-            onChange={this.onKeyDownDrugID}
-          />
-          <label>
-            &nbsp; Quantity&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.quantity}
-            onChange={this.onKeyDownQuantity}
-          />
-          <label>
-            &nbsp; Days Valid&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.daysValid}
-            onChange={this.onKeyDownDaysValid}
-          />
-          <label>
-            &nbsp; Dispensor ID&nbsp;
-          </label>
-          <input
-            type="p"
-            value={this.state.dispensorID}
-            onChange={this.onKeyDownDispensorID}
-          />
-        </form>
+        <div className="col-xl-8 order-xl-1 center">
+        <div className="card bg-secondary shadow">
+          <div className="card-header bg-white border-0">
+              <div className="row align-items-center">
+                <div className="col-8 text-left">
+                  <h3 className="mb-0">Prescription Add</h3>
+                </div>
+              </div>
+          </div>
+          <div className="card-body text-left">
+          <form>
+            <div className="pl-lg-4"> </div>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Patient ID:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the patient's ID"
+                  onChange={this.onKeyDownPatientID}/> 
+                </div>
+              </div>
 
-          <button type="button" class="btn btn-info" onClick={this.onSendPrecription}>
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Drug ID:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the drug's ID"
+                  onChange={this.onKeyDownDrugID}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Quantity:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the quantity"
+                  onChange={this.onKeyDownQuantity}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Days For:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the number of days for"
+                  onChange={this.onKeyDownDaysFor}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Refills Left:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the number of refills left"
+                  onChange={this.onKeyDownRefillsLeft}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Prescriber ID:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the prescriber's ID"
+                  onChange={this.onKeyDownPrescriberID}/> 
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Dispenser ID:</label>
+                  <input 
+                  type="p" 
+                  className="form-control" 
+                  placeholder="Enter the dispenser's ID"
+                  onChange={this.onKeyDownDispenserID}/> 
+                </div>
+              </div>
+            </div> 
+          </form>
+          <Link to={"/"}>
+                <button 
+                  type="button" 
+                  className="btn btn-danger my-4"
+                  variant="raised">
+                  Cancel
+                </button>
+          </Link>
+          <nbsp> </nbsp>
+          <button 
+            type="button" 
+            class="btn btn-success my-4" 
+            data-toggle="modal" 
+            data-target="#add-prescription-modal"
+            onClick={this.onSendPrecription}>
             Add Prescription
           </button>
-      </div>
+          </div>
+          </div>
+        </div>
+    </div>
     );
   }
 }

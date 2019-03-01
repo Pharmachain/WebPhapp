@@ -30,11 +30,13 @@
     transform: rotate(360deg);
   }
 }
+/*Allows cards to be displayed in order from left to right*/
+.masonry { 
+  display: flex;
+  flex-flow: row wrap;
+}
 
-table tr td a {
-    display:block;
-    height:100%;
-    width:100%;
-    color: #428BCA;
-    text-decoration: none;
+/*Greys out disabled table data*/
+.disabled td {
+  color: #b9b9b9;
 }

@@ -30,20 +30,22 @@ class PatientSearch extends Component {
     this.setState({firstName: event.target.value});
   }
 
-  // Updating text in the first last state
+  // Updating text in the last name state
   onKeyDownLastName = event => {
     this.setState({lastName: event.target.value});
   }
 
   // Search query for patient lookup via names
-  onSearchPatients = () => {
+  onSearchPatients = e => {
+    e.preventDefault()
     const patientID = this.state.patientID;
     const firstName = this.state.firstName;
     const lastName = this.state.lastName;
 
     // String interpolation
     var idSearchQuery = `/api/v1/patients/${patientID}`;
-    var nameSearchQuery= `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var nameSearchQuery = `/api/v1/patients?first=${firstName}&last=${lastName}`;
+    var defaultQuery = `/api/v1/patients?first=&last=`;
 
     if (patientID) {
       axios
@@ -52,76 +54,101 @@ class PatientSearch extends Component {
       .then(people => this.setState({ people: [people] }));
     }
 
-    else if (firstName || lastName) {
+    else if (firstName) {
       axios
       .get(nameSearchQuery)
       .then(results => results.data)
       .then(people => this.setState({ people }));
+    }
+
+    else if (lastName) {
+      axios
+      .get(nameSearchQuery)
+      .then(results => results.data)
+      .then(people => this.setState({ people }));
+    }
+
+    else {
+      axios
+        .get(defaultQuery)
+        .then(results => results.data)
+        .then(people => this.setState({ people }));
     }
   }
 
   render() {
 
     return (
-      <div className="form-group">
-        <form role="form">
-
-          <div className="form-group mb-3">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+      <div className="col-xl-8 order-xl-1 center">
+        <div className="card bg-secondary shadow">
+          <div className="card-header bg-white border-0">
+            <div className="row align-items-center">
+              <div className="col-8 text-left">
+                <h3 className="mb-0">Patient Search</h3>
               </div>
-              <input
-                className="form-control"
-                placeholder="Patient ID"
-                type="text"
-                value={this.state.patientID}
-                onChange={this.onKeyDownPatientID}
-              />
             </div>
           </div>
-
+          <div className="card-body text-left">
           <div className="form-group">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+          <form onSubmit={this.onSearchPatients}>
+            <div className="form-group mb-3">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  id="patient_id"
+                  placeholder="Patient ID"
+                  type="text"
+                  value={this.state.patientID}
+                  onChange={this.onKeyDownPatientID}
+                />
               </div>
-              <input
-                className="form-control"
-                placeholder="First Name"
-                type="p"
-                value={this.state.firstName}
-                onChange={this.onKeyDownFirstName}
-              />
             </div>
-          </div>
-
-          <div className="form-group">
-            <div className="input-group input-group-alternative">
-              <div className="input-group-prepend">
-                <span className="input-group-text"></span>
+            <hr className="my-4"></hr>
+            <div className="form-group">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  id="first_name"
+                  placeholder="First Name"
+                  type="p"
+                  value={this.state.firstName}
+                  onChange={this.onKeyDownFirstName}
+                />
               </div>
-              <input
-                className="form-control"
-                placeholder="Last Name"
-                type="p"
-                value={this.state.lastName}
-                onChange={this.onKeyDownLastName}
-              />
             </div>
+            <div className="form-group">
+              <div className="input-group input-group-alternative">
+                <div className="input-group-prepend">
+                  <span className="input-group-text"></span>
+                </div>
+                <input
+                  className="form-control"
+                  id="last_name"
+                  placeholder="Last Name"
+                  type="p"
+                  value={this.state.lastName}
+                  onChange={this.onKeyDownLastName}
+                />
+              </div>
+            </div>
+            <div className="text-center">
+              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
+                <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
+                <span className="btn-inner--text">Search</span>
+              </button>
+            </div>
+          </form>
+          <br></br>
+          <People patientList={this.state.people}/>
           </div>
-
-          <div className="text-center">
-            <button type="button" className="btn btn-primary my-4"
-              onClick={this.onSearchPatients}>
-              Search
-            </button>
           </div>
-
-        </form>
-
-        <People patientList={this.state.people}/>
-
+        </div>
       </div>
     );
   }
