@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
-import "../style/Alerts.css"
+import "../style/custom-argon.css"
 
 class Prescription extends Component {
     constructor(props){
@@ -21,6 +21,20 @@ class Prescription extends Component {
         .get(cancelQuery)
         .then(results => results.data);
         //Grey out cancelled prescription.
+        //TODO: grey out Rx logo
+        this.props.getPrescriptions();
+        window.location.href=`/cancel`;
+    }
+
+    // Gets the events id, to redeem the proper prescription.
+    onRedeemClick = event => {
+        // Probably add some validation to make sure the user wants to redeem this.
+        const redeemQuery = `/api/v1/prescriptions/redeem/${event.target.id}`
+        axios
+        .get(redeemQuery)
+        .then(results => results.data);
+        //Green out redeemed prescription.
+        //TODO: green out Rx logo
         this.props.getPrescriptions();
     }
 
@@ -113,16 +127,22 @@ class Prescription extends Component {
             <div className="container">
                 <div className="masonry align-items-left">
                       {this.displayPrescriptions()}
+
+                      {/* Modal that displays all prescription information */}
                       {<div className="col-md-4">
-                        <div className="modal fade" tabIndex="-1" id="prescription-modal">
-                        <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document">
-                            <div className="modal-content">
+                        <div className="modal fade" tabIndex="-1" id="prescription-modal" data-backdrop="false">
+                        <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
+                        <div className="modal-content">
+
+                            {/* Modal Header */}
                             <div className="modal-header">
                                 <h3 className="modal-title" id="modal-title-default">Prescription: {drugName}</h3>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
                                 </button>
                             </div>
+
+                            {/* Modal Body */}
                             <div className="modal-body">
                             <div className="row">
                                 <div className="col-auto">
@@ -206,6 +226,8 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Refill Dates Table */}
                                 <div className="col">
                                     <div className="card shadow">
                                         <div className="card-header border-0">
@@ -227,6 +249,7 @@ class Prescription extends Component {
                                     </div>
                                     <br></br>
                                     
+                                    {/* Buttons for modal given certain conditions... */}
                                     <div className="row justify-content-center form-inline">
                                         <div className="form-group justify-content-bottom">
                                         { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
@@ -235,9 +258,6 @@ class Prescription extends Component {
                                                 className = "btn btn-outline-danger"
                                                 style={{width: '8rem'}}
                                                 id = {prescription.prescriptionID}
-                                                data-target="cancel-alert"
-                                                data-toggle="modal" 
-                                                data-target="#cancel-prescription-modal"
                                                 onClick = {this.onCancelClick}>
                                                 <span className="btn-inner--text">Cancel </span>
                                                 <span><i className="fas fa-trash-alt"></i></span>
@@ -250,14 +270,37 @@ class Prescription extends Component {
                                                 <span className="btn-inner--text">Edit </span>
                                                 <span><i className="fas fa-edit"></i></span>
                                             </button>
+                                            <button type = "button"
+                                                className = "btn btn-outline-info"
+                                                style={{width: '8rem'}}
+                                                id = {prescription.prescriptionID}
+                                                onClick = {this.onRedeemClick}>
+                                                <span className="btn-inner--text">Redeem </span>
+                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
+                                            </button>
                                             </div>
-                                            : ""
+                                            :
+                                            prescription ?
+                                            <div>
+                                            <button type = "button"
+                                                className = "btn btn-outline-info"
+                                                style={{width: '8rem'}}
+                                                id={prescription.prescriptionID}
+                                                onClick = {this.onRedeemClick}>
+                                                <span className="btn-inner--text">Redeem </span>
+                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
+                                            </button>
+                                            </div>
+                                            :
+                                            ""
                                         }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             </div>
+
+                            {/* Modal Footer */}
                             <div className="modal-footer justify-content-center ">
                                 <div className="row text-xs text-uppercase text-muted mb-0">
                                     <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {(prescription && prescription.prescriptionID) || ""} </div>
@@ -267,23 +310,12 @@ class Prescription extends Component {
                                     <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
                                 </div>
                             </div>
+
                             </div>
                         </div>
                         </div>
                         </div>
                     }
-                    {
-                    <div className="modal fade-up" id="cancel-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-                        <div className="modal-dialog modal-dialog-bottom modal-" role="document">
-                            <div className="alert alert-danger alert-dismissible" role="alert">
-                                <span className="alert-inner--text"><strong> CANCELLED: </strong> Prescription cancelled from Pharmachain.</span>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    }                    
                 </div>
             </div>
         );
