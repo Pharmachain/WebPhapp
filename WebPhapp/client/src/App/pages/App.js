@@ -8,6 +8,7 @@ import PatientSearch from "./PatientSearch"
 import PrescriptionAdd from "./PrescriptionAdd.js"
 import PrescriptionEdit from "./PrescriptionEdit.js"
 import Header from "../components/Header.js"
+import Login from "./Login.js"
 
 class App extends Component {
   render() {
@@ -20,6 +21,7 @@ class App extends Component {
           <Route path="/patientSearch" component={PatientSearch} />
           <Route path="/prescriptionAdd" component={PrescriptionAdd}/>
           <Route path="/prescriptionEdit" component={PrescriptionEdit}/>
+          <Route path="/login" component={Login}/>
         </Switch>
       </div>
     );

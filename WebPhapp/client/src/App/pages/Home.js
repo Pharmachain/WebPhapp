@@ -6,6 +6,16 @@ class Home extends Component {
     return (
       <div className="App">
         <h1>Pharmaceutical Blockchain</h1>
+        <Link to={"./login"}>
+          <div className="text-center">
+            <button 
+              type="button" 
+              className="btn btn-primary my-4"
+              variant="raised">
+              Login
+            </button>
+          </div>
+        </Link>
         {/* Link to PatientSearch.js */}
         <Link to={"./patientSearch"}>
           <div className="text-center">
