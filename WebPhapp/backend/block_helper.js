@@ -198,6 +198,16 @@ module.exports = {
         var block;
 
         try {
+            // Ensures that a neither cancelled prescription nor one without refills left can be filled.
+            let values = await blockchain.patient.methods.getPrescription(chainIndex).call({from: blockchain.account});
+            let prescription = valuesToPrescription(values, chainIndex);
+            if(prescription.cancelDate > 0) {
+                throw new Error('cannot redeem a cancelled prescription.');
+            }
+            if(prescription.refillsLeft < 1) {
+                throw new Error('cannot redeem a prescription with no refills left.');
+            }
+
             let transaction = await blockchain.patient.methods.redeemPrescription(chainIndex, date);
             // Submitting prescription transaction.
             let encodedTransaction = transaction.encodeABI();
@@ -257,38 +267,52 @@ module.exports = {
 
     /*
     This function updates a prescription on the blockchain,
-        altering its dispenserID, drugQuantity, daysValid, and refillsLeft
+        altering its dispenserID, quantity, daysValid, and refillsLeft
     Args:
         chainIndex (int)
         dispenserID (int)
-        drugQuantity (string)
-        daysValid (int)
+        quantity (string)
+        daysFor (int)
         refillsLeft (int)
     Returns:
         Transaction Object.
     Example:
         update(0, 2, '300MG', 16, 1)
+    Note:
+        we have a daysFor vs daysValid problem here
     */
-    update: async function(chainIndex, dispenserID, drugQuantity, daysValid, refillsLeft) {
+    update: async function(chainIndex, dispenserID, quantity, daysValid, refillsLeft) {
         var blockchain = await connectToChain();
         var error;
         var block;
         try {
-            let transaction = await blockchain.patient.methods.updatePrescription(
-                chainIndex,
-                dispenserID,
-                drugQuantity,
-                daysValid,
-                refillsLeft
-            );
+            // Ensures that a filled or cancelled prescription cannot be altered.
+            let values = await blockchain.patient.methods.getPrescription(chainIndex).call({from: blockchain.account});
+            let prescription = valuesToPrescription(values, chainIndex);
+            if(prescription.cancelDate > 0 || prescription.fillDates[0] > 0) {
+                throw new Error('cannot change a cancelled or already filled prescription.');
+            }
 
-            let encodedTransaction = transaction.encodeABI();
-            block = await blockchain.web3.eth.sendTransaction({
-                data: encodedTransaction,
-                from: blockchain.account,
-                to: blockchain.patient.options.address,
-                gas: 50000000
-            });
+            // Only call blockchain function if something is being updated
+            if(!(prescription.dispenserID === dispenserID) || !(prescription.quantity === quantity)
+                    || !(prescription.daysFor === daysValid) || !(prescription.refillsLeft === refillsLeft)) {
+
+                let transaction = await blockchain.patient.methods.updatePrescription(
+                    chainIndex,
+                    dispenserID,
+                    quantity,
+                    daysValid,
+                    refillsLeft
+                );
+    
+                let encodedTransaction = transaction.encodeABI();
+                block = await blockchain.web3.eth.sendTransaction({
+                    data: encodedTransaction,
+                    from: blockchain.account,
+                    to: blockchain.patient.options.address,
+                    gas: 50000000
+                });
+            }
         }
         catch(err) {
             error = err;
@@ -297,5 +321,12 @@ module.exports = {
             if(error) reject(error);
             resolve(block);
         });
+    },
+
+    // Returns the Integer number of prescriptions stored on the blockchain.
+    getChainLength: async function() {
+        var blockchain = await connectToChain();
+        let length = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+        return parseInt(length);
     }
 }

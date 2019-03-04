@@ -28,7 +28,6 @@ contract TestPrescriptionData is PrescriptionBase{
         cancelDate: 0
     });
 
-
     // Test the ability to add a prescription
     function testAddingPrescription() public {
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
@@ -54,22 +53,34 @@ contract TestPrescriptionData is PrescriptionBase{
 
 	//Test ability to update a prescription
     function testUpdate() public{
-		uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
-        data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
-        data.isCancelled, data.cancelDate);
-	p.updatePrescription(index, 3, data.drugQuantity, data.daysValid, data.refillsLeft);
+        uint index = p.addPrescription(
+            data.patientID,
+            data.prescriberID,
+            data.dispenserID,
+            data.drugID,
+            data.drugQuantity,
+            data.fulfillmentDates,
+            data.dateWritten,
+            data.daysValid,
+            data.refillsLeft,
+            data.isCancelled,
+            data.cancelDate
+        );
 
-	
-        
+        p.updatePrescription(
+            index,
+            3,
+            data.drugQuantity,
+            data.daysValid,
+            data.refillsLeft
+        );
 
         uint256 patientID;
         uint128 prescriberID;
         uint128 dispenserID;
 
-
          //Max local args is 16, limit reached. So last values are not compared
         (patientID, prescriberID, dispenserID, , , , , , , , ) = p.getPrescription(index);
-
         Assert.equal(uint (dispenserID), uint (data.dispenserID + 1), "dispenserID not updated error....");
     }
 
@@ -94,17 +105,12 @@ contract TestPrescriptionData is PrescriptionBase{
         uint128 dispenserID;
         uint128 refillsLeft;
 
-
          //Max local args is 16, limit reached. So last values are not compared
         (patientID, prescriberID, dispenserID, , , , , , refillsLeft, , ) = p.getPrescription(index);
         Assert.equal(uint(0), uint(redeem), "Unsucessful redemption");
         Assert.equal(uint(refillsLeft), uint(data.refillsLeft - 1), "Refills not decremented");
-              
-        
-
     }
 
-    
     // Tests the results of an improper access for a prescription. 
     function testImproperChainIndexCheck() public {
         bool result = DeployedAddresses.Patient().call(bytes4(bytes32(keccak256("getPatientPrescription(2)"))));
