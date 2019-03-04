@@ -130,7 +130,7 @@ class Prescription extends Component {
 
                       {/* Modal that displays all prescription information */}
                       {<div className="col-md-4">
-                        <div className="modal fade" tabIndex="-1" id="prescription-modal" data-backdrop="false">
+                        <div className="modal fade" tabIndex="-1" id="prescription-modal">
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
                         <div className="modal-content">
 

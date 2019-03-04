@@ -3,10 +3,12 @@ import axios from "axios";
 import Prescription from "../components/Prescription";
 import qs from 'qs';
 
-class DispenserPatient extends Component {
+class PrescriptionRedeem extends Component {
   // Initialize the state
   state = {
-    prescriptions: []
+    // prescriptions are all the prescriptions given a dispenser id
+    prescriptions: [],
+    dispenserID: 0
   };
 
   // Fetch the prescription on first mount
@@ -20,11 +22,12 @@ class DispenserPatient extends Component {
 
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
-    const patientID = querystring.ID;
+    const dispenserID = querystring.ID;
+    this.state.dispenserID = dispenserID;
 
     axios
       // String interpolation.
-      .get(`/api/v1/prescriptions/${patientID}`)
+      .get(`api/v1/dispensers/prescriptions/all/${dispenserID}`)
       .then(results => results.data)
       .then(prescriptions => this.setState({ prescriptions }));
   };
@@ -32,6 +35,12 @@ class DispenserPatient extends Component {
   // displayPrescriptions() displays the properties of a prescription using Prescription
   // @return: returns all prescriptions for a patient id
   displayPrescriptions = () => {
+    const prescriptions = this.state.prescriptions;
+    // open are all the prescriptions that are open given a dispenser id
+    var open = prescriptions.filter(prescription => prescription.refillsLeft > 0 && prescription.cancelDate < 1 );
+    // historical are all the prescriptions that are historical given a dispenser id
+    var historical = prescriptions.filter(prescription => prescription.cancelDate > 0 || prescription.refillsLeft < 1);
+
     return(
       <div className="col-xl-12 order-xl-1 center">
         <div className="card bg-secondary shadow">
@@ -39,7 +48,7 @@ class DispenserPatient extends Component {
           <div className="card-header bg-white border-0">
               <div className="row align-items-center">
                 <div className="col-8 text-left">
-                  <h3 className="mb-0">Dispenser's Prescriptions</h3>
+                  <h3 className="mb-0">Dispenser: {this.state.dispenserID} Prescriptions</h3>
                 </div>
               </div>
           </div>
@@ -64,23 +73,17 @@ class DispenserPatient extends Component {
                   <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                     <Prescription
                       prescriptions = {this.state.prescriptions}
-                      getPrescriptions = {this.getPrescriptions}
                     />
                   </div>
                   <div className="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
-                    {/* <Prescription className=""
-                      prescriptions = {this.state.prescriptions}
-                      getPrescriptions = {this.getPrescriptions}
-                    />          */}
-                    <h1>open tab</h1>
-
+                    <Prescription
+                      prescriptions = {open}
+                    />         
                   </div>
                   <div className="tab-pane fade" id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
-                    {/* <Prescription
-                      prescriptions = {this.state.prescriptions}
-                      getPrescriptions = {this.getPrescriptions}
-                    /> */}
-                    <h1>historical tab</h1>
+                    <Prescription
+                      prescriptions = {historical}
+                    />
                   </div>
               </div>
             </div>
@@ -112,4 +115,4 @@ class DispenserPatient extends Component {
   }
 };
 
-export default DispenserPatient;
+export default PrescriptionRedeem;

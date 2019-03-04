@@ -27,7 +27,7 @@ class Home extends Component {
             </button>
           </div>
         </Link>
-        <Link to={"./dispenserPatientSearch"}>
+        <Link to={"./dispenserSearch"}>
           <div className="text-center">
             <button 
               type="button" 
