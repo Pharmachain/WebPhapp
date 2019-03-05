@@ -555,8 +555,10 @@ Examples:
     curl 'http://localhost:5000/api/v1/users/add' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacob","role":"Patient"}'
 Returns:
     Success or failure with message
+Authentication:
+    Admin only (Role.Admin)
 */
-app.post('/api/v1/users/add', (req,res) => {
+app.post('/api/v1/users/add', auth.checkAuth([]), (req,res) => {
     const userInfo = req.body;
 
     // validate fields exist that should
