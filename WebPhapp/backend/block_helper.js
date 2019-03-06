@@ -61,6 +61,13 @@ var connectToChain = async function() {
     };
 };
 
+// Returns the Integer number of prescriptions stored on the blockchain.
+var getChainLength = async function() {
+    var blockchain = await connectToChain();
+    let length = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+    return parseInt(length);
+};
+
 module.exports = {
 
     /*
@@ -323,10 +330,28 @@ module.exports = {
         });
     },
 
-    // Returns the Integer number of prescriptions stored on the blockchain.
-    getChainLength: async function() {
+    /*
+    Checks the length of the blockchain to determine if the given chainIndex is valid for an existing prescription.
+    Args:
+        chainIndex (int)
+    */
+    verifyChainIndex: async function(chainIndex) {
         var blockchain = await connectToChain();
-        let length = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
-        return parseInt(length);
+        let chainLength;
+        let error;
+
+        try {
+            chainLength = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+            if(chainIndex >= parseInt(chainLength)) {
+                throw new Error('verifyChainIndex: given chainIndex is too high to be a valid index on the blockchain.');
+            }
+        } catch (err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(true);
+        });
     }
 }

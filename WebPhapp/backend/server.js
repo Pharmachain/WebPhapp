@@ -578,14 +578,9 @@ app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
     }
 
     if(conn.Blockchain) {
-        block_helper.getChainLength()
-        .then((chainLength) => {
-            // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
-            if(prescriptionID >= chainLength) {
-                return finish('/api/v1/dispensers/redeem: given prescriptionID is invalid.', false);
-            }
-
-            // now we can redeem the prescription
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+        block_helper.verifyChainIndex(prescriptionID)
+        .then((_) => {
             block_helper.redeem(prescriptionID, fillDate)
             .then((_) => {
                 return finish('/api/v1/dispensers/redeem: redeemed prescription with ID ' + prescriptionID.toString(), true);
@@ -602,7 +597,7 @@ app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
             __dirname + '/dummy_data/prescriptions.json').prescriptions;
 
         var prescription = prescriptions.find( function(elem) {
-            return elem.prescriptionID === changedPrescription.prescriptionID;
+            return elem.prescriptionID === prescriptionID;
         });
         return finish('/api/v1/dispensers/redeem: tmp: dummy data not changed', true);
     }
