@@ -558,7 +558,7 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
 /*
 About:
-    An api endpoint that returns all related prescriptions for a given dispenserID.
+    An api endpoint that redeems a prescription at a specific prescriptionID.
 Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/dispensers/redeem/1"
