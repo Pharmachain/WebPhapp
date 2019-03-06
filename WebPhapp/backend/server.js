@@ -258,7 +258,7 @@ Returns:
         prescriberID, dispenserID, cancelDate, drugName
     ]
 */
-app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government]), (req,res) => {
+app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
     var patientID = parseInt(req.params.patientID);
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
@@ -460,7 +460,7 @@ Returns:
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
 */
-app.get('/api/v1/patients', auth.checkAuth([Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
+app.get('/api/v1/patients', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
     var first = req.query.first;
     var last = req.query.last;
 
