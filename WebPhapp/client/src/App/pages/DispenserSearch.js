@@ -26,7 +26,7 @@ class DispenserSearch extends Component {
           </div>
           <div className="card-body text-left">
           <div className="form-group">
-
+          <div className="form">
             <div className="form-group mb-3">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
@@ -39,12 +39,19 @@ class DispenserSearch extends Component {
                   type="text"
                   value={this.state.dispenserID}
                   onChange={this.onKeyDownDispenserID}
+                  onKeyPress=
+                  {event => {
+                    if(event.charCode === 13){
+                      window.location.href= "./prescriptionRedeem?ID=" + this.state.dispenserID
+                    } 
+                  }}
                 />
               </div>
             </div>
+            </div>
             <Link to={"./prescriptionRedeem?ID=" + this.state.dispenserID}>
             <div className="text-center">
-              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary" onClick="location.href='http://google.com';">
+              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
                 <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
                 <span className="btn-inner--text">Search</span>
               </button>

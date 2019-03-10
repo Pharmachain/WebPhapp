@@ -55,32 +55,32 @@ class PrescriptionRedeem extends Component {
 
           <div className="card-body">
             <div className="nav-wrapper">
-                <ul className="nav nav-tabs nav-justified flex-column flex-md-row justify-content-center" id="tabs-icons-text" role="tablist">
+                <ul className="nav nav-tabs nav-justified flex-column flex-md-row justify-content-center" id="prescription" role="tablist">
                     <li className="nav-item">
-                        <a className="nav-link mb-sm-3 mb-md-0 active" id="tabs-icons-text-1-tab" data-toggle="tab" href="#tabs-icons-text-1" role="tab" aria-controls="tabs-icons-text-1" aria-selected="true"><i className="fas fa-globe-americas"></i> All</a>
+                        <a className="nav-link mb-sm-3 mb-md-0 active" id="prescription-tab-all" data-toggle="tab" href="#prescription-all" role="tab" aria-controls="prescription-tab-all" aria-selected="true"><i className="fas fa-globe-americas"></i> All</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link mb-sm-3 mb-md-0" id="tabs-icons-text-2-tab" data-toggle="tab" href="#tabs-icons-text-2" role="tab" aria-controls="tabs-icons-text-2" aria-selected="false"><i className="fas fa-clipboard-check"></i> Open</a>
+                        <a className="nav-link mb-sm-3 mb-md-0" id="prescription-tab-open" data-toggle="tab" href="#prescription-open" role="tab" aria-controls="prescription-tab-open" aria-selected="false"><i className="fas fa-clipboard-check"></i> Open</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link mb-sm-3 mb-md-0" id="tabs-icons-text-3-tab" data-toggle="tab" href="#tabs-icons-text-3" role="tab" aria-controls="tabs-icons-text-3" aria-selected="false"><i className="fas fa-history"></i> Historical</a>
+                        <a className="nav-link mb-sm-3 mb-md-0" id="prescription-tab-historical" data-toggle="tab" href="#prescription-historical" role="tab" aria-controls="prescription-tab-historical" aria-selected="false"><i className="fas fa-history"></i> Historical</a>
                     </li>
                 </ul>
             </div>
 
             <div className="card-body">
               <div className="tab-content">
-                  <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                  <div className="tab-pane fade show active" id="prescription-all" role="tabpanel" aria-labelledby="prescription-tab-all">
                     <Prescription
                       prescriptions = {this.state.prescriptions}
                     />
                   </div>
-                  <div className="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
+                  <div className="tab-pane fade" id="prescription-open" role="tabpanel" aria-labelledby="prescription-tab-open">
                     <Prescription
                       prescriptions = {open}
                     />         
                   </div>
-                  <div className="tab-pane fade" id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
+                  <div className="tab-pane fade" id="prescription-historical" role="tabpanel" aria-labelledby="prescription-tab-historical">
                     <Prescription
                       prescriptions = {historical}
                     />
