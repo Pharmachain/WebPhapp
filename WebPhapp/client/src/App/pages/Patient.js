@@ -6,12 +6,14 @@ import qs from 'qs';
 class Patient extends Component {
   // Initialize the state
   state = {
-    prescriptions: []
+    prescriptions: [],
+    isFetching: true
   };
 
   // Fetch the prescription on first mount
   componentDidMount() {
     this.getPrescriptions();
+    this.state.isFetching = false;
   }
 
   // Retrieves the items in a prescription from the Express app
@@ -42,21 +44,26 @@ class Patient extends Component {
 
   render() {
     const prescriptions = this.state.prescriptions;
+    const {isFetching} = this.state;
+    
     return (
+      /* Logic to render prescriptions or warning conditionally */
       <div className="App">
-        {/* Check to see if any prescriptions are found*/}
-        {Array.isArray(prescriptions) || prescriptions.length ? (
-          <div>
-            {/* Render the prescription */}
-            {this.displayPrescriptions()}
+      { isFetching ? ""
+        :          
+        /* Check to see if any prescriptions are found */
+        prescriptions.length ?
+        <div>
+          {/* Render the prescription */}
+          {this.displayPrescriptions()}
+        </div>
+        : 
+        <div className="col-8 center">
+          <div className="alert alert-warning" role="alert">
+          <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
           </div>
-        ) : (
-          <div className="col-8 center">
-            <div className="alert alert-warning" role="alert">
-              <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
-            </div>
-          </div>
-        )}
+        </div>
+      }
       </div>
     );
   }
