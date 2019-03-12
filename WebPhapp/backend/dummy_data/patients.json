@@ -1,38 +1,38 @@
 {
     "patients": [
         {
-            "first": "Jacob",
-            "last": "Krantz",
+            "first": "jacob",
+            "last": "krantz",
             "patientID": 1,
             "dob": "10-05-1996"
         },
         {
-            "first": "Maxwell",
-            "last": "Dulin",
+            "first": "maxwell",
+            "last": "dulin",
             "patientID": 2,
             "dob": "10-06-1996"
         },
         {
-            "first": "Andrew",
-            "last": "Yang",
+            "first": "andrew",
+            "last": "ayng",
             "patientID": 3,
             "dob": "10-07-1996"
         },
         {
-            "first": "Mehak",
-            "last": "Bharagava",
+            "first": "mehak",
+            "last": "bharagava",
             "patientID": 4,
             "dob": "10-08-1996"
         },
         {
-            "first": "Jeb",
-            "last": "Kilfoyle",
+            "first": "jeb",
+            "last": "kilfoyle",
             "patientID": 5,
             "dob": "10-09-1996"
         },
         {
-            "first": "Jacob",
-            "last": "Krantz",
+            "first": "jacob",
+            "last": "krantz",
             "patientID": 6,
             "dob": "3-02-2004"
         }
