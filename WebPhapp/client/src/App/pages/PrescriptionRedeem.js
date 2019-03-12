@@ -23,7 +23,7 @@ class PrescriptionRedeem extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const dispenserID = querystring.ID;
-    this.state.dispenserID = dispenserID;
+    this.setState({dispenserID: dispenserID});
 
     axios
       // String interpolation.
