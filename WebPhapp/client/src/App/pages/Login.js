@@ -131,8 +131,8 @@ class Login extends Component {
                     </div>
                   </div>
                   <div className="custom-control custom-control-alternative custom-checkbox">
-                    <input className="custom-control-input" type="checkbox"/>
-                    <label className="custom-control-label">
+                    <input className="custom-control-input" id="remember-me-check" type="checkbox"/>
+                    <label className="custom-control-label" for="remember-me-check">
                       <span className="text-muted">Remember me</span>
                     </label>
                   </div>
