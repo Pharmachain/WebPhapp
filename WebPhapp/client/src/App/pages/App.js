@@ -11,24 +11,33 @@ import Header from "../components/Header.js"
 import Login from "./Login.js"
 
 class App extends Component {
+  state = {
+    headerToggle: true
+  };
+
+  componentDidMount() {
+    if (window.location.pathname === '/login') {
+      this.setState({headerToggle: false})
+    }
+  }
   render() {
     const App = () => (
       <div>
-        <Header/>
+        {this.state.headerToggle && <Header/>}
         <Switch>
           <Route exact path="/" component={Home} />
+          <Route path="/login" component={Login}/>
           <Route path="/patient" component={Patient} />
           <Route path="/patientSearch" component={PatientSearch} />
           <Route path="/prescriptionAdd" component={PrescriptionAdd}/>
           <Route path="/prescriptionEdit" component={PrescriptionEdit}/>
-          <Route path="/login" component={Login}/>
         </Switch>
       </div>
     );
     return (
       <BrowserRouter>
           <Switch>
-            <App />
+            <App/>
           </Switch>
       </BrowserRouter>
     );
