@@ -169,7 +169,7 @@ class Login extends Component {
             <div className="row align-items-center justify-content-xl-between">
               <div className="col-xl-6">
                 <div className="copyright text-center text-xl-left text-muted">
-                  © 2018 <a className="font-weight-bold ml-1">Pharmachain</a>
+                  © 2019 <a className="font-weight-bold ml-1">Pharmachain</a>
                 </div>
               </div>
               <div className="col-xl-6">
