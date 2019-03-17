@@ -85,7 +85,7 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
             });
         })
         .catch((error) => {
-            return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false)
+            return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
         });
     } else { // cancel prescription from dummy data
         return finish('/api/v1/prescriptions/cancel: tmp: dummy data not changed', true);
