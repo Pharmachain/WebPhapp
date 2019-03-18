@@ -11,7 +11,8 @@
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 30
     },
     {
       "prescriptionID": 2,
@@ -24,7 +25,9 @@
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 15
+      
     },
     {
       "prescriptionID": 3,
@@ -37,7 +40,8 @@
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 30
     },
     {
       "prescriptionID": 4,
@@ -50,7 +54,8 @@
       "refillsLeft": 0,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 10
     },
     {
       "prescriptionID": 5,
@@ -63,7 +68,8 @@
       "refillsLeft": 1,
       "prescriberID": 2,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 30
     },
     {
       "prescriptionID": 6,
@@ -76,7 +82,8 @@
       "refillsLeft": 1,
       "prescriberID": 1,
       "dispenserID": 2,
-      "cancelDate": 1546560000000
+      "cancelDate": 1546560000000,
+      "daysBetween": 30
     },
     {
       "prescriptionID": 7,
@@ -89,7 +96,8 @@
       "refillsLeft": 0,
       "prescriberID": 1,
       "dispenserID": 1,
-      "cancelDate": 0
+      "cancelDate": 0,
+      "daysBetween": 30
     }
   ]
 }

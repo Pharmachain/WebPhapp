@@ -292,7 +292,7 @@ module.exports = {
     Note:
         we have a daysFor vs daysValid problem here
     */
-    update: async function(chainIndex, dispenserID, quantity, daysValid, refillsLeft) {
+    update: async function(chainIndex, dispenserID, quantity, daysValid, refillsLeft, daysBetween) {
         var blockchain = await connectToChain();
         var error;
         var block;

@@ -62,7 +62,8 @@ async function loadPrescriptions(){
 		p.daysFor,
 		p.refillsLeft,
 		p.isCancelled,
-		p.cancelDate
+		p.cancelDate,
+		p.daysBetween
 	    );
 	
 	    let encoded_transaction = transaction.encodeABI();

@@ -125,7 +125,8 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
         changedPrescription.quantity,
         changedPrescription.daysValid,
         changedPrescription.refillsLeft,
-        changedPrescription.dispenserID
+        changedPrescription.dispenserID,
+        changedPrescription.daysBetween
     ]);
     if(fields.has(undefined) || fields.has(null)) {
         return finish('/api/v1/prescriptions/edit: One of the mandatory prescription fields is null or undefined.', false);
@@ -138,7 +139,8 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
             changedPrescription.dispenserID,
             changedPrescription.quantity,
             changedPrescription.daysValid,
-            changedPrescription.refillsLeft 
+            changedPrescription.refillsLeft,
+            changedPrescription.daysBetween 
         ).then((_) => {
             return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
         })
@@ -168,11 +170,13 @@ About:
         daysFor,
         refillsLeft,
         prescriberID,
-        dispensorID
+        dispensorID,
+        daysBetween
     }
 Examples: 
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Typplication/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":0,
+        "dispenserID":0,"daysBetween":30}'
     To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
@@ -201,10 +205,12 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
         prescription.daysFor,
         prescription.refillsLeft,
         prescription.prescriberID,
-        prescription.dispenserID
+        prescription.dispenserID,
+        prescription.daysBetween
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log(fieldsSet)
         return finish('Required prescription field(s) are null or undefined.', false)
     }
 
@@ -216,6 +222,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
         prescription.refillsLeft = parseInt(prescription.refillsLeft);
         prescription.prescriberID = parseInt(prescription.prescriberID);
         prescription.dispenserID = parseInt(prescription.dispenserID);
+        prescription.daysBetween = parseInt(prescription.daysBetween);
     } catch(error) {
         finish("Error casting fields to int: " + error.toString(), false);
     }
@@ -261,7 +268,8 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
             prescription.daysFor,
             prescription.refillsLeft,
             prescription.isCancelled,
-            prescription.cancelDate
+            prescription.cancelDate,
+            prescription.daysBetween
         ).then((_) => {
             return finish('Added prescription to chain.', true);
         }).catch((error) => {
@@ -285,7 +293,7 @@ Returns:
     A list of prescription objects each with fields: [
         prescriptionID, patientID, drugID, fillDates,
         writtenDate, quantity, daysFor, refillsLeft,
-        prescriberID, dispenserID, cancelDate, drugName
+        prescriberID, dispenserID, cancelDate, daysBetween, drugName
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', (req,res) => {
@@ -387,10 +395,9 @@ Returns:
         prescriberID,
         dispenserID,
         cancelDate,
+        daysBetween,
         drugName
     ]
-Warning:
-    no validation exists for blockchain index yet. See Issue #32 on GitHub.
 */
 app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
