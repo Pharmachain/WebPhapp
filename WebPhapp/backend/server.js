@@ -88,18 +88,19 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
 
 /*
 Edits a prescription for a given prescriptionID. The prescriptionID indexes the prescription on the blockchain.
-Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int)
+Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int), daysBetween (int)
 Takes an object of shape:
     {
         prescriptionID,
         quantity,
         daysValid,
         refillsLeft,
-        dispenserID
+        dispenserID,
+        daysBetween
     }
 Examples:
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 0,"quantity":"99mg","daysValid":98,"refillsLeft":97,"dispenserID":96}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 0,"quantity":"99mg","daysValid":98,"refillsLeft":97,"dispenserID":96, "daysBetween":95}'
     To be used in an axios call:
         .post("/api/v1/prescription/edit",{
             prescriptionID: 0,

@@ -4,11 +4,11 @@ let net = require("net");
 
 /*  This function creates a new prescription on the drugChain
     User input: prescription arguments
-    Argument list: patientID, prescriberID, dispenserID, drugID, drugQuantity, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate
-    Example usage: node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0   
+    Argument list: patientID, prescriberID, dispenserID, drugID, drugQuantity, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate, daysBetween
+    Example usage: node write_prescription.js 0 1 2 34 '300MG' 1542357074 200 8 false 0 30
 */
 
-async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate){
+async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate, daysBetween){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -44,7 +44,8 @@ async function write(patientID, prescriberID, dispenserID, drugID, drugQuantity,
         daysValid,
         refillsLeft,
         cancelled,
-        cancelDate
+        cancelDate,
+        daysBetween
     );
 
     // Submitting prescription transaction.
@@ -74,5 +75,6 @@ let daysValid = args[8];
 let refillsLeft = args[9];
 let isCancelled = args[10];
 let cancelDate = args[11];
+let daysBetween = args[12];
 
-write(patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate);
+write(patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, daysValid, refillsLeft, isCancelled, cancelDate, daysBetween);
