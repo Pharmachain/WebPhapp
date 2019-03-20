@@ -13,7 +13,6 @@ class Patient extends Component {
   // Fetch the prescription on first mount
   componentDidMount() {
     this.getPrescriptions();
-    this.state.isFetching = false;
   }
 
   // Retrieves the items in a prescription from the Express app
@@ -28,7 +27,7 @@ class Patient extends Component {
       // String interpolation.
       .get(`/api/v1/prescriptions/${patientID}`)
       .then(results => results.data)
-      .then(prescriptions => this.setState({ prescriptions }));
+      .then(prescriptions => this.setState({ prescriptions, isFetching: false }));
   };
 
   // displayPrescriptions() displays the properties of a prescription using Prescription
