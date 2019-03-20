@@ -15,26 +15,25 @@ class Prescription extends Component {
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
         // Probably add some validation to make sure the user wants to delete this.
-        const cancelQuery = `/api/v1/prescriptions/cancel/${event.target.id}`
+        const cancelQuery = `/api/v1/prescriptions/cancel/${event.currentTarget.id}`
         axios
         .get(cancelQuery)
         .then(results => results.data);
         //Grey out cancelled prescription.
         //TODO: grey out Rx logo
-        this.props.getPrescriptions();
+        // this.props.getPrescriptions();
         window.location.href=`/cancel`;
     }
 
     // Gets the events id, to redeem the proper prescription.
     onRedeemClick = event => {
         // Probably add some validation to make sure the user wants to redeem this.
-        const redeemQuery = `/api/v1/prescriptions/redeem/${event.target.id}`
+        const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
         axios
         .get(redeemQuery)
         .then(results => results.data);
         //Green out redeemed prescription.
         //TODO: green out Rx logo
-        this.props.getPrescriptions();
     }
 
     // Displays all prescription cards for a patient
