@@ -8,6 +8,7 @@ import DispenserSearch from "./DispenserSearch"
 import PrescriptionAdd from "./PrescriptionAdd.js"
 import PrescriptionEdit from "./PrescriptionEdit.js"
 import PrescriptionRedeem from "./PrescriptionRedeem";
+import GovernmentOversight from "./GovernmentOversight";
 import Header from "../components/Header.js"
 import Login from "./Login.js"
 
@@ -29,14 +30,15 @@ class App extends Component {
       <div>
         {this.state.headerToggle && <Header/>}
         <Switch>
-          <Route exact path="/" component={Home} />
+          <Route exact path="/" component={Home}/>
           <Route path="/login" component={Login}/>
-          <Route path="/patient" component={Patient} />
-          <Route path="/patientSearch" component={PatientSearch} />
-          <Route path="/dispenserSearch" component={DispenserSearch} />
+          <Route path="/patient" component={Patient}/>
+          <Route path="/patientSearch" component={PatientSearch}/>
+          <Route path="/dispenserSearch" component={DispenserSearch}/>
           <Route path="/prescriptionAdd" component={PrescriptionAdd}/>
           <Route path="/prescriptionEdit" component={PrescriptionEdit}/>
-          <Route path="/prescriptionRedeem" component={PrescriptionRedeem} />
+          <Route path="/prescriptionRedeem" component={PrescriptionRedeem}/>
+          <Route path="/governmentOversight" component={GovernmentOversight}/>
           <Route path="/cancel" component={CancelAlert}/>
         </Switch>
       </div>
