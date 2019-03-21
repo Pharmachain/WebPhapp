@@ -54,9 +54,9 @@ export class Header extends React.Component {
                         </li>
                     </ul>
                 </div>
-            </div>
-        </nav>
-      </div>
+                </div>
+            </nav>
+        </div>
   );
   }
 }

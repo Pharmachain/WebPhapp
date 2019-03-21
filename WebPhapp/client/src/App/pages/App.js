@@ -9,6 +9,7 @@ import PrescriptionAdd from "./PrescriptionAdd.js"
 import PrescriptionEdit from "./PrescriptionEdit.js"
 import PrescriptionRedeem from "./PrescriptionRedeem";
 import Header from "../components/Header.js"
+import Footer from "../components/Footer.js"
 import Login from "./Login.js"
 
 import CancelAlert from "./CancelAlert.js"
@@ -39,6 +40,7 @@ class App extends Component {
           <Route path="/prescriptionRedeem" component={PrescriptionRedeem} />
           <Route path="/cancel" component={CancelAlert}/>
         </Switch>
+        <Footer/>
       </div>
     );
     return (
