@@ -1,10 +1,9 @@
-
 import React from 'react';
 
 export class Footer extends React.Component {
   render(){
     return(
-        // Returns a navigation bar styled according to the Argon style system
+        // Returns a footer styled according to the Argon style system
         <div className="App">
         {/* Footer */}
         <footer className="py-5">

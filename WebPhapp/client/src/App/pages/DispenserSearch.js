@@ -15,6 +15,7 @@ class DispenserSearch extends Component {
   render() {
 
     return (
+      <div className="header bg-gradient-primary py-7 py-lg-8">
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -60,6 +61,7 @@ class DispenserSearch extends Component {
           </div>
           </div>
         </div>
+      </div>
       </div>
     );
   }

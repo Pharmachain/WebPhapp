@@ -5,6 +5,7 @@ class Home extends Component {
   render() {
     return (
       <div className="App">
+        <div className="header bg-gradient-primary py-7 py-lg-8">
         {/* Link to PatientSearch.js */}
         <Link to={"./patientSearch"}>
           <div className="text-center">
@@ -36,6 +37,7 @@ class Home extends Component {
             </button>
           </div>
         </Link>
+        </div>
       </div>
     );
   }

@@ -85,6 +85,7 @@ class PrescriptionEdit extends Component {
 
       { this.state.cancelDate === "" ? "Loading..." :
         this.state.cancelDate <= 0 && this.state.fillDates.length === 0 ?
+        <div className="header bg-gradient-primary py-7 py-lg-8">
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -203,6 +204,7 @@ class PrescriptionEdit extends Component {
             </div>
           </form>
           </div>
+        </div>
         </div>
         </div>
         :

@@ -6,9 +6,9 @@ import qs from 'qs';
 class PrescriptionRedeem extends Component {
   // Initialize the state
   state = {
+    dispenserID: 0,
     // prescriptions are all the prescriptions given a dispenser id
-    prescriptions: [],
-    dispenserID: 0
+    prescriptions: []
   };
 
   // Fetch the prescription on first mount
@@ -23,7 +23,7 @@ class PrescriptionRedeem extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const dispenserID = querystring.ID;
-    this.setState({dispenserID: dispenserID});
+    this.setState({dispenserID});
 
     axios
       .get(`api/v1/dispensers/prescriptions/all/${dispenserID}`)
@@ -64,6 +64,7 @@ class PrescriptionRedeem extends Component {
   // @return: returns all prescriptions for a patient id
   displayPrescriptions = () => {
     return(
+      <div className="header bg-gradient-primary py-7 py-lg-8">
       <div className="col-xl-12 order-xl-1 center">
         <div className="card bg-secondary shadow">
         
@@ -125,16 +126,15 @@ class PrescriptionRedeem extends Component {
 
             <div className="card-body">
               <div className="tab-content">
-                  <div className="tab-pane fade show active" id="prescription-all" role="tabpanel" aria-labelledby="prescription-tab-all">
-                    <Prescription
-                      prescriptions = {this.state.prescriptions}
-                    />
+                  <div className="tab-pane  fade show active" id="prescription-all" role="tabpanel" aria-labelledby="prescription-tab-all">
+                    <Prescription prescriptions = {this.state.prescriptions}/>
                   </div>
               </div>
             </div>
             
           </div>
         </div>
+      </div>
       </div>
     )
   }

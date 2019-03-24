@@ -6,6 +6,7 @@ import qs from 'qs';
 class Patient extends Component {
   // Initialize the state
   state = {
+    patientID: 0,
     prescriptions: [],
     isFetching: true
   };
@@ -22,6 +23,7 @@ class Patient extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const patientID = querystring.ID;
+    this.setState({patientID});
 
     axios
       // String interpolation.
@@ -53,8 +55,21 @@ class Patient extends Component {
         /* Check to see if any prescriptions are found */
         prescriptions.length ?
         <div>
+          <div className="header bg-gradient-primary py-7 py-lg-8">
           {/* Render the prescription */}
-          {this.displayPrescriptions()}
+          <div className="col-xl-12 order-xl-1 center">
+            <div className="card bg-secondary shadow">
+              <div className="card-header bg-white border-0">
+                  <div className="row align-items-center">
+                    <div className="col-8 text-left">
+                      <h3 className="mb-0">Patient: {this.state.patientID} Prescriptions</h3>
+                    </div>
+                  </div>
+              </div>
+              <div className="card-body"> {this.displayPrescriptions()} </div>
+            </div>
+          </div>
+        </div>
         </div>
         : 
         <div className="col-8 center">
