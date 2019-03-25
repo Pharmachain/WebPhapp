@@ -1,0 +1,35 @@
+{
+    "prescribers": [
+        {
+            "prescriberID": 0,
+            "name": "Jim",
+            "phone": 15553336464
+        },
+        {
+            "prescriberID": 1,
+            "name": "Sally",
+            "phone": 15551106464
+        },
+        {
+            "prescriberID": 2,
+            "name": "Lisa Evers",
+            "phone": 15559376464
+        },
+        {
+            "prescriberID": 3,
+            "name": "Toby",
+            "phone": 15552126464
+        },
+        {
+            "prescriberID": 4,
+            "name": "Susan",
+            "phone": 15553456464
+        },
+        {
+            "prescriberID": 5,
+            "name": "Lincoln",
+            "phone": 15555676464
+        }
+    ]
+}
+

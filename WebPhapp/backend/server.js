@@ -963,6 +963,73 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
 
 /*
 About:
+    An api endpoint that returns a single dispenser given a dispenserID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/single/1"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/single/1")
+Returns:
+    {
+        dispenserID (int),
+        name (string),
+        location (string),
+        phone (int)
+    }
+*/
+app.get('/api/v1/dispensers/single/:dispenserID', (req,res) => { // auth.checkAuth([Role.Government]),
+    var dispenserID = parseInt(req.params.dispenserID);
+
+    var dispensers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+    dispensers = dispensers.filter(function(elem) {
+        return dispenserID === elem.dispenserID;
+    });
+
+    if(dispensers.length > 1) {
+        console.log('/api/v1/dispensers/single/: error: too many dispenserID matches');
+        res.status(400).send(false);
+    }
+    else if(dispensers.length === 0) {
+        console.log('/api/v1/dispensers/single/: error: no dispenserID match');
+        res.status(400).send(false);
+    }
+    else {
+        dispenser = dispensers[0]
+        console.log('/api/v1/dispensers/single/: returning dispenser with ID ' + dispenserID.toString());
+        res.status(200).send(dispenser);
+    }
+});
+
+/*
+About:
+    An api endpoint that returns all dispensers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/all"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/all")
+Returns:
+    [
+        {
+            prescriberID (int),
+            name (string),
+            phone (int)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),
+    var dispensers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+    console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+    res.status(200).send(dispensers);    
+});
+
+/*
+About:
     An api endpoint that returns a list of all dispensers given a name to match on.
     String matching is case insensitive.
 Examples:
@@ -984,15 +1051,15 @@ Returns:
 app.get('/api/v1/dispensers/:name', (req, res) => {
     var name = req.params.name;
 
+    var dispensers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
     // if dispenser ID is null or undefined, return all
     if(name == null) {
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning all dispensers');
+        console.log('/api/v1/dispensers/: returning all dispensers');
         res.status(200).send([]);
         return;
     }
-
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
     dispensers = dispensers.filter(function(elem) {
         // if no query given, return all dispensers
@@ -1002,9 +1069,123 @@ app.get('/api/v1/dispensers/:name', (req, res) => {
         return elem.name.toLowerCase().includes(name.toLowerCase());
     });
 
-    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
+    console.log('/api/v1/dispensers/: returning '
                     + dispensers.length.toString() + ' dispensers.');
     res.status(200).send(dispensers);
+});
+
+// ------------------------
+//        Prescriber
+// ------------------------
+
+/*
+About:
+    An api endpoint that returns all prescribers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/all"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/all")
+Returns:
+    [
+        {
+            prescriberID (int),
+            name (string),
+            phone (int)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers/all', (req,res) => { // auth.checkAuth([Role.Government]),
+    var prescribers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+    console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+    res.status(200).send(prescribers);
+});
+
+/*
+About:
+    An api endpoint that returns a single prescriber given a prescriberID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/single/1"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/single/1")
+Returns:
+    {
+        prescriberID (int),
+        name (string),
+        phone (int)
+    }
+*/
+app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkAuth([Role.Government]),
+    var prescriberID = parseInt(req.params.prescriberID);
+
+    var prescribers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+    prescribers = prescribers.filter(function(elem) {
+        return prescriberID === elem.prescriberID;
+    });
+
+    if(prescribers.length > 1) {
+        console.log('/api/v1/prescribers/single/: error: too many prescriberID matches');
+        res.status(400).send(false);
+    }
+    else if(prescribers.length === 0) {
+        console.log('/api/v1/prescribers/single/: error: no prescriberID match');
+        res.status(400).send(false);
+    }
+    else {
+        prescriber = prescribers[0]
+        console.log('/api/v1/prescribers/single/: returning prescriber with ID ' + prescriberID.toString());
+        res.status(200).send(prescriber);
+    }
+});
+
+/*
+About:
+    An api endpoint that returns a list of all prescribers given a name to match on.
+    String matching is case insensitive.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/sally"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/sally")
+Returns:
+    [
+        {
+            prescriberID (int),
+            name (string),
+            phone (int)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers/:name', (req, res) => { // auth.checkAuth([Role.Government]),
+    var name = req.params.name;
+
+    var prescribers = readJsonFileSync(
+        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+    // if prescriber ID is null or undefined, return all
+    if(name == null) {
+        console.log('/api/v1/prescribers/: returning all prescribers');
+        res.status(200).send(prescribers);
+        return;
+    }
+
+    prescribers = prescribers.filter(function(elem) {
+        // if no query given, return all prescribers
+        if(name === undefined) return true;
+
+        // case insensitive: match substrings in prescriber name
+        return elem.name.toLowerCase().includes(name.toLowerCase());
+    });
+
+    console.log('/api/v1/prescribers/: returning ' + prescribers.length.toString() + ' prescribers.');
+    res.status(200).send(prescribers);
 });
 
 // ------------------------

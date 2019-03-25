@@ -21,7 +21,7 @@ describe("loading express", function() {
 
 
   // // ------------------------------------------------------
-  // //             Tests: /api/vi/prescriptions
+  // //             Tests: /api/v1/prescriptions
   // // ------------------------------------------------------
 
 
@@ -93,7 +93,7 @@ describe("loading express", function() {
 
 
   // ------------------------------------------------------
-  //             Tests: /api/vi/patients
+  //             Tests: /api/v1/patients
   // ------------------------------------------------------
 
 
@@ -163,7 +163,7 @@ describe("loading express", function() {
 
 
   // ------------------------------------------------------
-  //             Tests: /api/vi/patients
+  //             Tests: /api/v1/patients
   // ------------------------------------------------------
 
 
@@ -296,7 +296,7 @@ describe("loading express", function() {
   });
 
   // ------------------------------------------------------
-  //             Tests: /api/vi/dispensers
+  //             Tests: /api/v1/dispensers
   // ------------------------------------------------------
 
   // /api/v1/dispensers/prescriptions/historical/:dispenserID
@@ -350,27 +350,78 @@ describe("loading express", function() {
   });
 
     // /api/v1/dispensers/prescriptions/all/:dispenserID
-it("test-route-dispensers-prescriptions", function(done) {
-  request(server)
-  .get("/api/v1/dispensers/prescriptions/all/1")
-  .expect(200)
-  .expect(function(res) {
-    if(res.body.length < 1) throw new Error('Returned 0 prescriptions. Is this right?');
-    for(var i = 0; i < res.body.length; i++) {
-      // assert the dispenserID is in the returned prescription.
-      var expectedID = 1;
-      if(res.body[i].dispenserID !== expectedID) {
-        throw new Error("Did not return the expected prescription");
+  it("test-route-dispensers-prescriptions", function(done) {
+    request(server)
+    .get("/api/v1/dispensers/prescriptions/all/1")
+    .expect(200)
+    .expect(function(res) {
+      if(res.body.length < 1) throw new Error('Returned 0 prescriptions. Is this right?');
+      for(var i = 0; i < res.body.length; i++) {
+        // assert the dispenserID is in the returned prescription.
+        var expectedID = 1;
+        if(res.body[i].dispenserID !== expectedID) {
+          throw new Error("Did not return the expected prescription");
+        }
+        if(typeof res.body[i].writtenDate !== 'string') {
+          throw new Error('WrittenDate must be a string field.');
+        }
       }
-      if(typeof res.body[i].writtenDate !== 'string') {
-        throw new Error('WrittenDate must be a string field.');
-      }
-    }
-    return true;
-  })
-  .end(done);
-});
+      return true;
+    })
+    .end(done);
+  });
 
+  it("test-route-dispensers-single", function(done) {
+    request(server)
+      .get("/api/v1/dispensers/single/2")
+      .expect(function didGetDispenser(res) {
+        var dispenser = res.body;
+
+        // assert the dispensers ID is in the returned dispensers.
+        var expectedID = 2;
+        if(dispenser.dispenserID !== expectedID) {
+          throw new Error("Did not return the expected dispenser.");
+        }
+        if(typeof dispenser.name !== 'string') {
+          throw new Error('name must be a string field.');
+        }
+        if(typeof dispenser.phone !== 'number') {
+          throw new Error('phone must be a number field.');
+        }
+        if(typeof dispenser.location !== 'string') {
+          throw new Error('phone must be a string field.');
+        }
+
+        // assert all fields return some value
+        Object.values(dispenser).forEach(v => {
+          if (v === null) throw new Error("dispenser field empty");
+        });
+      })
+      .end(done);
+  });
+
+  // ensures that given a faulty dispenser ID, the get request
+  //    does not return a dispenser.
+  it("test-route-dispensers-single-bad", function(done) {
+    request(server)
+      .get("/api/v1/dispensers/single/1234567898765434567876543")
+      .expect(function didNotGetDispenser(res) {
+        if (Object.keys(res.body).length !== 0)
+          throw new Error("Should not return result on dispenserID");
+      })
+      .end(done);
+  });
+
+  it("test-route-dispensers-all", function(done) {
+    request(server)
+    .get("/api/v1/dispensers/all")
+    .expect(200)
+    .expect(function(res) {
+      if(res.body.length < 1) throw new Error('Returned 0 dispensers. Is this right?');
+      return true;
+    })
+    .end(done);
+  });
   it("test-route-dispensers-name", function(done) {
     request(server)
     .get("/api/v1/dispensers/walgreens")
@@ -407,6 +458,97 @@ it("test-route-dispensers-prescriptions", function(done) {
     })
     .end(done);
   });
+
+  // ------------------------------------------------------
+  //             Tests: /api/v1/prescribers
+  // ------------------------------------------------------
+
+  it("test-route-prescribers-single", function(done) {
+    request(server)
+      .get("/api/v1/prescribers/single/2")
+      .expect(function didGetPrescriber(res) {
+        var pres = res.body;
+
+        // assert the prescriber ID is in the returned prescriber.
+        var expectedID = 2;
+        if(pres.prescriberID !== expectedID) {
+          throw new Error("Did not return the expected prescriber.");
+        }
+        if(typeof pres.name !== 'string') {
+          throw new Error('name must be a string field.');
+        }
+        if(typeof pres.phone !== 'number') {
+          throw new Error('phone must be a number field.');
+        }
+
+        // assert all fields return some value
+        Object.values(pres).forEach(v => {
+          if (v === null) throw new Error("prescriber field empty");
+        });
+      })
+      .end(done);
+  });
+
+  // ensures that given a faulty prescriber ID, the get request
+  //    does not return a prescriber.
+  it("test-route-prescribers/single-bad", function(done) {
+    request(server)
+      .get("/api/v1/prescribers/single/1234567898765434567876543")
+      .expect(function didNotGetPrescriber(res) {
+        if (Object.keys(res.body).length !== 0)
+          throw new Error("Should not return result on bad prescriberID");
+      })
+      .end(done);
+  });
+
+  it("test-route-prescribers-all", function(done) {
+    request(server)
+    .get("/api/v1/prescribers/all")
+    .expect(200)
+    .expect(function(res) {
+      if(res.body.length < 1) throw new Error('Returned 0 prescribers. Is this right?');
+      return true;
+    })
+    .end(done);
+  });
+
+  it("test-route-prescribers-name", function(done) {
+    request(server)
+    .get("/api/v1/prescribers/sally")
+    .expect(200)
+    .expect(function(res) {
+      var fields;
+      for(var i = 0; i < res.body.length; i++){
+        fields = new Set([res.body[i].prescriberID, res.body[i].phone, res.body[i].name]);
+        if(fields.has(undefined)){
+          throw new Error('Prescriber fields should be not empty for name "sally"');
+        }
+      }
+      return true;
+    })
+    .end(done);
+  });
+
+  it("test-route-prescribers-name-bad", function(done) {
+    request(server)
+    .get("/api/v1/prescribers/thisismostdefinitelynotaprescribername")
+    .expect(200)
+    .expect(function(res) {
+      var fields;
+      for(var i = 0; i < res.body.length; i++){
+        fields = new Set([res.body[i].prescriberID, res.body[i].phone, res.body[i].name, res.body[i].location]);
+        if(fields.length > 1){
+          throw new Error('Should not have any prescriber fields for bad prescriberID.');
+        }
+        if(!fields.has(undefined)){
+          throw new Error('Prescriber fields should be empty for bad prescriberID');
+        }
+      }
+      return true;
+    })
+    .end(done);
+  });
+
 
   // ------------------------------------------------------
   //             Tests: other
