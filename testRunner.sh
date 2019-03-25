@@ -76,9 +76,9 @@ if $c_option; then
     # Clone into a fresh copy of the network if it doesn't  already
     if [ ! -d "./quorum-maker" ]; then
         git clone https://github.com/Pharmachain/quorum-maker
-	cd ./quorum-maker
-	git checkout timeoutBranch
-	cd ..
+    	cd ./quorum-maker
+    	git checkout timeoutBranch
+    	cd ..
     fi
 
     # Turn on the Quorum Network
@@ -91,9 +91,11 @@ if $c_option; then
 
     # Run the test contracts
     cd ../../PharmaChain
+    testrpc &
+    sleep 15s
     sudo truffle version
     sudo truffle migrate
-    sudo truffle test
+    sudo truffle test --network testrpc_net
     sudo node deploy.js
     sudo node load_data.js
     cd ../../
