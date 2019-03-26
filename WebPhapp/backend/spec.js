@@ -93,7 +93,7 @@ describe("loading express", function() {
 
 
   // ------------------------------------------------------
-  //             Tests: /api/v1/patients
+  //             Tests: /api/v1/patients (name)
   // ------------------------------------------------------
 
 
@@ -474,8 +474,14 @@ describe("loading express", function() {
         if(pres.prescriberID !== expectedID) {
           throw new Error("Did not return the expected prescriber.");
         }
-        if(typeof pres.name !== 'string') {
-          throw new Error('name must be a string field.');
+        if(typeof pres.first !== 'string') {
+          throw new Error('first name must be a string field.');
+        }
+        if(typeof pres.last !== 'string') {
+          throw new Error('last name must be a string field.');
+        }
+        if(typeof pres.location !== 'string') {
+          throw new Error('location must be a string field.');
         }
         if(typeof pres.phone !== 'number') {
           throw new Error('phone must be a number field.');
@@ -512,41 +518,71 @@ describe("loading express", function() {
     .end(done);
   });
 
-  it("test-route-prescribers-name", function(done) {
+  it("test-route-prescribers-full", function(done) {
+    // test for fully qualified first and last name
     request(server)
-    .get("/api/v1/prescribers/sally")
-    .expect(200)
-    .expect(function(res) {
-      var fields;
-      for(var i = 0; i < res.body.length; i++){
-        fields = new Set([res.body[i].prescriberID, res.body[i].phone, res.body[i].name]);
-        if(fields.has(undefined)){
-          throw new Error('Prescriber fields should be not empty for name "sally"');
+      .get("/api/v1/prescribers?first=fred&last=beckey")
+      .expect(function(res) {
+        if(res.body.length !== 1) throw new Error('Should be one fred beckey prescriber for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].phone, res.body[0].location, res.body[0].prescriberID].includes(undefined)){
+          throw new Error('Found empty prescriber field.');
         }
-      }
-      return true;
-    })
-    .end(done);
+        return true;
+      })
+      .end(done);
   });
 
-  it("test-route-prescribers-name-bad", function(done) {
+  it("test-route-prescribers-full-bad", function(done) {
+    // test for bad fully qualified first and last name
     request(server)
-    .get("/api/v1/prescribers/thisismostdefinitelynotaprescribername")
-    .expect(200)
-    .expect(function(res) {
-      var fields;
-      for(var i = 0; i < res.body.length; i++){
-        fields = new Set([res.body[i].prescriberID, res.body[i].phone, res.body[i].name, res.body[i].location]);
-        if(fields.length > 1){
-          throw new Error('Should not have any prescriber fields for bad prescriberID.');
+      .get("/api/v1/prescribers?first=madeupnamethatdoesnotexist&last=asdf")
+      .expect(function(res) {
+        if(res.body.length !== 0) throw new Error('Returned prescriber info for input with no matches.');
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-prescribers-first", function(done) {
+    // test for fully qualified first and last name
+    request(server)
+      .get("/api/v1/prescribers?first=lynn")
+      .expect(function(res) {
+        if(res.body.length !== 1) throw new Error('Should be one lynn prescriber for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].phone, res.body[0].location, res.body[0].prescriberID].includes(undefined)){
+          throw new Error('Found empty prescriber field.');
         }
-        if(!fields.has(undefined)){
-          throw new Error('Prescriber fields should be empty for bad prescriberID');
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-prescribers-last", function(done) {
+    // test for fully qualified last name
+    request(server)
+      .get("/api/v1/prescribers?last=beckey")
+      .expect(function(res) {
+        if(res.body.length !== 1) throw new Error('Should be one beckey for testing.');
+        if([res.body[0].first, res.body[0].last, res.body[0].phone, res.body[0].location, res.body[0].prescriberID].includes(undefined)){
+          throw new Error('Found empty prescriber field.');
         }
-      }
-      return true;
-    })
-    .end(done);
+        return true;
+      })
+      .end(done);
+  });
+
+  it("test-route-prescribers-null", function(done) {
+    // test to ensure all prescribers are returned when no queries are provided.
+    request(server)
+      .get("/api/v1/prescribers")
+      .expect(function(res) {
+        if(res.body.length <= 6) throw new Error('Should return all prescribers.');
+        if([res.body[0].first, res.body[0].last, res.body[0].phone, res.body[0].location, res.body[0].prescriberID].includes(undefined)){
+          throw new Error('Found empty prescriber field.');
+        }
+        return true;
+      })
+      .end(done);
   });
 
 

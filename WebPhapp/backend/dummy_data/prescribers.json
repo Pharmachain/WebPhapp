@@ -2,33 +2,52 @@
     "prescribers": [
         {
             "prescriberID": 0,
-            "name": "Jim",
-            "phone": 15553336464
+            "first": "Fred",
+            "last": "Beckey",
+            "phone": 15553332818,
+            "location": "Indiana and Hamilton"
         },
         {
             "prescriberID": 1,
-            "name": "Sally",
-            "phone": 15551106464
+            "first": "Colin",
+            "last": "Haley",
+            "phone": 15551106464,
+            "location": "Mission and Ruby"
         },
         {
             "prescriberID": 2,
-            "name": "Lisa Evers",
-            "phone": 15559376464
+            "first": "Dani",
+            "last": "Arnold",
+            "phone": 15559379688,
+            "location": "Spokane Falls and Washington"
         },
         {
             "prescriberID": 3,
-            "name": "Toby",
-            "phone": 15552126464
+            "first": "Steph",
+            "last": "Davis",
+            "phone": 15552122223,
+            "location": "Broadway and Monroe"
         },
         {
             "prescriberID": 4,
-            "name": "Susan",
-            "phone": 15553456464
+            "first": "Dean",
+            "last": "Potter",
+            "phone": 15553456352,
+            "location": "Cincinnati and Nora"
         },
         {
             "prescriberID": 5,
-            "name": "Lincoln",
-            "phone": 15555676464
+            "first": "Ueli",
+            "last": "Steck",
+            "phone": 15555676597,
+            "location": "2nd and McClellan"
+        },
+        {
+            "prescriberID": 6,
+            "first": "Lynn",
+            "last": "Hill",
+            "phone": 15555670183,
+            "location": "Lyons and Lidgerwood"
         }
     ]
 }

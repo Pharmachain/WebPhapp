@@ -522,13 +522,13 @@ app.get('/api/v1/patients', (req,res) => {
             // if no query given, return all patients
             return true;
         } else if( last === undefined ){
-            return (elem.first.includes(first.toLowerCase()));
+            return (elem.first.toLowerCase().includes(first.toLowerCase()));
         }
         else if( first === undefined ){
-            return (elem.last.includes(last.toLowerCase()));
+            return (elem.last.toLowerCase().includes(last.toLowerCase()));
         }
-        return (elem.first.includes(first.toLowerCase()))
-                && (elem.last.includes(last.toLowerCase()));
+        return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                && (elem.last.toLowerCase().includes(last.toLowerCase()));
     });
 
     // log the backend process to the terminal
@@ -1151,6 +1151,15 @@ About:
 Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/prescribers/sally"
+
+
+    Directly in terminal:
+        By both first and last name:
+            >>> curl "http://localhost:5000/api/v1/prescribers?first=fred&last=beckey"
+        By just first name:
+            >>> curl "http://localhost:5000/api/v1/prescribers?first=fred"
+        By just last name:
+            >>> curl "http://localhost:5000/api/v1/prescribers?last=beckey"
     To be used in Axois call:
         .get("/api/v1/prescribers/sally")
 Returns:
@@ -1163,29 +1172,35 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/prescribers/:name', (req, res) => { // auth.checkAuth([Role.Government]),
-    var name = req.params.name;
+app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Government]),
+    var first = req.query.first;
+    var last = req.query.last;
 
-    var prescribers = readJsonFileSync(
+    var all_prescribers = readJsonFileSync(
         __dirname + '/' + "dummy_data/prescribers.json").prescribers;
 
-    // if prescriber ID is null or undefined, return all
-    if(name == null) {
-        console.log('/api/v1/prescribers/: returning all prescribers');
-        res.status(200).send(prescribers);
-        return;
-    }
-
-    prescribers = prescribers.filter(function(elem) {
-        // if no query given, return all prescribers
-        if(name === undefined) return true;
-
-        // case insensitive: match substrings in prescriber name
-        return elem.name.toLowerCase().includes(name.toLowerCase());
+    // Searching for substrings
+    var matchingPrescribers = all_prescribers.filter(function(elem) {
+        if( first === undefined && last === undefined ){
+            // if no query given, return all patients
+            return true;
+        } else if( last === undefined ){
+            return (elem.first.toLowerCase().includes(first.toLowerCase()));
+        }
+        else if( first === undefined ){
+            return (elem.last.toLowerCase().includes(last.toLowerCase()));
+        }
+        return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                && (elem.last.toLowerCase().includes(last.toLowerCase()));
     });
 
-    console.log('/api/v1/prescribers/: returning ' + prescribers.length.toString() + ' prescribers.');
-    res.status(200).send(prescribers);
+    // log the backend process to the terminal
+    var msg = '/api/v1/prescribers: returning ' + matchingPrescribers.length.toString() + ' prescriber match(es) for';
+    if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
+    if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
+    console.log(msg);
+
+    res.json(matchingPrescribers);
 });
 
 // ------------------------

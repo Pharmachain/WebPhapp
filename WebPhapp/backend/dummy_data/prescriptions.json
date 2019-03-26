@@ -9,8 +9,8 @@
       "quantity": "1",
       "daysFor": 7,
       "refillsLeft": 1,
-      "prescriberID": 1,
-      "dispenserID": 1,
+      "prescriberID": 0,
+      "dispenserID": 4,
       "cancelDate": 0
     },
     {
@@ -22,7 +22,7 @@
       "quantity": "1",
       "daysFor": 14,
       "refillsLeft": 1,
-      "prescriberID": 1,
+      "prescriberID": 0,
       "dispenserID": 1,
       "cancelDate": 0
     },
@@ -35,8 +35,8 @@
       "quantity": "1",
       "daysFor": 14,
       "refillsLeft": 0,
-      "prescriberID": 1,
-      "dispenserID": 1,
+      "prescriberID": 0,
+      "dispenserID": 3,
       "cancelDate": 0
     },
     {
@@ -87,7 +87,7 @@
       "quantity": "1",
       "daysFor": 7,
       "refillsLeft": 0,
-      "prescriberID": 1,
+      "prescriberID": 0,
       "dispenserID": 1,
       "cancelDate": 0
     }
