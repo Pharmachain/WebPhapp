@@ -380,6 +380,99 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 });
 
 /*
+An api endpoint that returns all of the prescriptions associated with a prescriber ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/prescriber/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/prescriber/1")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates,
+        writtenDate, quantity, daysFor, refillsLeft,
+        prescriberID, dispenserID, cancelDate, drugName
+    ]
+*/
+app.get('/api/v1/prescriptions/prescriber/:prescriberID', (req,res) => {
+    var prescriberID = parseInt(req.params.prescriberID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        var msg = '/api/v1/prescriptions/prescriber: Sent ' + prescriptions.length.toString() +
+                    ' prescription(s) for prescriberID ' + prescriberID.toString();
+
+        // if no prescriptions for a prescriber ID, return early
+        if (prescriptions.length === 0) {
+            console.log(msg);
+            res.json([]);
+            return;
+        }
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            for (var i = 0; i < prescriptions.length; i++){
+                prescriptions[i].drugName = "drugName";
+            }
+            res.json(prescriptions);
+            return;
+        }
+
+        // Look up the drug names given the list of drugIDs in MySQL
+        var drugIDs = prescriptions.map((prescription) => {
+            return prescription.drugID;
+        })
+
+        mysql.getDrugNamesFromIDs(drugIDs, connection)
+        .then((answer) => {
+            for (var i = 0; i < prescriptions.length; i++){
+                var drug = answer.rows.filter((row) => {
+                    return (row.ID === prescriptions[i].drugID);
+                });
+
+                // Could be undefined on return
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+            }
+
+            console.log(msg);
+            res.json(prescriptions);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions/prescriber: error: ", error);
+            res.status(400).send({});
+        });
+    };
+
+    if(conn.Blockchain){
+        var field_prescriberID = 0;
+        block_helper.read_by_value(field_prescriberID, prescriberID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        }).catch((error) => {
+            console.log('/api/v1/prescriptions/prescriber: error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching prescriberID.');
+        });
+    }
+    else { // search prescriptions from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.prescriberID === prescriberID) toSend.push(prescription);
+        });
+        handlePrescriptionsCallback(toSend);
+    }
+});
+
+/*
 An api endpoint that returns a single prescription given a prescription ID
 Examples:
     Directly in terminal:

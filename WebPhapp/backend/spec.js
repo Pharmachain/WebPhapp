@@ -20,9 +20,9 @@ describe("loading express", function() {
   });
 
 
-  // // ------------------------------------------------------
-  // //             Tests: /api/v1/prescriptions
-  // // ------------------------------------------------------
+  // ------------------------------------------------------
+  //             Tests: /api/v1/prescriptions
+  // ------------------------------------------------------
 
 
   // ensure that given a prescription ID, the get request
@@ -62,7 +62,7 @@ describe("loading express", function() {
       .end(done);
   });
 
-  it("test-route-prescriptions", function(done) {
+  it("test-route-prescriptions-by-patient-id", function(done) {
     request(server)
       .get("/api/v1/prescriptions/1")
       .expect(function(res) {
@@ -81,12 +81,36 @@ describe("loading express", function() {
       .end(done);
   });
 
-  it("test-route-prescriptions-bad", function(done) {
+  it("test-route-prescriptions-by-patient-id-bad", function(done) {
     request(server)
       .get("/api/v1/prescriptions/12345678909876543234567")
       .expect(function(res) {
-        // TODO
-        null;
+        if(res.body.length !== 0) {
+          throw new Error('Returned prescription for bad patientID.');
+        }
+      })
+      .end(done);
+  });
+
+  it("test-route-prescriptions-by-prescriber-id", function(done) {
+    request(server)
+      .get("/api/v1/prescriptions/prescriber/0")
+      .expect(function(res) {
+        var prescription;
+        if(res.body.length < 2) throw new Error('Returned 0 or 1 prescriptions. Is this right?'); 
+        for(var i = 0; i < res.body.length; i++){
+          prescription = res.body[i];
+
+          // check writtenDate type
+          if(typeof prescription.writtenDate !== 'string') {
+            throw new Error('WrittenDate must be a string field.');
+          }
+          // check prescriberID match
+          if(prescription.prescriberID !== 0) {
+            throw new Error('prescriberID does not match.');
+          }
+        }
+        return true;
       })
       .end(done);
   });
