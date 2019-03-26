@@ -35,5 +35,34 @@ module.exports = {
                 resolve({rows, fields});
             });
         });
+    },
+
+    /*
+    Args:
+        name: name substring to search for
+        connection: MySQL Connection object
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
+    */
+    getDispensersByName: function(name, connection) {
+        var q = `
+        SELECT *
+        FROM seniordesign1.dispensers
+        WHERE name LIKE ?
+        `;
+
+        name = '%' + name + '%';
+        return new Promise((resolve, reject) => {
+            connection.query(q, name, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
     }
 }
