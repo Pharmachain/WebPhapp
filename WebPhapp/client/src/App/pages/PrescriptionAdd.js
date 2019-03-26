@@ -41,11 +41,6 @@ class PrescriptionAdd extends Component {
     this.setState({refillsLeft: event.target.value});
   }
 
-  // Updating value in the prescriberID state
-  onKeyDownPrescriberID = event => {
-    this.setState({prescriberID: event.target.value});
-  }
-
   // Updating value in the dispenserID state
   onKeyDownDispenserID = event => {
     this.setState({dispenserID: event.target.value});
@@ -55,7 +50,9 @@ class PrescriptionAdd extends Component {
   onSendPrecription = () => {
 
     var prescriptionAddQuery= `/api/v1/prescriptions/add`;
-
+    const id = this.props.id;
+    this.setState({prescriberID: id});
+    console.log(this.state.prescriberID);
     /* Send a message back for an error or a success */
     axios
       .post(prescriptionAddQuery,{
@@ -78,7 +75,7 @@ class PrescriptionAdd extends Component {
       {user === 'Prescriber' || user === 'Admin' ?
       <div className="App">
 
-        <div className="modal fade" id="add-prescription-modal" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+        <div className="modal fade" id="add-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
@@ -160,17 +157,6 @@ class PrescriptionAdd extends Component {
 
               <div className="col-md-6">
                 <div className="form-group focused">
-                <label className="form-control-label">Prescriber ID:</label>
-                  <input
-                  type="p"
-                  className="form-control"
-                  placeholder="Enter the prescriber's ID"
-                  onChange={this.onKeyDownPrescriberID}/>
-                </div>
-              </div>
-
-              <div className="col-md-6">
-                <div className="form-group focused">
                 <label className="form-control-label">Dispenser ID:</label>
                   <input
                   type="p"
@@ -189,10 +175,10 @@ class PrescriptionAdd extends Component {
                   Cancel
                 </button>
           </Link>
-          <nbsp> </nbsp>
+          &nbsp;
           <button
             type="button"
-            class="btn btn-success my-4"
+            className="btn btn-success my-4"
             data-toggle="modal"
             data-target="#add-prescription-modal"
             onClick={this.onSendPrecription}>
