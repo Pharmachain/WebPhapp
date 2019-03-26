@@ -123,7 +123,6 @@ class Prescription extends Component {
             <div className="container">
                 <div className="masonry align-items-left">
                       {this.displayPrescriptions()}
-                      {console.log(user, prescription)}
 
                       {/* Modal that displays all prescription information */}
                       {<div className="col-md-4">

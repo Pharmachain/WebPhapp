@@ -157,8 +157,7 @@ class PatientSearch extends Component {
         </div>
       </div>
       : 
-      "Not authorized :("
-      }
+      "Not authorized :(" }
       </div>
     );
   }

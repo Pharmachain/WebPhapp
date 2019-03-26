@@ -146,7 +146,7 @@ class PrescriptionRedeem extends Component {
     var prescriptions = this.state.prescriptions;
       return (
         <div>
-        {user === 'Dispenser' || user === 'Admin' ?
+        {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
           <div>
           {/* Check to see if any prescriptions are found*/}
           {prescriptions ? (
