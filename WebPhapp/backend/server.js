@@ -1125,9 +1125,10 @@ app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Governm
 About:
     An api endpoint that returns a list of all dispensers given a name to match on.
     String matching is case insensitive.
+    Returns all dispensers if no name is given.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/dispensers/walgreens"
+        >>> curl "http://localhost:5000/api/v1/dispensers?name=walgreens"
     To be used in Axois call:
         .get("/api/v1/dispensers/walgreens")
 Returns:
@@ -1141,30 +1142,52 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/dispensers/:name', (req, res) => {
-    var name = req.params.name;
+app.get('/api/v1/dispensers', (req, res) => {
+    var name = req.query.name; 
+    var finish = function(success, dispensers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + dispensers.length.toString() + ' dispensers.';
+        } else {
+            msg = 'error: ' + error;
+        }
+        console.log('/api/v1/dispensers/prescriptions/:dispenserID: ' + msg);
+        res.status(success ? 200 : 400).send(dispensers);
+    };
 
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
-    // if dispenser ID is null or undefined, return all
-    if(name == null) {
-        console.log('/api/v1/dispensers/: returning all dispensers');
-        res.status(200).send([]);
-        return;
+        dispensers = dispensers.filter(function(elem) {
+            // if no query given, return all dispensers
+            if(name === undefined) return true;
+
+            // case insensitive: match substrings in dispenser name
+            return elem.name.toLowerCase().includes(name.toLowerCase());
+        });
+        return finish(true, dispensers);
     }
 
-    dispensers = dispensers.filter(function(elem) {
-        // if no query given, return all dispensers
-        if(name === undefined) return true;
-
-        // case insensitive: match substrings in dispenser name
-        return elem.name.toLowerCase().includes(name.toLowerCase());
+    // otherwise, grab dispensers from MySQL
+    if (name == undefined)  name = '';
+    mysql.getDispensersByName(name, connection)
+    .then((answer) => {
+        var dispensers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            dispensers.push({
+                dispenserID: answer.rows[i].id,
+                name: answer.rows[i].name,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
+        }
+        return finish(true, dispensers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
     });
-
-    console.log('/api/v1/dispensers/: returning '
-                    + dispensers.length.toString() + ' dispensers.');
-    res.status(200).send(dispensers);
 });
 
 // ------------------------
