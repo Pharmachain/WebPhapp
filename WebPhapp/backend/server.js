@@ -1130,7 +1130,7 @@ Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/dispensers?name=walgreens"
     To be used in Axois call:
-        .get("/api/v1/dispensers/walgreens")
+        .get("/api/v1/dispensers?name=walgreens")
 Returns:
     [
         {
@@ -1151,7 +1151,7 @@ app.get('/api/v1/dispensers', (req, res) => {
         } else {
             msg = 'error: ' + error;
         }
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: ' + msg);
+        console.log('/api/v1/dispensers: ' + msg);
         res.status(success ? 200 : 400).send(dispensers);
     };
 
@@ -1264,26 +1264,24 @@ app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkA
 About:
     An api endpoint that returns a list of all prescribers given a name to match on.
     String matching is case insensitive.
-Examples:
-    Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/prescribers/sally"
-
-
-    Directly in terminal:
-        By both first and last name:
-            >>> curl "http://localhost:5000/api/v1/prescribers?first=fred&last=beckey"
-        By just first name:
-            >>> curl "http://localhost:5000/api/v1/prescribers?first=fred"
-        By just last name:
-            >>> curl "http://localhost:5000/api/v1/prescribers?last=beckey"
-    To be used in Axois call:
-        .get("/api/v1/prescribers/sally")
+    Examples:
+        Directly in terminal:
+            By both first and last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred&last=beckey"
+            By just first name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred"
+            By just last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?last=beckey"
+        To be used in Axois call:
+            .get("/api/v1/prescribers?first=fred&last=beckey")
 Returns:
     [
         {
             prescriberID (int),
-            name (string),
-            phone (int)
+            first (string),
+            last  (string),
+            phone (int),
+            location (string)
         },
         ...
     ]
@@ -1291,32 +1289,60 @@ Returns:
 app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Government]),
     var first = req.query.first;
     var last = req.query.last;
-
-    var all_prescribers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
-
-    // Searching for substrings
-    var matchingPrescribers = all_prescribers.filter(function(elem) {
-        if( first === undefined && last === undefined ){
-            // if no query given, return all patients
-            return true;
-        } else if( last === undefined ){
-            return (elem.first.toLowerCase().includes(first.toLowerCase()));
+    var finish = function(success, prescribers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + prescribers.length.toString() + ' prescriber match(es) for';
+            if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
+            if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
+        } else {
+            msg = 'error: ' + error;
         }
-        else if( first === undefined ){
-            return (elem.last.toLowerCase().includes(last.toLowerCase()));
+        console.log('/api/v1/prescribers: ' + msg);
+        res.status(success ? 200 : 400).send(prescribers);
+    };
+
+    // if no connection string (Travis testing), grab dispensers from json files
+    if(!conn.MySQL) {
+        var all_prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        // Searching for substrings
+        var matchingPrescribers = all_prescribers.filter(function(elem) {
+            if( first === undefined && last === undefined ){
+                // if no query given, return all patients
+                return true;
+            } else if( last === undefined ){
+                return (elem.first.toLowerCase().includes(first.toLowerCase()));
+            }
+            else if( first === undefined ){
+                return (elem.last.toLowerCase().includes(last.toLowerCase()));
+            }
+            return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                    && (elem.last.toLowerCase().includes(last.toLowerCase()));
+        });
+
+        return finish(true, matchingPrescribers);
+    }
+
+    // otherwise, grab prescribers from MySQL
+    mysql.getPrescribersByName(first, last, connection)
+    .then((answer) => {
+        var prescribers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            prescribers.push({
+                prescriberID: answer.rows[i].id,
+                first: answer.rows[i].first,
+                last: answer.rows[i].last,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
         }
-        return (elem.first.toLowerCase().includes(first.toLowerCase()))
-                && (elem.last.toLowerCase().includes(last.toLowerCase()));
+        return finish(true, prescribers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
     });
-
-    // log the backend process to the terminal
-    var msg = '/api/v1/prescribers: returning ' + matchingPrescribers.length.toString() + ' prescriber match(es) for';
-    if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
-    if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
-    console.log(msg);
-
-    res.json(matchingPrescribers);
 });
 
 // ------------------------

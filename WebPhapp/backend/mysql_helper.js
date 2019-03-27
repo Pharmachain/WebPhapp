@@ -38,6 +38,7 @@ module.exports = {
     },
 
     /*
+    Search for all dispensers that have matching name substrings.
     Args:
         name: name substring to search for
         connection: MySQL Connection object
@@ -67,6 +68,7 @@ module.exports = {
     },
 
     /*
+    Search for all prescribers that have matching first and last name substrings.
     Args:
         first: first name substring to search for
         last: last name substring to search for
