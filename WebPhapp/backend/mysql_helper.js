@@ -64,5 +64,42 @@ module.exports = {
                 resolve({rows, fields});
             });
         });
+    },
+
+    /*
+    Args:
+        first: first name substring to search for
+        last: last name substring to search for
+        connection: MySQL Connection object
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
+    */
+    getPrescribersByName: function(first, last, connection) {
+        var q = `
+        SELECT *
+        FROM seniordesign1.prescribers
+        WHERE
+            first LIKE ?
+            AND last LIKE ?
+        `;
+
+        if(first == undefined) first = '';
+        first = '%' + first + '%';
+
+        if(last == undefined) last = '';
+        last = '%' + last + '%';
+
+        return new Promise((resolve, reject) => {
+            connection.query(q, [first, last], (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
     }
 }
