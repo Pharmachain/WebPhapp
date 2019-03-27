@@ -373,7 +373,7 @@ it("test-route-dispensers-prescriptions", function(done) {
 
   it("test-route-dispensers-name", function(done) {
     request(server)
-    .get("/api/v1/dispensers/walgreens")
+    .get("/api/v1/dispensers?name=walgreens")
     .expect(200)
     .expect(function(res) {
       var fields;
@@ -390,7 +390,7 @@ it("test-route-dispensers-prescriptions", function(done) {
 
   it("test-route-dispensers-name-bad", function(done) {
     request(server)
-    .get("/api/v1/dispensers/thisismostdefinitelynotadispensername")
+    .get("/api/v1/dispensers?name=thisismostdefinitelynotadispensername")
     .expect(200)
     .expect(function(res) {
       var fields;

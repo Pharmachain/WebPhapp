@@ -1017,7 +1017,7 @@ app.get('/api/v1/dispensers', (req, res) => {
         var dispensers = [];
         for (var i = 0; i < answer.rows.length; i++){
             dispensers.push({
-                id: answer.rows[i].id,
+                dispenserID: answer.rows[i].id,
                 name: answer.rows[i].name,
                 location: answer.rows[i].location,
                 phone: answer.rows[i].phone
