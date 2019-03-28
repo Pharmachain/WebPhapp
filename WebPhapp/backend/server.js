@@ -196,7 +196,7 @@ About:
         daysFor,
         refillsLeft,
         prescriberID,
-        dispensorID
+        dispenserID
     }
 Examples:
     Directly in terminal:
@@ -266,7 +266,7 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
 
     // other validation here should include:
     //  - When sessions are created, validate the prescriber based upon the session cookie, not the ID itself.
-    //  - Validate the drugID, dispensorID, patient all exist.
+    //  - Validate the drugID, dispenserID, patient all exist.
     // we are ignoring this for now and will come back to it.
 
     // Add derived fields to the prescription

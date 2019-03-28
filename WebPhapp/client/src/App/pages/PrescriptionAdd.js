@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Error from './Error';
 
 class PrescriptionAdd extends Component {
   // Initialize the state
@@ -124,6 +125,17 @@ class PrescriptionAdd extends Component {
 
               <div className="col-md-6">
                 <div className="form-group focused">
+                <label className="form-control-label">Dispenser ID:</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Enter the dispenser's ID"
+                  onChange={this.onKeyDownDispenserID}/>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
                 <label className="form-control-label">Quantity:</label>
                   <input
                   type="p"
@@ -155,16 +167,6 @@ class PrescriptionAdd extends Component {
                 </div>
               </div>
 
-              <div className="col-md-6">
-                <div className="form-group focused">
-                <label className="form-control-label">Dispenser ID:</label>
-                  <input
-                  type="p"
-                  className="form-control"
-                  placeholder="Enter the dispenser's ID"
-                  onChange={this.onKeyDownDispenserID}/>
-                </div>
-              </div>
             </div>
           </form>
           <Link to={"/"}>
@@ -189,7 +191,7 @@ class PrescriptionAdd extends Component {
         </div>
       </div>
       : 
-      "Not authorized :(" }
+      <Error/> }
     </div>
     );
   }

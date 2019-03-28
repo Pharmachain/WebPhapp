@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import Error from './Error';
 
 class DispenserSearch extends Component {
   // Initialize the state
@@ -65,7 +66,7 @@ class DispenserSearch extends Component {
         </div>
       </div>
       :
-      "Not authorized :(" }
+      <Error/> }
       </div>
     );
   }

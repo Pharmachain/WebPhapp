@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import People from '../components/People'
+import Error from './Error';
 
 class PatientSearch extends Component {
   // Initialize the state
@@ -157,7 +158,7 @@ class PatientSearch extends Component {
         </div>
       </div>
       : 
-      "Not authorized :(" }
+      <Error/> }
       </div>
     );
   }

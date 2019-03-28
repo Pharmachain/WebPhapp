@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Error from './Error';
 
 class CancelAlert extends Component {
     render() {
@@ -13,7 +14,7 @@ class CancelAlert extends Component {
             </div>
             </div>
             :
-            "Not authorized :(" }
+            <Error/> }
           </div>
         );
     }
