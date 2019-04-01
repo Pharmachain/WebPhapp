@@ -76,9 +76,6 @@ if $c_option; then
     # Clone into a fresh copy of the network if it doesn't  already
     if [ ! -d "./quorum-maker" ]; then
         git clone https://github.com/Pharmachain/quorum-maker
-    	cd ./quorum-maker
-    	git checkout timeoutBranch
-    	cd ..
     fi
 
     # Turn on the Quorum Network
