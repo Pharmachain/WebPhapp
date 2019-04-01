@@ -1066,33 +1066,51 @@ Returns:
     {
         dispenserID (int),
         name (string),
-        location (string),
-        phone (int)
+        phone (int),
+        location (string)
     }
 */
 app.get('/api/v1/dispensers/single/:dispenserID', (req,res) => { // auth.checkAuth([Role.Government]),
     var dispenserID = parseInt(req.params.dispenserID);
+    var finish = function(dispensers) {
+        if(dispensers.length > 1) {
+            console.log('/api/v1/dispensers/single/: error: too many dispenserID matches');
+            res.status(400).send(false);
+        }
+        else if(dispensers.length === 0) {
+            console.log('/api/v1/dispensers/single/: error: no dispenserID match');
+            res.status(400).send(false);
+        }
+        else {
+            dispenser = dispensers[0]
+            console.log('/api/v1/dispensers/single/: returning dispenser with ID ' + dispenserID.toString());
+            res.status(200).send(dispenser);
+        }
+    };
 
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
-    dispensers = dispensers.filter(function(elem) {
-        return dispenserID === elem.dispenserID;
+        dispensers = dispensers.filter(function(elem) {
+            return dispenserID === elem.dispenserID;
+        });
+        return finish(dispensers);
+    }
+    
+    mysql.getDispenserByID(dispenserID, connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        return finish(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/single/: error: ', error);
+        return res.status(400).send({});
     });
-
-    if(dispensers.length > 1) {
-        console.log('/api/v1/dispensers/single/: error: too many dispenserID matches');
-        res.status(400).send(false);
-    }
-    else if(dispensers.length === 0) {
-        console.log('/api/v1/dispensers/single/: error: no dispenserID match');
-        res.status(400).send(false);
-    }
-    else {
-        dispenser = dispensers[0]
-        console.log('/api/v1/dispensers/single/: returning dispenser with ID ' + dispenserID.toString());
-        res.status(200).send(dispenser);
-    }
 });
 
 /*
@@ -1106,19 +1124,38 @@ Examples:
 Returns:
     [
         {
-            prescriberID (int),
+            dispenserID (int),
             name (string),
-            phone (int)
+            phone (int),
+            location (string)
         },
         ...
     ]
 */
-app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),    
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
-    console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
-    res.status(200).send(dispensers);    
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
+    }
+
+    mysql.getDispensers(connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/all: error: ', error);
+        return res.status(400).send([]);
+    });
 });
 
 /*
@@ -1136,8 +1173,8 @@ Returns:
         {
             dispenserID (int),
             name (string),
-            location (string),
-            phone (int)
+            phone (int),
+            location (string)
         },
         ...
     ]
@@ -1206,18 +1243,38 @@ Returns:
     [
         {
             prescriberID (int),
-            name (string),
-            phone (int)
+            first (string),
+            last (string),
+            phone (int),
+            location (string)
         },
         ...
     ]
 */
 app.get('/api/v1/prescribers/all', (req,res) => { // auth.checkAuth([Role.Government]),
-    var prescribers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+    // if no connection string (Travis testing), grab prescribers from json files
+    if (!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
 
-    console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
-    res.status(200).send(prescribers);
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    }
+
+    mysql.getPrescribers(connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/all: error: ', error);
+        return res.status(400).send([]);
+    });
 });
 
 /*
@@ -1231,33 +1288,53 @@ Examples:
 Returns:
     {
         prescriberID (int),
-        name (string),
-        phone (int)
+        first (string),
+        last (string),
+        phone (int),
+        location (string)
     }
 */
 app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkAuth([Role.Government]),
     var prescriberID = parseInt(req.params.prescriberID);
+    var finish = function(prescribers) {
+        if(prescribers.length > 1) {
+            console.log('/api/v1/prescribers/single/: error: too many prescriberID matches');
+            res.status(400).send(false);
+        }
+        else if(prescribers.length === 0) {
+            console.log('/api/v1/prescribers/single/: error: no prescriberID match');
+            res.status(400).send(false);
+        }
+        else {
+            var prescriber = prescribers[0]
+            console.log('/api/v1/prescribers/single/: returning prescriber with ID ' + prescriberID.toString());
+            res.status(200).send(prescriber);
+        }
+    }
+    
+    if(!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
 
-    var prescribers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+        prescribers = prescribers.filter(function(elem) {
+            return prescriberID === elem.prescriberID;
+        });
+        return finish(prescribers);
+    }
 
-    prescribers = prescribers.filter(function(elem) {
-        return prescriberID === elem.prescriberID;
+    mysql.getPrescriberByID(prescriberID, connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        return finish(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/single/: error: ', error);
+        return res.status(400).send({});
     });
-
-    if(prescribers.length > 1) {
-        console.log('/api/v1/prescribers/single/: error: too many prescriberID matches');
-        res.status(400).send(false);
-    }
-    else if(prescribers.length === 0) {
-        console.log('/api/v1/prescribers/single/: error: no prescriberID match');
-        res.status(400).send(false);
-    }
-    else {
-        prescriber = prescribers[0]
-        console.log('/api/v1/prescribers/single/: returning prescriber with ID ' + prescriberID.toString());
-        res.status(200).send(prescriber);
-    }
 });
 
 /*

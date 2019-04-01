@@ -94,7 +94,7 @@ describe("loading express", function() {
 
   it("test-route-prescriptions-by-prescriber-id", function(done) {
     request(server)
-      .get("/api/v1/prescriptions/prescriber/0")
+      .get("/api/v1/prescriptions/prescriber/1")
       .expect(function(res) {
         var prescription;
         if(res.body.length < 2) throw new Error('Returned 0 or 1 prescriptions. Is this right?'); 
@@ -106,7 +106,7 @@ describe("loading express", function() {
             throw new Error('WrittenDate must be a string field.');
           }
           // check prescriberID match
-          if(prescription.prescriberID !== 0) {
+          if(prescription.prescriberID !== 1) {
             throw new Error('prescriberID does not match.');
           }
         }
