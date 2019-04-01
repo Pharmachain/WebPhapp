@@ -1,4 +1,4 @@
-//Helper Functions to work with the blockchain15
+//Helper Functions to work with the blockchain
 
 let fs = require("fs");
 let Web3 = require("web3");
