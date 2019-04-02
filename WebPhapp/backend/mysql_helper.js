@@ -38,50 +38,56 @@ module.exports = {
     },
 
     /*
-    Insert a user into the DB
+    Search for all dispensers that have matching name substrings.
     Args:
-        username: Username to insert
-        password: The salted and hashed password
-        role: The type of user being inserted
+        name: name substring to search for
         connection: MySQL Connection object
     Returns: Promise.
-        Upon resolution, returns the insertion ID of the row.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
     */
-    insertUser: function(username, password, role, role_id, connection) {
+    getDispensersByName: function(name, connection) {
         var q = `
-        INSERT INTO users (role, role_id, username, password)
-        VALUES (?,?,?,?);
-        SELECT LAST_INSERT_ID();
+        SELECT *
+        FROM seniordesign1.dispensers
+        WHERE name LIKE ?
         `;
 
+        name = '%' + name + '%';
         return new Promise((resolve, reject) => {
-            var values = [role.toString(), role_id, username, password];
-            connection.query(q, values, (error, rows, fields) => {
+            connection.query(q, name, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
         });
     },
 
-
     /*
-    Insert the salt into the DB
+    Get all dispensers.
     Args:
-        userID: userID to insert
-        salt: Salt value for the user
         connection: MySQL Connection object
     Returns: Promise.
-        Nothing is inside of the promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
     */
-    insertSalt: function(userID, salt, connection){
+    getDispensers: function(connection) {
         var q = `
-        INSERT INTO salts
-        VALUES (?,?);
+        SELECT *
+        FROM seniordesign1.dispensers
         `;
 
         return new Promise((resolve, reject) => {
-            var values = [userID,salt];
-            connection.query(q, values, (error, rows, fields) => {
+            connection.query(q, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
@@ -89,23 +95,28 @@ module.exports = {
     },
 
     /*
-    Get the value of a salt, given the username
+    Get a single dispenser by ID.
     Args:
-        username: the username of the user
+        dispenserID: ID to match on
         connection: MySQL Connection object
-    Returns: Promise
-        Upon resolution the salt of a given user.
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row (should only be one) contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
     */
-    getSaltByUsername: function(username, connection){
+    getDispenserByID: function(dispenserID, connection) {
         var q = `
-        SELECT salt
-        FROM salts s, users u
-        WHERE s.id = u.id AND u.username = ?
-        LIMIT 1;
+        SELECT *
+        FROM seniordesign1.dispensers
+        WHERE id = ?
         `;
+
         return new Promise((resolve, reject) => {
-            var values = [username];
-            connection.query(q, values, (error, rows, fields) => {
+            connection.query(q, dispenserID, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
@@ -113,27 +124,37 @@ module.exports = {
     },
 
     /*
-    Updates the count of the role index for the users
+    Search for all prescribers that have matching first and last name substrings.
     Args:
-        role: The type of user being addded to the system
+        first: first name substring to search for
+        last: last name substring to search for
         connection: MySQL Connection object
-    Returns: Promise
-        Upon resolution the Role id for the user. 
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.name (string)
+            row.location (string)
+            row.phone (int)
     */
-    updateRoleCount: function(role, connection){
+    getPrescribersByName: function(first, last, connection) {
         var q = `
-        UPDATE Role_Id_Count as R
-        SET R.id_number = (R.id_number + 1)
-        WHERE R.role = ?;
-
-        SELECT id_number
-        FROM Role_Id_Count
-        WHERE role = ?;
+        SELECT *
+        FROM seniordesign1.prescribers
+        WHERE
+            first LIKE ?
+            AND last LIKE ?
         `;
 
+        if(first == undefined) first = '';
+        first = '%' + first + '%';
+
+        if(last == undefined) last = '';
+        last = '%' + last + '%';
+
         return new Promise((resolve, reject) => {
-            var values = [role, role];
-            connection.query(q, values, (error, rows, fields) => {
+            connection.query(q, [first, last], (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
@@ -141,26 +162,60 @@ module.exports = {
     },
 
     /*
-    Get the username and password
+    Get a single prescriber by ID.
     Args:
-        username: the username of the user
-        password: Password that has been salted and hashed
+        prescriberID: ID to match on
         connection: MySQL Connection object
-    Returns: Promise
-        Upon resolution the user with the username and password
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row (should only be one) contains:
+            row.id (int)
+            row.first (string)
+            row.last (string)
+            row.location (string)
+            row.phone (int)
     */
-    getUserValidation: function(username, password, connection){
+    getPrescriberByID: function(prescriberID, connection) {
         var q = `
-        SELECT role_id, role
-        FROM users
-        WHERE username = ? AND password = ?
+        SELECT *
+        FROM seniordesign1.prescribers
+        WHERE id = ?
         `;
+
         return new Promise((resolve, reject) => {
-            var values = [username,password];
-            connection.query(q, values, (error, rows, fields) => {
+            connection.query(q, prescriberID, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
         });
     },
+
+    /*
+    Get all prescribers.
+    Args:
+        connection: MySQL Connection object
+    Returns: Promise.
+        Upon resolution, returns (answer) which is a list of rows.
+        Answer can be unpacked in a call to .then((answer) => { ... })
+        Each row contains:
+            row.id (int)
+            row.first (string)
+            row.last (string)
+            row.location (string)
+            row.phone (int)
+    */
+    getPrescribers: function(connection) {
+        var q = `
+        SELECT *
+        FROM seniordesign1.prescribers
+        `;
+
+        return new Promise((resolve, reject) => {
+            connection.query(q, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    }
 }
