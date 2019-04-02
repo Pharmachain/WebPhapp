@@ -206,7 +206,6 @@ class PrescriptionEdit extends Component {
           </div>
         </div>
         </div>
-        </div>
         :
         <div className="col-8 center">
           <div className="alert alert-warning" role="alert">
