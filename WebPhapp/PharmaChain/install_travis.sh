@@ -25,6 +25,7 @@ sudo npm config set prefix /usr
 sudo npm install truffle@4.1.14 -g --allow-root
 sudo npm install web3@1.0.0-beta.37 --allow-root --unsafe-perm=true
 sudo npm install @babel/runtime@latest
+sudo npm install -g ethereumjs-testrpc
 
 #ln -s /usr/bin/nodejs /usr/bin/node
 export NODE_PATH=/usr/lib/node_modules

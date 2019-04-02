@@ -380,6 +380,99 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
 });
 
 /*
+An api endpoint that returns all of the prescriptions associated with a prescriber ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/prescriber/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/prescriber/1")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates,
+        writtenDate, quantity, daysFor, refillsLeft,
+        prescriberID, dispenserID, cancelDate, drugName
+    ]
+*/
+app.get('/api/v1/prescriptions/prescriber/:prescriberID', (req,res) => {
+    var prescriberID = parseInt(req.params.prescriberID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        var msg = '/api/v1/prescriptions/prescriber: Sent ' + prescriptions.length.toString() +
+                    ' prescription(s) for prescriberID ' + prescriberID.toString();
+
+        // if no prescriptions for a prescriber ID, return early
+        if (prescriptions.length === 0) {
+            console.log(msg);
+            res.json([]);
+            return;
+        }
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            for (var i = 0; i < prescriptions.length; i++){
+                prescriptions[i].drugName = "drugName";
+            }
+            res.json(prescriptions);
+            return;
+        }
+
+        // Look up the drug names given the list of drugIDs in MySQL
+        var drugIDs = prescriptions.map((prescription) => {
+            return prescription.drugID;
+        })
+
+        mysql.getDrugNamesFromIDs(drugIDs, connection)
+        .then((answer) => {
+            for (var i = 0; i < prescriptions.length; i++){
+                var drug = answer.rows.filter((row) => {
+                    return (row.ID === prescriptions[i].drugID);
+                });
+
+                // Could be undefined on return
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+            }
+
+            console.log(msg);
+            res.json(prescriptions);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions/prescriber: error: ", error);
+            res.status(400).send({});
+        });
+    };
+
+    if(conn.Blockchain){
+        var field_prescriberID = 0;
+        block_helper.read_by_value(field_prescriberID, prescriberID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        }).catch((error) => {
+            console.log('/api/v1/prescriptions/prescriber: error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching prescriberID.');
+        });
+    }
+    else { // search prescriptions from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.prescriberID === prescriberID) toSend.push(prescription);
+        });
+        handlePrescriptionsCallback(toSend);
+    }
+});
+
+/*
 An api endpoint that returns a single prescription given a prescription ID
 Examples:
     Directly in terminal:
@@ -522,13 +615,13 @@ app.get('/api/v1/patients', (req,res) => {
             // if no query given, return all patients
             return true;
         } else if( last === undefined ){
-            return (elem.first.includes(first.toLowerCase()));
+            return (elem.first.toLowerCase().includes(first.toLowerCase()));
         }
         else if( first === undefined ){
-            return (elem.last.includes(last.toLowerCase()));
+            return (elem.last.toLowerCase().includes(last.toLowerCase()));
         }
-        return (elem.first.includes(first.toLowerCase()))
-                && (elem.last.includes(last.toLowerCase()));
+        return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                && (elem.last.toLowerCase().includes(last.toLowerCase()));
     });
 
     // log the backend process to the terminal
@@ -963,48 +1056,370 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
 
 /*
 About:
-    An api endpoint that returns a list of all dispensers given a name to match on.
-    String matching is case insensitive.
+    An api endpoint that returns a single dispenser given a dispenserID.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/dispensers/walgreens"
+        >>> curl "http://localhost:5000/api/v1/dispensers/single/1"
     To be used in Axois call:
-        .get("/api/v1/dispensers/walgreens")
+        .get("/api/v1/dispensers/single/1")
+Returns:
+    {
+        dispenserID (int),
+        name (string),
+        phone (int),
+        location (string)
+    }
+*/
+app.get('/api/v1/dispensers/single/:dispenserID', (req,res) => { // auth.checkAuth([Role.Government]),
+    var dispenserID = parseInt(req.params.dispenserID);
+    var finish = function(dispensers) {
+        if(dispensers.length > 1) {
+            console.log('/api/v1/dispensers/single/: error: too many dispenserID matches');
+            res.status(400).send(false);
+        }
+        else if(dispensers.length === 0) {
+            console.log('/api/v1/dispensers/single/: error: no dispenserID match');
+            res.status(400).send(false);
+        }
+        else {
+            dispenser = dispensers[0]
+            console.log('/api/v1/dispensers/single/: returning dispenser with ID ' + dispenserID.toString());
+            res.status(200).send(dispenser);
+        }
+    };
+
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+        dispensers = dispensers.filter(function(elem) {
+            return dispenserID === elem.dispenserID;
+        });
+        return finish(dispensers);
+    }
+    
+    mysql.getDispenserByID(dispenserID, connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        return finish(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/single/: error: ', error);
+        return res.status(400).send({});
+    });
+});
+
+/*
+About:
+    An api endpoint that returns all dispensers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/all"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/all")
 Returns:
     [
         {
             dispenserID (int),
             name (string),
-            location (string),
-            phone (int)
+            phone (int),
+            location (string)
         },
         ...
     ]
 */
-app.get('/api/v1/dispensers/:name', (req, res) => {
-    var name = req.params.name;
+app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),    
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
-    // if dispenser ID is null or undefined, return all
-    if(name == null) {
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning all dispensers');
-        res.status(200).send([]);
-        return;
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
     }
 
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
-
-    dispensers = dispensers.filter(function(elem) {
-        // if no query given, return all dispensers
-        if(name === undefined) return true;
-
-        // case insensitive: match substrings in dispenser name
-        return elem.name.toLowerCase().includes(name.toLowerCase());
+    mysql.getDispensers(connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/all: error: ', error);
+        return res.status(400).send([]);
     });
+});
 
-    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
-                    + dispensers.length.toString() + ' dispensers.');
-    res.status(200).send(dispensers);
+/*
+About:
+    An api endpoint that returns a list of all dispensers given a name to match on.
+    String matching is case insensitive.
+    Returns all dispensers if no name is given.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers?name=walgreens"
+    To be used in Axois call:
+        .get("/api/v1/dispensers?name=walgreens")
+Returns:
+    [
+        {
+            dispenserID (int),
+            name (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/dispensers', (req, res) => {
+    var name = req.query.name; 
+    var finish = function(success, dispensers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + dispensers.length.toString() + ' dispensers.';
+        } else {
+            msg = 'error: ' + error;
+        }
+        console.log('/api/v1/dispensers: ' + msg);
+        res.status(success ? 200 : 400).send(dispensers);
+    };
+
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+        dispensers = dispensers.filter(function(elem) {
+            // if no query given, return all dispensers
+            if(name === undefined) return true;
+
+            // case insensitive: match substrings in dispenser name
+            return elem.name.toLowerCase().includes(name.toLowerCase());
+        });
+        return finish(true, dispensers);
+    }
+
+    // otherwise, grab dispensers from MySQL
+    if (name == undefined)  name = '';
+    mysql.getDispensersByName(name, connection)
+    .then((answer) => {
+        var dispensers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            dispensers.push({
+                dispenserID: answer.rows[i].id,
+                name: answer.rows[i].name,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
+        }
+        return finish(true, dispensers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
+    });
+});
+
+// ------------------------
+//        Prescriber
+// ------------------------
+
+/*
+About:
+    An api endpoint that returns all prescribers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/all"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/all")
+Returns:
+    [
+        {
+            prescriberID (int),
+            first (string),
+            last (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers/all', (req,res) => { // auth.checkAuth([Role.Government]),
+    // if no connection string (Travis testing), grab prescribers from json files
+    if (!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    }
+
+    mysql.getPrescribers(connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/all: error: ', error);
+        return res.status(400).send([]);
+    });
+});
+
+/*
+About:
+    An api endpoint that returns a single prescriber given a prescriberID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/single/1"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/single/1")
+Returns:
+    {
+        prescriberID (int),
+        first (string),
+        last (string),
+        phone (int),
+        location (string)
+    }
+*/
+app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkAuth([Role.Government]),
+    var prescriberID = parseInt(req.params.prescriberID);
+    var finish = function(prescribers) {
+        if(prescribers.length > 1) {
+            console.log('/api/v1/prescribers/single/: error: too many prescriberID matches');
+            res.status(400).send(false);
+        }
+        else if(prescribers.length === 0) {
+            console.log('/api/v1/prescribers/single/: error: no prescriberID match');
+            res.status(400).send(false);
+        }
+        else {
+            var prescriber = prescribers[0]
+            console.log('/api/v1/prescribers/single/: returning prescriber with ID ' + prescriberID.toString());
+            res.status(200).send(prescriber);
+        }
+    }
+    
+    if(!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        prescribers = prescribers.filter(function(elem) {
+            return prescriberID === elem.prescriberID;
+        });
+        return finish(prescribers);
+    }
+
+    mysql.getPrescriberByID(prescriberID, connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        return finish(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/single/: error: ', error);
+        return res.status(400).send({});
+    });
+});
+
+/*
+About:
+    An api endpoint that returns a list of all prescribers given a name to match on.
+    String matching is case insensitive.
+    Examples:
+        Directly in terminal:
+            By both first and last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred&last=beckey"
+            By just first name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred"
+            By just last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?last=beckey"
+        To be used in Axois call:
+            .get("/api/v1/prescribers?first=fred&last=beckey")
+Returns:
+    [
+        {
+            prescriberID (int),
+            first (string),
+            last  (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Government]),
+    var first = req.query.first;
+    var last = req.query.last;
+    var finish = function(success, prescribers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + prescribers.length.toString() + ' prescriber match(es) for';
+            if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
+            if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
+        } else {
+            msg = 'error: ' + error;
+        }
+        console.log('/api/v1/prescribers: ' + msg);
+        res.status(success ? 200 : 400).send(prescribers);
+    };
+
+    // if no connection string (Travis testing), grab dispensers from json files
+    if(!conn.MySQL) {
+        var all_prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        // Searching for substrings
+        var matchingPrescribers = all_prescribers.filter(function(elem) {
+            if( first === undefined && last === undefined ){
+                // if no query given, return all patients
+                return true;
+            } else if( last === undefined ){
+                return (elem.first.toLowerCase().includes(first.toLowerCase()));
+            }
+            else if( first === undefined ){
+                return (elem.last.toLowerCase().includes(last.toLowerCase()));
+            }
+            return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                    && (elem.last.toLowerCase().includes(last.toLowerCase()));
+        });
+
+        return finish(true, matchingPrescribers);
+    }
+
+    // otherwise, grab prescribers from MySQL
+    mysql.getPrescribersByName(first, last, connection)
+    .then((answer) => {
+        var prescribers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            prescribers.push({
+                prescriberID: answer.rows[i].id,
+                first: answer.rows[i].first,
+                last: answer.rows[i].last,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
+        }
+        return finish(true, prescribers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
+    });
 });
 
 // ------------------------
