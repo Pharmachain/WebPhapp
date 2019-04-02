@@ -71,12 +71,8 @@ class DispenserSearch extends Component {
     // User role from log in
     const user = this.props.role; 
     return (
-<<<<<<< HEAD
-      <div className="header bg-gradient-primary py-7 py-lg-8">
-=======
       <div>
       {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
->>>>>>> access_control
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -133,11 +129,8 @@ class DispenserSearch extends Component {
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-=======
       :
       <Error/> }
->>>>>>> access_control
       </div>
     );
   }
