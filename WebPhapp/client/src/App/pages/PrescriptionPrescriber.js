@@ -26,7 +26,7 @@ class PrescriptionPrescriber extends Component {
 
     axios
       // String interpolation.
-      .get(`/api/v1/dispensers/prescriptions/all/${prescriberID}`)
+      .get(`/api/v1/prescribers/prescriptions/${prescriberID}`)
       .then(results => results.data)
       .then(prescriptions => this.setState({ prescriptions, isFetching: false }));
   };
