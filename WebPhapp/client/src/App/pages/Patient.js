@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import qs from 'qs';
 import Prescription from "../components/Prescription";
+import Error from "./Error";
 
 class Patient extends Component {
   // Initialize the state
@@ -69,7 +70,7 @@ class Patient extends Component {
         </div> }
       </div>
       :
-      "" }
+      <Error/> }
       </div>
     );
   }

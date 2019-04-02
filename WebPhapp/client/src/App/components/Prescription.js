@@ -4,7 +4,7 @@ import axios from "axios";
 
 class Prescription extends Component {
     state = {};
-
+      
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
         // Probably add some validation to make sure the user wants to delete this.
@@ -20,13 +20,23 @@ class Prescription extends Component {
 
     // Gets the events id, to redeem the proper prescription.
     onRedeemClick = event => {
+        // 'X' or close button in modal
+        document.getElementById('close').click(); 
         // Probably add some validation to make sure the user wants to redeem this.
+
         const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
         axios
         .get(redeemQuery)
-        .then(results => results.data);
+        .then(results => results.data)
         //Green out redeemed prescription.
+        // Trigger prescription request 
         //TODO: green out Rx logo
+        .catch(error => {
+            // Prescription not redeemed because....
+        });
+        return(
+            <div></div>
+        )
     }
 
     // Displays all prescription cards for a patient
@@ -118,7 +128,6 @@ class Prescription extends Component {
         for (var i = 0; i < fillDatesLength; i++){
             formattedDates.push(fillDates[i].split(" ", 4).join(" "));
         }
-    
         return(
             <div className="container">
                 <div className="masonry align-items-left">
@@ -126,14 +135,19 @@ class Prescription extends Component {
 
                       {/* Modal that displays all prescription information */}
                       {<div className="col-md-4">
-                        <div className="modal fade" tabIndex="-1" id="prescription-modal" data-backdrop="false" style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div 
+                            className="modal fade" 
+                            tabIndex="-1" 
+                            id="prescription-modal" 
+                            data-backdrop="false" 
+                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
                         <div className="modal-content">
 
                             {/* Modal Header */}
                             <div className="modal-header">
                                 <h3 className="modal-title" id="modal-title-default">Prescription: {drugName}</h3>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <button type="button" className="close" id="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
                                 </button>
                             </div>
@@ -265,14 +279,6 @@ class Prescription extends Component {
                                                 onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
                                                 <span className="btn-inner--text">Edit </span>
                                                 <span><i className="fas fa-edit"></i></span>
-                                            </button>
-                                            <button type = "button"
-                                                className = "btn btn-outline-info"
-                                                style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {this.onRedeemClick}>
-                                                <span className="btn-inner--text">Redeem </span>
-                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
                                             </button>
                                             </div>
                                             :

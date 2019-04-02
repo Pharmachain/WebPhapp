@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Prescription from "../components/Prescription";
 import qs from 'qs';
+import Error from './Error';
 
 class PrescriptionRedeem extends Component {
   // Initialize the state
@@ -162,7 +163,7 @@ class PrescriptionRedeem extends Component {
             </div> 
           )}
           </div>
-        : "" }
+        : <Error/> }
         </div>
       );
   }
