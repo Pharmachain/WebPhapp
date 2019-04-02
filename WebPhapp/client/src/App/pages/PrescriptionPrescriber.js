@@ -4,10 +4,9 @@ import qs from 'qs';
 import Prescription from "../components/Prescription";
 import Error from "./Error";
 
-class Patient extends Component {
+class PrescriptionPrescriber extends Component {
   // Initialize the state
   state = {
-    patientID: 0,
     prescriptions: [],
     isFetching: true
   };
@@ -23,18 +22,17 @@ class Patient extends Component {
 
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
-    const patientID = querystring.ID;
-    this.setState({patientID});
+    const prescriberID = querystring.ID;
 
     axios
       // String interpolation.
-      .get(`/api/v1/prescriptions/${patientID}`)
+      .get(`/api/v1/prescribers/prescriptions/${prescriberID}`)
       .then(results => results.data)
       .then(prescriptions => this.setState({ prescriptions, isFetching: false }));
   };
 
   // displayPrescriptions() displays the properties of a prescription using Prescription
-  // @return: returns all prescriptions for a patient id
+  // @return: returns all prescriptions for a prescriber id
   displayPrescriptions = () => {
     return(
       <Prescription
@@ -54,28 +52,15 @@ class Patient extends Component {
     return (
       /* Logic to render prescriptions or warning conditionally */
       <div>
-      {user === 'Patient' || user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+      {user === 'Government' || user === 'Admin' ?
       <div>
       { isFetching ? ""
         :          
         /* Check to see if any prescriptions are found */
         prescriptions.length ?
         <div>
-          <div className="header bg-gradient-primary py-7 py-lg-8">
           {/* Render the prescription */}
-          <div className="col-xl-12 order-xl-1 center">
-            <div className="card bg-secondary shadow">
-              <div className="card-header bg-white border-0">
-                  <div className="row align-items-center">
-                    <div className="col-8 text-left">
-                      <h3 className="mb-0">Patient: {this.state.patientID} Prescriptions</h3>
-                    </div>
-                  </div>
-              </div>
-              <div className="card-body"> {this.displayPrescriptions()} </div>
-            </div>
-          </div>
-        </div>
+          {this.displayPrescriptions()}
         </div>
         : 
         <div className="col-8 center">
@@ -91,4 +76,4 @@ class Patient extends Component {
   }
 }
 
-export default Patient;
+export default PrescriptionPrescriber;

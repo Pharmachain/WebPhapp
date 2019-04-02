@@ -1,15 +1,23 @@
 const express = require('express');
 const path = require('path');
-var bodyParser = require('body-parser');
-var fs = require("fs");
-var conn = require('./connections.js') // private file not under VC.
-
+const bodyParser = require('body-parser');
+const fs = require("fs");
+const crypto = require('crypto');
 const app = express();
-app.use(bodyParser.json() );        // to support JSON-encoded bodies
+const cookieParser = require('cookie-parser');
+const pbkdf2 = require('pbkdf2');
+
+const conn = require('./connections.js') // private file not under VC.
+const auth = require('./auth_helper.js');
+const Role = require("./role.js");
+const settings = require('./settings.js');
+
+app.use(bodyParser.json());        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+app.use(cookieParser());
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -52,6 +60,31 @@ function convertDatesToString(prescription){
 }
 
 /*
+    Given a list of prescriptions, organize them in decreasing, chronological order.
+    prescriptions: An array of prescription objects
+    attribute: A value to determine the mode of the function.
+        1 for the written date to organize, anything else for fillDates
+    returns an array of organized prescriptions
+*/
+function orderPrescriptions(prescriptions, attribute){
+    return prescriptions.sort((pres1, pres2) => {
+        if(attribute === 1){
+            return  pres2.writtenDate - pres1.writtenDate;
+        }
+
+        if(pres1.fillDates.length === 0 ){
+            return 1;
+        }
+        else if(pres2.fillDates.length === 0){
+            return -1;
+        }
+        else{
+            return pres2.fillDates[pres2.fillDates.length-1] - pres1.fillDates[pres1.fillDates.length-1];
+        }
+    });
+}
+
+/*
 An api endpoint that cancels a prescription associated with a given prescriptionID.
 Example:
     Directly in terminal:
@@ -59,7 +92,7 @@ Example:
     To be used in Axois call:
         .get("api/v1/prescriptions/cancel/0")
 */
-app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
 
@@ -69,8 +102,6 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         res.status(success ? 200 : 400).json(success);
         return;
     }
-
-    //TODO Check for auth to do this.
 
     if(conn.Blockchain) {
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
@@ -114,8 +145,9 @@ Examples:
 Returns:
     true (and status code 200) if prescription edited, false (and status code 400) otherwise.
 */
-app.post('/api/v1/prescriptions/edit',(req,res) => {
-    //TODO auth check needed here with cookie that goes with request headers
+
+app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
+
     const changedPrescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -146,7 +178,7 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysValid,
-                changedPrescription.refillsLeft 
+                changedPrescription.refillsLeft
             ).then((_) => {
                 return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
             })
@@ -182,7 +214,7 @@ About:
         prescriberID,
         dispensorID
     }
-Examples: 
+Examples:
     Directly in terminal:
         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
     To be used in Axois call:
@@ -195,7 +227,7 @@ Returns:
 Note on daysValid field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {
+app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -288,6 +320,8 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
 /*
 An api endpoint that returns all of the prescriptions associated with a patient ID
+Roles:
+    TODO: Role.Patient needs to be restricted further to one's own patientID only.
 Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/prescriptions/1"
@@ -300,8 +334,15 @@ Returns:
         prescriberID, dispenserID, cancelDate, drugName
     ]
 */
-app.get('/api/v1/prescriptions/:patientID', (req,res) => {
+app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+    if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
                     ' prescription(s) for patient ID ' + patientID.toString();
@@ -313,6 +354,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
@@ -370,7 +412,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     else { // search prescriptions from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-    
+
         var toSend = [];
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
@@ -495,8 +537,18 @@ Returns:
         drugName
     ]
 */
-app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
+app.get('/api/v1/prescriptions/single/:prescriptionID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
+
+    // Need check for prescriptions
     var prescriptionID = parseInt(req.params.prescriptionID);
+    // Ensures that the patientID is the same as the tokens ID.
+    var token = req.token;
+
+    if((token.role === Role.Patient && prescriptionID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionCallback = function(prescription) {
         // '==' catches both null and undefined
         if (prescription == null) {
@@ -601,10 +653,11 @@ Returns:
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
 */
-app.get('/api/v1/patients', (req,res) => {
+app.get('/api/v1/patients', auth.checkAuth([Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
     var first = req.query.first;
     var last = req.query.last;
 
+    // Need to check for the role of a patient here...
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
@@ -653,8 +706,17 @@ Returns:
         "dob": "10-05-1996"
     }
 */
-app.get('/api/v1/patients/:patientID', (req,res) => {
+app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), function(req,res) {
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+
+    // Ensures that the patientID is the same as the tokens ID.
+    if(settings.env !== "test" || (token.role === Role.Patient && patientID != token.sub)){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
 
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
@@ -662,7 +724,7 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     var matchingPatient = all_patients.find(function(patient){
         return patient.patientID === patientID;
-    })
+    });
 
     // log the backend process to the terminal
     var msg = '/api/v1/patients/:patientID: ';
@@ -675,6 +737,168 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     console.log(msg);
     res.json(matchingPatient);
+});
+
+app.post('/api/v1/users/me', (req,res) => {
+    const userInfo = req.body;
+    console.log(userInfo);
+    var token = auth.createToken(1, userInfo.role);
+    console.log(token);
+    res.json(token);
+})
+
+/*
+About:
+    The api endpoint to create a user.
+    Expects a username, password and role.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/add' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacob","role":"Patient"}'
+Returns:
+    Success or failure with message
+Authentication:
+    Admin only (Role.Admin)
+*/
+app.post('/api/v1/users/add', (req,res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+        userInfo.role
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/add: error: Not all fields");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validates the role
+    const checkRole = Object.keys(Role).filter(role => userInfo.role === role);
+    if(checkRole.length === 0){
+        console.log("/api/v1/users/add: Invalid role");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Salts: Making the random table attack near impossible.
+    var salt = crypto.randomBytes(64).toString('base64');
+
+    // Hash the password
+    var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+    mysql.updateRoleCount(userInfo.role, connection).then(results => {
+        // Grabs the query, not the insertion.
+        const role_id = results.rows[1][0].id_number;
+        return mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, role_id, connection);
+    }).then(result => {
+        const id = result.rows[0].insertId;
+        return mysql.insertSalt(id, salt, connection);
+    }).then(() => {
+        console.log("/api/v1/users/add: User created of role", userInfo.role, );
+        res.status(200).send(true);
+    }).catch((error) => {
+        console.log("/api/v1/users/add: error: ", error);
+        res.status(400).send(false);
+    });
+});
+
+/*
+About:
+    The api endpoint to login as a user.
+    Expects a username and password.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/login' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacobispink"}'
+Returns:
+    A failure message or a auth to authenticate to the next page.
+*/
+app.post('/api/v1/users/login', (req, res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/login: error: Missing Fields");
+        res.status(403).send(false);
+        return;
+    }
+
+    // Validate the logged in user
+    mysql.getSaltByUsername(userInfo.username, connection)
+    .then(salt => {
+
+        if(salt.rows.length === 0){
+            console.log("/api/v1/users/login: error: User not found.");
+            res.status(403).send(false);
+            return;
+        }
+
+        // Salt the password with the user specific salt
+        salt = salt.rows[0].salt;
+        var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+        // See if the password matches
+        return mysql.getUserValidation(userInfo.username, hashedPassword, connection);
+    }).then(user => {
+        if(user.rows.length === 0){
+            console.log('/api/v1/users/login: Failed attempt');
+            res.status(403).send(false);
+            return;
+        }
+
+        // Login is complete. Send back a auth for the user to advance on.
+        var token = auth.createToken(user.rows[0].role_id, user.rows[0].role);
+
+        // Set the cookie AND send the token.
+        const options = {
+            httpOnly: true,
+            sameSite: true
+        }
+        res.cookie('auth_token',token, options);
+        res.json(token);
+
+    }).catch(error => {
+        console.log(error);
+    });
+});
+
+/*
+About:
+    On the frontend, each time a web request is made for a webpage or api the  token needs to be verified. This reauth will verify the token, then send the user a new token.
+Example: NOTE - The 'jwt' must be a valid jwt token for the user.
+    curl "http://localhost:5000/api/v1/users/reauth" --cookie 'jwt=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiUGF0aWVudCIsInN1YiI6IjEyIiwiaWF0IjoxNTUxMzMzNTYwLCJleHAiOjE1NTEzMzcxNjB9.dR-JZF1VBQU7jEU9nROa_Ky8X7U5w5_H3m2ZpT61_eakRriHMPAQOANLbIVuXfZFeXAaBD0VYM2h4Dmj54WW-L7yn5PJqnlEOJzS1ut4-B1NkfgIXJEdUIFjIedNpkJ9nfN7G7_kSjJ3jpA-pqV8CZHtgINUQggbxp_UrAJd7iUN3Fa58hrQJ3_40ge7seLgI15LLIFUOQV0JQR3VbSPUL5wfZI6XKEXAeAIhuz7YXPxodPZVAxk6a0h4jmfnaxWD777vdiaW_7djYUlIwVD3OWcOGV4EojcIYvUyM8c9MrsRij1LNHEMBr5BuElYcV2ZqgxKE3ek9k1gyu3pMKpOQ'
+Returns:
+    jwt token or error
+*/
+app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+    if(settings.env === 'test'){
+        res.status(200);
+        return;
+    }
+
+    var token = auth.createToken(req.token.sub, req.token.role);
+    const options = {
+        httpOnly: true,
+        sameSite: true
+    }
+    res.cookie('auth_token',token, options);
+    res.status(200).send(token);
+});
+
+/*
+About:
+    Users need to be able to logout. So, this request just clears the auth_token cookie for the user.
+Returns:
+    Nothing
+*/
+app.get('/api/v1/users/logout', (req,res) => {
+    res.cookie('auth_token','');
+    res.status(200);
 });
 
 // ------------------------
@@ -693,7 +917,7 @@ Examples:
 Returns:
     true if redeemed, false otherwise
 */
-app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
+app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispenser]), (req, res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var fillDate = new Date().getTime();
 
@@ -740,8 +964,15 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // take only prescriptions with matching dispenserID
         prescriptions = prescriptions.filter(
@@ -757,6 +988,8 @@ app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', (req, res) => {
             res.status(200).send(prescriptions);
             return;
         }
+
+        prescriptions = orderPrescriptions(prescriptions,1);
 
         // Convert date integers to strings
         prescriptions = prescriptions.map(
@@ -847,8 +1080,15 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take historical prescriptions with dispenserID
         prescriptions = prescriptions.filter(
@@ -867,6 +1107,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
@@ -918,7 +1159,7 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
             });
         }
     }
-    
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
         console.log('/api/v1/dispensers/prescriptions/historical: error: No ID match');
@@ -956,12 +1197,19 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...");
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take open prescriptions with dispenserID
         prescriptions = prescriptions.filter(
-            prescription => 
+            prescription =>
                 prescription.dispenserID === dispenserID
                 && prescription.refillsLeft > 0
                 && prescription.cancelDate < 1 // there is no cancel date if cancelDate is 0 or -1
@@ -977,6 +1225,7 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,0);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)

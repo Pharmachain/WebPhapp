@@ -3,15 +3,8 @@ import PropTypes from "prop-types";
 import axios from "axios";
 
 class Prescription extends Component {
-    constructor(props){
-        super(props);
-        // Check for type of user with some API call.
-        const user = 'prescriber';
-        this.state={
-            user: user,
-        }
-    }
-
+    state = {};
+      
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
         // Probably add some validation to make sure the user wants to delete this.
@@ -27,13 +20,23 @@ class Prescription extends Component {
 
     // Gets the events id, to redeem the proper prescription.
     onRedeemClick = event => {
+        // 'X' or close button in modal
+        document.getElementById('close').click(); 
         // Probably add some validation to make sure the user wants to redeem this.
+
         const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
         axios
         .get(redeemQuery)
-        .then(results => results.data);
+        .then(results => results.data)
         //Green out redeemed prescription.
+        // Trigger prescription request 
         //TODO: green out Rx logo
+        .catch(error => {
+            // Prescription not redeemed because....
+        });
+        return(
+            <div></div>
+        )
     }
 
     // Displays all prescription cards for a patient
@@ -82,14 +85,14 @@ class Prescription extends Component {
 
     // Displays the prescription card modal for "more info" of a prescription
     onClickViewPrescription = (event) => {
-        var prescriptionID = event.target.id || event.currentTarget.id;        
+        var prescriptionID = event.target.id || event.currentTarget.id;
         const modalPrescription = this.props.prescriptions[prescriptionID];
         this.setState({modalPrescription});
     }
 
     // Displays the table body for the fill dates of a prescription
     displayFillDates(fillDates){
-        if (fillDates == 0) {
+        if (fillDates === 0) {
             return (
                 <tr>
                     <td>{"-"}</td>
@@ -97,7 +100,7 @@ class Prescription extends Component {
                 </tr>
             )
         } else {
-            return fillDates.map((date, index) => 
+            return fillDates.map((date, index) =>
             <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{date}</td>
@@ -107,21 +110,24 @@ class Prescription extends Component {
     }
 
     render() {
-        var prescription = this.state.modalPrescription;        
+        // User role from log in
+        const user = this.props.role; 
+
+        // Attributes of a prescription
+        var prescription = this.state.modalPrescription;
         var drugName = (prescription && prescription.drugName) || "";
         var quantity = (prescription && prescription.quantity) || "";
         var daysFor = (prescription && prescription.daysFor) || "";
         var refillsLeft = (prescription && prescription.refillsLeft);
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
         var cancelDate = prescription && (prescription.cancelDate <= 0 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
-        var fillDates = prescription && prescription.fillDates;  
+        var fillDates = prescription && prescription.fillDates;
 
         var fillDatesLength = prescription && prescription.fillDates.length;
         var formattedDates = [];
         for (var i = 0; i < fillDatesLength; i++){
-            formattedDates.push(fillDates[i].split(" ", 4).join(" ")); 
+            formattedDates.push(fillDates[i].split(" ", 4).join(" "));
         }
-
         return(
             <div className="container">
                 <div className="masonry align-items-left">
@@ -129,14 +135,19 @@ class Prescription extends Component {
 
                       {/* Modal that displays all prescription information */}
                       {<div className="col-md-4">
-                        <div className="modal fade" tabIndex="-1" id="prescription-modal" data-backdrop="false" style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div 
+                            className="modal fade" 
+                            tabIndex="-1" 
+                            id="prescription-modal" 
+                            data-backdrop="false" 
+                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
                         <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
                         <div className="modal-content">
 
                             {/* Modal Header */}
                             <div className="modal-header">
                                 <h3 className="modal-title" id="modal-title-default">Prescription: {drugName}</h3>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <button type="button" className="close" id="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
                                 </button>
                             </div>
@@ -247,11 +258,31 @@ class Prescription extends Component {
                                         </div>
                                     </div>
                                     <br/>
-                                    
-                                    {/* Buttons for modal given certain conditions... */}
+
+                                    {/* Buttons for modal given certain users... */}
                                     <div className="row justify-content-center form-inline">
-                                        <div className="form-group justify-content-bottom">
-                                        { prescription && prescription.fillDates.length === 0 && prescription.cancelDate === 0 ?
+                                        <div className="form-group justify-content-bottom">                                        
+                                        { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                            <div>
+                                            <button type = "button"
+                                                className = "btn btn-outline-danger"
+                                                style={{width: '8rem'}}
+                                                id = {prescription.prescriptionID}
+                                                onClick = {this.onCancelClick}>
+                                                <span className="btn-inner--text">Cancel </span>
+                                                <span><i className="fas fa-trash-alt"></i></span>
+                                            </button>
+                                            <button type = "button"
+                                                className = "btn btn-outline-success"
+                                                style={{width: '8rem'}}
+                                                id = {prescription.prescriptionID}
+                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
+                                                <span className="btn-inner--text">Edit </span>
+                                                <span><i className="fas fa-edit"></i></span>
+                                            </button>
+                                            </div>
+                                            :
+                                            user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                             <div>
                                             <button type = "button"
                                                 className = "btn btn-outline-danger"
@@ -272,18 +303,6 @@ class Prescription extends Component {
                                             <button type = "button"
                                                 className = "btn btn-outline-info"
                                                 style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {this.onRedeemClick}>
-                                                <span className="btn-inner--text">Redeem </span>
-                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
-                                            </button>
-                                            </div>
-                                            :
-                                            prescription ?
-                                            <div>
-                                            <button type = "button"
-                                                className = "btn btn-outline-info"
-                                                style={{width: '8rem'}}
                                                 id={prescription.prescriptionID}
                                                 onClick = {this.onRedeemClick}>
                                                 <span className="btn-inner--text">Redeem </span>
@@ -291,8 +310,7 @@ class Prescription extends Component {
                                             </button>
                                             </div>
                                             :
-                                            ""
-                                        }
+                                            "" }
                                         </div>
                                     </div>
                                 </div>

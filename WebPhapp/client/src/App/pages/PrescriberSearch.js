@@ -1,34 +1,35 @@
 import React, { Component } from "react";
 import axios from "axios";
-import PatientTable from '../components/PatientTable'
+import PrescriberTable from '../components/PrescriberTable'
 import Error from './Error';
 
-class PatientSearch extends Component {
+class PrescriberSearch extends Component {
   // Initialize the state
   state = {
-    patients: [],
-    patientID: "",
+    prescribers: [],
+    prescriberID: "",
     firstName: "",
     lastName: ""
   };
 
   componentDidMount() {
-    // Loads all patients by default
-    if(this.props.role === 'Patient'){
-        return;
-    }
+    // const user = this.props.role;
+    // // Loads all prescribers by default
+    // if(user === 'Government' || user === 'Admin'){
+    //     return;
+    // }
 
     axios
-      .get(`/api/v1/patients?first=&last=`)
+      .get(`/api/v1/prescribers/all`)
       .then(results => results.data)
-      .then(patients => this.setState({ patients }));
+      .then(prescribers => this.setState({ prescribers }));
   }
 
-  // Updating text in the patient id state
-  onKeyDownPatientID = event => {
-    this.setState({patientID: String(event.target.value)});
+  // Updating text in the prescriber id state
+  onKeyDownPrescriberID = event => {
+    this.setState({prescriberID: String(event.target.value)});
   }
-
+  
   // Updating text in the first name state
   onKeyDownFirstName = event => {
     this.setState({firstName: event.target.value});
@@ -39,44 +40,45 @@ class PatientSearch extends Component {
     this.setState({lastName: event.target.value});
   }
 
-  // Search query for patient lookup via names
-  onSearchPatients = e => {
+
+  // Search query for prescriber lookup via id and names
+  onSearchPrescribers = e => {
     e.preventDefault()
-    const patientID = this.state.patientID;
+    const prescriberID = this.state.prescriberID;
     const firstName = this.state.firstName;
     const lastName = this.state.lastName;
 
     // String interpolation
-    var idSearchQuery = `/api/v1/patients/${patientID}`;
-    var nameSearchQuery = `/api/v1/patients?first=${firstName}&last=${lastName}`;
-    var defaultQuery = `/api/v1/patients?first=&last=`;
+    var idSearchQuery = `api/v1/prescribers/single/${prescriberID}`;
+    var nameSearchQuery = `/api/v1/prescribers?first=${firstName}&last=${lastName}`;
+    var defaultQuery = `/api/v1/prescribers/all`;
 
-    if (patientID) {
+    if (prescriberID) {
       axios
       .get(idSearchQuery)
       .then(results => results.data)
-      .then(patients => this.setState({ patients: [patients] }));
+      .then(prescribers => this.setState({ prescribers: [prescribers] }));
     }
 
     else if (firstName) {
       axios
       .get(nameSearchQuery)
       .then(results => results.data)
-      .then(patients => this.setState({ patients }));
+      .then(prescribers => this.setState({ prescribers }));
     }
 
     else if (lastName) {
-      axios
-      .get(nameSearchQuery)
-      .then(results => results.data)
-      .then(patients => this.setState({ patients }));
-    }
+        axios
+        .get(nameSearchQuery)
+        .then(results => results.data)
+        .then(prescribers => this.setState({ prescribers }));
+      }
 
     else {
       axios
       .get(defaultQuery)
       .then(results => results.data)
-      .then(patients => this.setState({ patients }));
+      .then(prescribers => this.setState({ prescribers }));
     }
   }
 
@@ -85,36 +87,36 @@ class PatientSearch extends Component {
     const user = this.props.role; 
     return (
       <div>
-      {user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+      {user === 'Government' || user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
             <div className="row align-items-center">
               <div className="col-8 text-left">
-                <h3 className="mb-0">Patient Search</h3>
+                <h3 className="mb-0">Prescriber Search</h3>
               </div>
             </div>
           </div>
           <div className="card-body text-left">
           <div className="form-group">
-          <form onSubmit={this.onSearchPatients}>
+          <form onSubmit={this.onSearchPrescribers}>
             <div className="form-group mb-3">
-              <div className="input-group input-group-alternative">
-                <div className="input-group-prepend">
-                  <span className="input-group-text"></span>
+                <div className="input-group input-group-alternative">
+                  <div className="input-group-prepend">
+                    <span className="input-group-text"></span>
+                  </div>
+                  <input
+                    className="form-control"
+                    id="prescriber_id"
+                    placeholder="Prescriber ID"
+                    type="text"
+                    value={this.state.prescriberID}
+                    onChange={this.onKeyDownPrescriberID}
+                  />
                 </div>
-                <input
-                  className="form-control"
-                  id="patient_id"
-                  placeholder="Patient ID"
-                  type="text"
-                  value={this.state.patientID}
-                  onChange={this.onKeyDownPatientID}
-                />
               </div>
-            </div>
-            <hr className="my-4"></hr>
-            <div className="form-group">
+              <hr className="my-4"></hr>
+              <div className="form-group">
               <div className="input-group input-group-alternative">
                 <div className="input-group-prepend">
                   <span className="input-group-text"></span>
@@ -144,24 +146,24 @@ class PatientSearch extends Component {
                 />
               </div>
             </div>
-            <div className="text-center">
-              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
-                <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
-                <span className="btn-inner--text">Search</span>
-              </button>
-            </div>
+              <div className="text-center">
+                <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-success">
+                  <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
+                  <span className="btn-inner--text">Search</span>
+                </button>
+              </div>
           </form>
           <br/>
-          <PatientTable patientList={this.state.patients}/>
+          <PrescriberTable prescriberList={this.state.prescribers}/>
           </div>
           </div>
         </div>
       </div>
-      : 
+      :
       <Error/> }
       </div>
     );
   }
 }
 
-export default PatientSearch;
+export default PrescriberSearch;

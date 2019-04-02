@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-class People extends Component {
-
-  // Displays all the people in a table with clickable links to each patient.
-  displayPeople = () => {
+class PatientTable extends Component {
+  // Displays all the patients in a table with clickable links to each patient.
+  displayPatients = () => {
     return this.props.patientList.map(person => {
       return(
         <tr key={person.patientID}>
@@ -50,7 +49,7 @@ class People extends Component {
               </tr>
             </thead>
             <tbody>
-              {this.displayPeople()}
+              {this.displayPatients()}
             </tbody>
           </table>
         </div>
@@ -60,7 +59,7 @@ class People extends Component {
 }
 
 // The properties of each person patient id, first name, last name, and data of birth
-People.propTypes = {
+PatientTable.propTypes = {
   patientList: PropTypes.arrayOf(
       PropTypes.shape({
         patientID: PropTypes.number.isRequired,
@@ -71,5 +70,5 @@ People.propTypes = {
     )
 }
 
-export default People;
+export default PatientTable;
 

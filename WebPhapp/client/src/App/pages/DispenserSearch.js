@@ -1,21 +1,82 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import DispenserTable from '../components/DispenserTable'
+import Error from './Error';
 
 class DispenserSearch extends Component {
   // Initialize the state
   state = {
+    dispensers: [],
     dispenserID: "",
+    name: ""
   };
+
+  componentDidMount() {
+    // const user = this.props.role;
+    // // Loads all dispensers by default
+    // if(user === 'Government' || user === 'Admin'){
+    //     return;
+    // }
+
+    axios
+      .get(`/api/v1/dispensers/all`)
+      .then(results => results.data)
+      .then(dispensers => this.setState({ dispensers }));
+  }
 
   // Updating text in the dispenser id state
   onKeyDownDispenserID = event => {
-      this.setState({dispenserID: String(event.target.value)});
+    this.setState({dispenserID: String(event.target.value)});
+  }
+  
+  // Updating text in the dispenser name state
+  onKeyDownDispenserName = event => {
+    this.setState({name: String(event.target.value)});
+  }
+
+  // Search query for dispenser lookup via id and names
+  onSearchDispensers = e => {
+    e.preventDefault()
+    const dispenserID = this.state.dispenserID;
+    const name = this.state.name;
+
+    // String interpolation
+    var idSearchQuery = `api/v1/dispensers/single/${dispenserID}`;
+    var nameSearchQuery = `/api/v1/dispensers?name=${name}`;
+    var defaultQuery = `/api/v1/dispensers/all`;
+
+    if (dispenserID) {
+      axios
+      .get(idSearchQuery)
+      .then(results => results.data)
+      .then(dispensers => this.setState({ dispensers: [dispensers] }));
     }
 
-  render() {
+    else if (name) {
+      axios
+      .get(nameSearchQuery)
+      .then(results => results.data)
+      .then(dispensers => this.setState({ dispensers }));
+    }
 
+    else {
+      axios
+      .get(defaultQuery)
+      .then(results => results.data)
+      .then(dispensers => this.setState({ dispensers }));
+    }
+  }
+
+  render() {
+    // User role from log in
+    const user = this.props.role; 
     return (
+<<<<<<< HEAD
       <div className="header bg-gradient-primary py-7 py-lg-8">
+=======
+      <div>
+      {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+>>>>>>> access_control
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -27,41 +88,56 @@ class DispenserSearch extends Component {
           </div>
           <div className="card-body text-left">
           <div className="form-group">
-          <div className="form">
+          <form onSubmit={this.onSearchDispensers}>
             <div className="form-group mb-3">
-              <div className="input-group input-group-alternative">
-                <div className="input-group-prepend">
-                  <span className="input-group-text"></span>
+                <div className="input-group input-group-alternative">
+                  <div className="input-group-prepend">
+                    <span className="input-group-text"></span>
+                  </div>
+                  <input
+                    className="form-control"
+                    id="dispenser_id"
+                    placeholder="Dispenser ID"
+                    type="text"
+                    value={this.state.dispenserID}
+                    onChange={this.onKeyDownDispenserID}
+                  />
                 </div>
-                <input
-                  className="form-control"
-                  id="patient_id"
-                  placeholder="Dispenser ID"
-                  type="text"
-                  value={this.state.dispenserID}
-                  onChange={this.onKeyDownDispenserID}
-                  onKeyPress=
-                  {event => {
-                    if(event.charCode === 13){
-                      window.location.href= "./prescriptionRedeem?ID=" + this.state.dispenserID
-                    } 
-                  }}
-                />
               </div>
-            </div>
-            </div>
-            <Link to={"./prescriptionRedeem?ID=" + this.state.dispenserID}>
-            <div className="text-center">
-              <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-primary">
-                <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
-                <span className="btn-inner--text">Search</span>
-              </button>
-            </div>
-            </Link>
+              <hr className="my-4"></hr>
+              <div className="form-group">
+                <div className="input-group input-group-alternative">
+                  <div className="input-group-prepend">
+                    <span className="input-group-text"></span>
+                  </div>
+                  <input
+                    className="form-control"
+                    id="name"
+                    placeholder="Name"
+                    type="p"
+                    value={this.state.name}
+                    onChange={this.onKeyDownDispenserName}
+                  />
+                </div>
+              </div>
+              <div className="text-center">
+                <button type="submit" id="patient_search_button" className="btn btn-icon btn-3 btn-warning">
+                  <span className="btn-inner--icon"><i className="fas fa-search"></i></span>
+                  <span className="btn-inner--text">Search</span>
+                </button>
+              </div>
+          </form>
+          <br/>
+          <DispenserTable dispenserList={this.state.dispensers}/>
           </div>
           </div>
         </div>
       </div>
+<<<<<<< HEAD
+=======
+      :
+      <Error/> }
+>>>>>>> access_control
       </div>
     );
   }
