@@ -1,7 +1,16 @@
-
 import React from 'react';
+import axios from "axios";
 
 export class Header extends React.Component {
+
+  logout = (e) => {
+    console.log("LOGGING OUT :)")
+    axios
+    .get(`/api/v1/users/logout`)
+    .then( () => {
+        window.location.href = './login';
+    }); 
+  }  
   render(){
     return(
         // Returns a navigation bar styled according to the Argon style system
@@ -135,13 +144,26 @@ export class Header extends React.Component {
                 <hr className="my-3"/>
                 {/* <!-- Heading --> */}
                 <h6 className="navbar-heading text-muted">Documentation</h6>
+
+
+
                 {/* <!-- Navigation --> */}
                 <ul className="navbar-nav mb-md-3">
                 <li className="nav-item">
-                    <a className="nav-link" href="./docs/getting-started/overview.html">
-                    <i className="ni ni-spaceship"></i> Getting started
+
+                    <button className="navbar-toggler" type="button" onClick={this.logout}>
+                    LOGOUT BUTTON
+                    </button>
+
+                    <a className="nav-link">
+                    <i className="ni ni-spaceship"></i> LOGOUT
                     </a>
                 </li>
+
+
+
+
+
                 <li className="nav-item">
                     <a className="nav-link" href="./docs/foundation/colors.html">
                     <i className="ni ni-palette"></i> Foundation
