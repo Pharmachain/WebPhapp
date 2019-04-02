@@ -609,6 +609,27 @@ describe("loading express", function() {
       .end(done);
   });
 
+  // /api/v1/prescribers/prescriptions/:prescriberID
+  it("test-route-prescribers-prescriptions", function(done) {
+    request(server)
+    .get("/api/v1/prescribers/prescriptions/1")
+    .expect(200)
+    .expect(function(res) {
+      if(res.body.length < 1) throw new Error('Returned 0 prescriptions. Is this right?');
+      for(var i = 0; i < res.body.length; i++) {
+        // assert the prescriberID is in the returned prescription.
+        var expectedID = 1;
+        if(res.body[i].prescriberID !== expectedID) {
+          throw new Error("Did not return the expected prescription");
+        }
+        if(typeof res.body[i].writtenDate !== 'string') {
+          throw new Error('WrittenDate must be a string field.');
+        }
+      }
+      return true;
+    })
+    .end(done);
+  });
 
   // ------------------------------------------------------
   //             Tests: other

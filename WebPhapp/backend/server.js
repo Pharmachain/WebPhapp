@@ -960,7 +960,7 @@ Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/all/1"
     To be used in Axois call:
-        .get("/api/v1/dispensers/prescriptions/1")
+        .get("/api/v1/dispensers/prescriptions/all/1")
 Returns:
     list<Prescription>
 */
@@ -1669,6 +1669,112 @@ app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Governmen
     .catch((error) => {
         return finish(false, [], error);
     });
+});
+
+/*
+About:
+    An api endpoint that returns all related prescriptions for a given prescriberID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/prescriptions/1"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/prescriptions/1")
+Returns:
+    list<Prescription>
+*/
+app.get('/api/v1/prescribers/prescriptions/:prescriberID', (req, res) => {
+    var prescriberID = parseInt(req.params.prescriberID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        // take only prescriptions with matching prescriberID
+        prescriptions = prescriptions.filter(
+            prescription => prescription.prescriberID === prescriberID
+        );
+
+        var valid_return_msg = 'Sending all ' + prescriptions.length.toString()
+                        + ' prescription(s) related to prescriberID ' + prescriberID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/prescribers/prescriptions: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
+    }
+
+    // Error if dispenser ID is null or undefined
+    if(prescriberID == null) {
+        console.log('/api/v1/prescribers/prescriptions: error: No ID match');
+        res.status(400).send([]);
+        return;
+    }
+
+    if(conn.Blockchain) {
+        block_helper.read_by_value(1, prescriberID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        })
+        .catch((error) => {
+            console.log('/api/v1/prescribers/prescriptions: error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching prescriberID.');
+            return;
+        });
+    }
+    else { // search from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+        handlePrescriptionsCallback(prescriptions);
+    }
 });
 
 // ------------------------
