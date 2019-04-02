@@ -4,7 +4,7 @@ import Prescription from "../components/Prescription";
 import qs from 'qs';
 import Error from './Error';
 
-class PrescriptionRedeem extends Component {
+class PrescriptionDispenser extends Component {
   // Initialize the state
   state = {
     // prescriptions are all the prescriptions given a dispenser id
@@ -147,7 +147,7 @@ class PrescriptionRedeem extends Component {
     var prescriptions = this.state.prescriptions;
       return (
         <div>
-        {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+        {user === 'Government' || user === 'Admin' ?
           <div>
           {/* Check to see if any prescriptions are found*/}
           {prescriptions ? (
@@ -169,4 +169,4 @@ class PrescriptionRedeem extends Component {
   }
 };
 
-export default PrescriptionRedeem;
+export default PrescriptionDispenser;

@@ -8,21 +8,21 @@ class DispenserTable extends Component {
       return(
         <tr key={dispenser.dispenserID}>
           <td>
-          <a href = {"/prescriptionRedeem?ID=" + dispenser.dispenserID}>
+          <a href = {"/dispenser?ID=" + dispenser.dispenserID}>
               {dispenser.dispenserID}</a>
           </td>
           <td>
-            <a href = {"/prescriptionRedeem?ID=" + dispenser.dispenserID}>
+            <a href = {"/dispenser?ID=" + dispenser.dispenserID}>
               {dispenser.name}
             </a>
           </td>
           <td>
-            <a href = {"/prescriptionRedeem?ID=" + dispenser.dispenserID}>
+            <a href = {"/dispenser?ID=" + dispenser.dispenserID}>
               {dispenser.phone}
             </a>
           </td>
           <td>
-            <a href = {"/prescriptionRedeem?ID=" + dispenser.dispenserID}>
+            <a href = {"/dispenser?ID=" + dispenser.dispenserID}>
               {dispenser.location}
             </a>
           </td>
@@ -58,7 +58,7 @@ class DispenserTable extends Component {
   }
 }
 
-// The properties of each dispenser id, name, last name, and date of birth
+// The properties of each dispenser id, name, phone number, and location
 DispenserTable.propTypes = {
   dispenserList: PropTypes.arrayOf(
       PropTypes.shape({

@@ -11,9 +11,11 @@ import Home from "./Home";
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
 import DispenserSearch from "./DispenserSearch"
+import PrescriberSearch from "./PrescriberSearch"
 import PrescriptionAdd from "./PrescriptionAdd"
 import PrescriptionEdit from "./PrescriptionEdit"
-import PrescriptionRedeem from "./PrescriptionRedeem";
+import PrescriptionDispenser from "./PrescriptionDispenser";
+import PrescriptionPrescriber from "./PrescriptionPrescriber";
 import Error from "./Error";
 import CancelAlert from "./CancelAlert"
 
@@ -74,9 +76,11 @@ class App extends Component {
             <Route path="/patient" component={props => <Patient {...props} id={user.sub} role={user.role} />}/>
             <Route path="/patientSearch" component={props => <PatientSearch {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/dispenserSearch" component={props => <DispenserSearch {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/prescriberSearch" component={props => <PrescriberSearch {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriptionAdd" component={props => <PrescriptionAdd {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriptionEdit" component={props => <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
-            <Route path="/prescriptionRedeem" component={props => <PrescriptionRedeem {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/dispenser" component={props => <PrescriptionDispenser {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/prescriber" component={props => <PrescriptionPrescriber{...props} id={user.sub} role={user.role}/>}/>
             <Route path="/cancel" component={props => <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/error" component={Error}/>
           </Switch>

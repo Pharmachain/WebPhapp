@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import DispenserTable from '../components/DispenserTable'
+import Error from './Error';
 
 class DispenserSearch extends Component {
   // Initialize the state
@@ -40,7 +41,7 @@ class DispenserSearch extends Component {
     const name = this.state.name;
 
     // String interpolation
-    var idSearchQuery = `/api/v1/dispensers/${dispenserID}`;
+    var idSearchQuery = `api/v1/dispensers/single/${dispenserID}`;
     var nameSearchQuery = `/api/v1/dispensers?name=${name}`;
     var defaultQuery = `/api/v1/dispensers/all`;
 
@@ -129,7 +130,7 @@ class DispenserSearch extends Component {
         </div>
       </div>
       :
-      "Not authorized :(" }
+      <Error/> }
       </div>
     );
   }
