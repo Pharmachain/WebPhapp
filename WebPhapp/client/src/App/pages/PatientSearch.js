@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import axios from "axios";
 import People from '../components/People'
 
-
 class PatientSearch extends Component {
   // Initialize the state
   state = {
@@ -14,6 +13,10 @@ class PatientSearch extends Component {
 
   componentDidMount() {
     // Loads all patients by default
+    if(this.props.role === 'Patient'){
+        return;
+    }
+
     axios
       .get("/api/v1/patients?first=&last=")
       .then(results => results.data)
@@ -77,8 +80,11 @@ class PatientSearch extends Component {
   }
 
   render() {
-
+    // User role from log in
+    const user = this.props.role; 
     return (
+      <div>
+      {user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -149,6 +155,9 @@ class PatientSearch extends Component {
           </div>
           </div>
         </div>
+      </div>
+      : 
+      "Not authorized :(" }
       </div>
     );
   }

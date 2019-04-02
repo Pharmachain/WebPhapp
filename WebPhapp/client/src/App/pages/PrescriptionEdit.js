@@ -4,11 +4,8 @@ import qs from 'qs';
 import { Link } from "react-router-dom";
 
 class PrescriptionEdit extends Component {
-
   constructor(props){
     super(props);
-    //TODO: Access control pattern here to check for proper usertype.
-
     this.state = {cancelDate: ""}
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriptionNo = querystring.ID;
@@ -68,8 +65,11 @@ class PrescriptionEdit extends Component {
   }
 
   render() {
+    // User role from log in
+    const user = this.props.role;
     return (
-    /* Logic to render text conditionally */
+    <div>
+      {user === 'Prescriber' || user === 'Dispenser' || user === 'Admin' ?
       <div className="App">
         <div className="modal fade" id="edit-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
           <div className="modal-dialog modal-" role="document">
@@ -83,8 +83,8 @@ class PrescriptionEdit extends Component {
           </div>
         </div>
 
-      { this.state.cancelDate === "" ? "Loading..." :
-        this.state.cancelDate <= 0 && this.state.fillDates.length === 0 ?
+      { this.state.cancelDate === "" ? "" :
+        this.state.cancelDate <= 0 && this.state.refillsLeft >= 0 ?
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -184,8 +184,8 @@ class PrescriptionEdit extends Component {
               </div>
             </div>
             <Link to={"/patient?ID=" + this.state.patientID}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger my-4"
                   variant="raised">
                   Cancel
@@ -195,7 +195,7 @@ class PrescriptionEdit extends Component {
             <button
               type="button"
               className ="btn btn-success my-4"
-              data-toggle="modal" 
+              data-toggle="modal"
               data-target="#edit-prescription-modal"
               onClick={this.onEditPrescription}>
               Confirm
@@ -213,6 +213,9 @@ class PrescriptionEdit extends Component {
         </div>
       }
       </div>
+      :
+      "Not authorized :(" }
+    </div>
     );
   }
 }
