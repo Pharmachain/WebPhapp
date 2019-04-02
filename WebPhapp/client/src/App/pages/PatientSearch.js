@@ -1,15 +1,14 @@
 import React, { Component } from "react";
 import axios from "axios";
-import People from '../components/People'
-import Error from './Error';
+import PatientTable from '../components/PatientTable'
 
 class PatientSearch extends Component {
   // Initialize the state
   state = {
-    people: [],
+    patients: [],
     patientID: "",
     firstName: "",
-    lastName:""
+    lastName: ""
   };
 
   componentDidMount() {
@@ -21,13 +20,13 @@ class PatientSearch extends Component {
     axios
       .get("/api/v1/patients?first=&last=")
       .then(results => results.data)
-      .then(people => this.setState({ people }));
+      .then(patients => this.setState({ patients }));
   }
 
   // Updating text in the patient id state
   onKeyDownPatientID = event => {
-      this.setState({patientID: String(event.target.value)});
-    }
+    this.setState({patientID: String(event.target.value)});
+  }
 
   // Updating text in the first name state
   onKeyDownFirstName = event => {
@@ -55,28 +54,28 @@ class PatientSearch extends Component {
       axios
       .get(idSearchQuery)
       .then(results => results.data)
-      .then(people => this.setState({ people: [people] }));
+      .then(patients => this.setState({ patients: [patients] }));
     }
 
     else if (firstName) {
       axios
       .get(nameSearchQuery)
       .then(results => results.data)
-      .then(people => this.setState({ people }));
+      .then(patients => this.setState({ patients }));
     }
 
     else if (lastName) {
       axios
       .get(nameSearchQuery)
       .then(results => results.data)
-      .then(people => this.setState({ people }));
+      .then(patients => this.setState({ patients }));
     }
 
     else {
       axios
-        .get(defaultQuery)
-        .then(results => results.data)
-        .then(people => this.setState({ people }));
+      .get(defaultQuery)
+      .then(results => results.data)
+      .then(patients => this.setState({ patients }));
     }
   }
 
@@ -152,13 +151,13 @@ class PatientSearch extends Component {
             </div>
           </form>
           <br/>
-          <People patientList={this.state.people}/>
+          <PatientTable patientList={this.state.patients}/>
           </div>
           </div>
         </div>
       </div>
       : 
-      <Error/> }
+      "Not authorized :(" }
       </div>
     );
   }
