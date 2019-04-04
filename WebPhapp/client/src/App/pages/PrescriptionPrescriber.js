@@ -59,8 +59,13 @@ class PrescriptionPrescriber extends Component {
         /* Check to see if any prescriptions are found */
         prescriptions.length ?
         <div>
+        <div className="bg-gradient-success py-7 py-xl-8 b-10"></div>
+        <section className="section section-lg pt-lg-0 mt--200 m-5">
+        <div>
           {/* Render the prescription */}
           {this.displayPrescriptions()}
+        </div>
+        </section>
         </div>
         : 
         <div className="col-8 center">

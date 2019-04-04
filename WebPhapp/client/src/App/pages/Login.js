@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import Footer from "../components/Footer"
 
 class Login extends Component {
     // Initialize the state
@@ -46,8 +47,8 @@ class Login extends Component {
           {/* Navbar */}
           <nav className="navbar navbar-top navbar-horizontal navbar-expand-md navbar-dark">
             <div className="container px-4">
-              <a className="navbar-brand">
-                <img src="../assets/img/brand/pharmachain-white.png"/>
+              <a className="navbar-brand" href="./login">
+                <img alt="Pharmachain" src="../assets/img/brand/pharmachain-white.png"/>
               </a>
               <button className="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar-collapse-main" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -58,7 +59,7 @@ class Login extends Component {
                 <div className="navbar-collapse-header d-md-none">
                   <div className="row">
                     <div className="col-6 collapse-brand">
-                      <img src="../assets/img/brand/pharmachain-blue.png"/>
+                      <img alt="Pharmachain" src="../assets/img/brand/pharmachain-blue.png"/>
                     </div>
                     <div className="col-6 collapse-close">
                       <button type="button" className="navbar-toggler collapsed" data-toggle="collapse" data-target="#navbar-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle sidenav">
@@ -76,12 +77,12 @@ class Login extends Component {
                       <span className="nav-link-inner--text">Login</span>
                     </a>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <a className="nav-link nav-link-icon" href="./login">
                       <i className="fas fa-user-plus"></i>
                       <span className="nav-link-inner--text">Register</span>
                     </a>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
             </div>
@@ -111,7 +112,7 @@ class Login extends Component {
                 <div className="text-center text-muted mb-4">
                   <small>Sign in with credentials below</small>
                 </div>
-                <form role="form">
+                <form>
                   <div className="form-group mb-3">
                     <div className="input-group input-group-alternative">
                       <div className="input-group-prepend">
@@ -153,10 +154,7 @@ class Login extends Component {
                   <br/>
                   }
                   <div className="text-center">
-                    <button
-                      type="button"
-                      className="btn btn-block btn-primary my-4"
-                      onClick={this.onClickUserLogin}>
+                    <button type="button" className="btn btn-block btn-primary my-4">
                       Sign In
                     </button>
                   </div>
@@ -165,7 +163,7 @@ class Login extends Component {
             </div>
 
             {/* TODO: Implement a forgot password page and create account page */}
-            <div className="row mt-3">
+            {/* <div className="row mt-3">
               <div className="col-6 text-left">
                 <a href="./login" className="text"><small>Forgot password?</small></a>
               </div>
@@ -173,11 +171,12 @@ class Login extends Component {
                 <a className="text-light"><small>Don't have an account? </small></a>
                 <a href="./login"><small><strong>Sign up</strong></small></a>
               </div>
-            </div>
+            </div> */}
 
           </div>
         </div>
         </div>
+        <Footer/>
       </div>
       );
     }

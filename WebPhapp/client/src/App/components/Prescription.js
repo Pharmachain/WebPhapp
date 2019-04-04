@@ -46,7 +46,7 @@ class Prescription extends Component {
             var writtenDate = prescription.writtenDate.split(" ", 4).join(" ");
             prescriptionCount += 1;
             return(
-                <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
+                <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{ width: '21rem' }} >
                     <div className="card-body" >
                         <div className="row">
                             <div className="col">
@@ -130,7 +130,7 @@ class Prescription extends Component {
         }
         return(
             <div className="container">
-                <div className="masonry align-items-left">
+                <div className="masonry align-items-left justify-content-center">
                       {this.displayPrescriptions()}
 
                       {/* Modal that displays all prescription information */}

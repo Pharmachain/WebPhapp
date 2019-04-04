@@ -13,6 +13,11 @@ class Error extends Component {
                     <p>Sorry, but the page you are looking for does not exist, has been removed, or is temporarily unavailable. <a className="text-warning" href="./">Return to homepage</a></p>
                 </div>
                 </div>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
             </div>
         );
     }
