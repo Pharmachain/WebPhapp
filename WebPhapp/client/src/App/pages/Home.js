@@ -18,7 +18,7 @@ class Home extends Component {
                     <div className="col-lg-6">
                         <h1 className="display-3 text-white">Welcome {user}!</h1> 
                         { user === 'Patient' ? 
-                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions. Select an option below...</p> 
                           :
                           user === 'Prescriber' ?
                           <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription.<br/>Select an option below...</p> 
@@ -44,12 +44,12 @@ class Home extends Component {
               <div className="row justify-content-center">
               <div className="col-lg-12">
                   { user === 'Patient' ? 
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-primary rounded-circle mb-4">
-                          <i class="fas fa-prescription-bottle"></i>
+                          <i className="fas fa-prescription-bottle"></i>
                           </div>
                           <h6 className="text-primary text-uppercase">View Prescriptions</h6>
                           <p className="description mt-3">View all of your personal prescriptions. Each prescription has a drugname, quantity, date written, and more.</p>
@@ -60,7 +60,7 @@ class Home extends Component {
                     </div>
                     :
                     user === 'Prescriber' ?
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
@@ -88,7 +88,7 @@ class Home extends Component {
                     </div>
                     :
                     user === 'Dispenser' ? 
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">

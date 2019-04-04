@@ -7,8 +7,10 @@ import Error from "./Error";
 class Patient extends Component {
   // Initialize the state
   state = {
+    patientID: 0,
     prescriptions: [],
-    isFetching: true
+    isFetching: true,
+    validPatient: true //TODO
   };
 
   // Fetch the prescription on first mount
@@ -23,6 +25,7 @@ class Patient extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const patientID = querystring.ID;
+    this.setState({patientID});
 
     axios
       // String interpolation.
@@ -60,8 +63,22 @@ class Patient extends Component {
         prescriptions.length ?
         <div>
           {/* Render the prescription */}
-          {this.displayPrescriptions()}
-        </div>
+          <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
+          <section className="section section-lg pt-lg-0 mt--200 m-5">
+          <div className="col-xl-12 order-xl-1 center">
+            <div className="card bg-secondary shadow">
+              <div className="card-header bg-white border-0">
+                  <div className="row align-items-center">
+                    <div className="col-8 text-left">
+                      <h3 className="mb-0">Patient: {this.state.patientID} Prescriptions</h3>
+                    </div>
+                  </div>
+              </div>
+              <div className="card-body"> {this.displayPrescriptions()} </div>
+            </div>
+          </div>
+          </section>
+      </div>
         : 
         <div className="col-8 center">
           <div className="alert alert-warning" role="alert">

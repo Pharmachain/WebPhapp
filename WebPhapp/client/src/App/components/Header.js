@@ -1,63 +1,166 @@
-
 import React from 'react';
+import axios from "axios";
 
 export class Header extends React.Component {
+
+  logout = (e) => {
+    axios
+    .get(`/api/v1/users/logout`)
+    .then( () => {
+        window.location.href = './login';
+    }); 
+  }  
   render(){
+    const user = this.props.role;
+    const id = this.props.id;
     return(
         // Returns a navigation bar styled according to the Argon style system
-        <div className="form-group">
-          <nav className="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
-            <div className="container">
-                <a className="navbar-brand" href="#">PharmaChain EPS</a>
-                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbar-default">
-                    <div className="navbar-collapse-header">
-                      <div className="row">
-                          <div className="col-6 collapse-brand">
-                              <a href="../../index.html">
-                                  {/* <img src="../../../public/assets/img/brand/blue.png"/> */}
-                              </a>
-                          </div>
-                          <div className="col-6 collapse-close">
-                              <button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbar-default" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
-                                  <span></span>
-                                  <span></span>
-                              </button>
-                          </div>
-                      </div>
+        <nav className="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
+            <div className="container-fluid">
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle navigation">
+                <span className="navbar-toggler-icon"></span>
+            </button>
+            <a className="navbar-brand pt-0" href="./">
+                <img src="./assets/img/brand/pharmachain-blue.png" className="navbar-brand-img" alt="Pharmachain"/>
+            </a>
+            <ul className="nav align-items-center d-md-none"></ul>
+            <div className="collapse navbar-collapse" id="sidenav-collapse-main">
+                {/* <!-- Collapse header --> */}
+                <div className="navbar-collapse-header d-md-none">
+                <div className="row">
+                    <div className="col-6 collapse-brand">
+                    <a href="./">
+                        <img src="./assets/img/brand/pharmachain-blue.png" alt="Pharmachain"/>
+                    </a>
                     </div>
-                    <ul className="navbar-nav ml-lg-auto">
-                        <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-favourite-28"></i>
-                                <span className="nav-link-inner--text d-lg-none">Discover</span>
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link nav-link-icon" href="#">
-                                <i className="ni ni-notification-70"></i>
-                                <span className="nav-link-inner--text d-lg-none">Profile</span>
-                            </a>
-                        </li>
-                        <li className="nav-item dropdown">
-                            <a className="nav-link nav-link-icon" href="#" id="navbar-default_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i className="ni ni-settings-gear-65"></i>
-                                <span className="nav-link-inner--text d-lg-none">Settings</span>
-                            </a>
-                            <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-default_dropdown_1">
-                                <a className="dropdown-item" href="#">Action</a>
-                                <a className="dropdown-item" href="#">Another action</a>
-                                <div className="dropdown-divider"></div>
-                                <a className="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </li>
-                    </ul>
+                    <div className="col-6 collapse-close">
+                    <button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle sidenav">
+                        <span></span>
+                        <span></span>
+                    </button>
+                    </div>
                 </div>
+                </div>
+                {/* <!-- Navigation --> */}
+                {user === 'Patient' ?
+                <div>
+                <ul className="navbar-nav">
+                <li className="nav-item">
+                    <a className="nav-link" href={"/patient?ID=" + id}>
+                    <i className="fas fa-prescription-bottle text-blue" alt="My Prescriptions"></i> My Prescriptions
+                    </a>
+                </li>
+                </ul>
+                <hr className="my-3"/>
+                <ul className="navbar-nav mb-md-3">
+                <li className="nav-item">
+                    <a className="nav-link" href={"./"}>
+                    <i className="fas fa-home text" alt="Home"></i> Home
+                    </a>
+                </li>
+                <li className="nav-item" style={{ cursor: "pointer" }}>
+                    <span className="nav-link" onClick={this.logout}>
+                    <i className="fas fa-door-open"></i> Logout
+                    </span>
+                </li>
+                </ul>
+                </div>
+                :
+                user === 'Prescriber' ?
+                <div>
+                <ul className="navbar-nav">
+                <li className="nav-item">
+                    <a className="nav-link" href={"/patientSearch"}>
+                    <i className="fas fa-user text-blue" alt="Patient Search"></i> Patient Search
+                    </a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link" href={"./prescriptionAdd"}>
+                    <i className="fas fa-folder-plus text-success" alt="Add Prescription"></i> Add Prescription
+                    </a>
+                </li>
+                </ul>
+                <hr className="my-3"/>
+                <ul className="navbar-nav mb-md-3">
+                <li className="nav-item">
+                    <a className="nav-link" href={"./"}>
+                    <i className="fas fa-home text" alt="Home"></i> Home
+                    </a>
+                </li>
+                <li className="nav-item" style={{ cursor: "pointer" }}>
+                    <span className="nav-link" onClick={this.logout}>
+                    <i className="fas fa-door-open"></i> Logout
+                    </span>
+                </li>
+                </ul>
+                </div>
+                : 
+                user === 'Dispenser' ?
+                <div>
+                <ul className="navbar-nav">
+                <li className="nav-item">
+                    <a className="nav-link" href={"/patientSearch"}>
+                    <i className="fas fa-user text-blue" alt="Patient Search"></i> Patient Search
+                    </a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link" href={"/dispenser?ID=" + id}>
+                    <i className="fas fa-file-prescription text-orange" alt="Dispenser Prescriptions"></i> Dispenser Prescriptions
+                    </a>
+                </li>
+                </ul>
+                <hr className="my-3"/>
+                <ul className="navbar-nav mb-md-3">
+                <li className="nav-item">
+                    <a className="nav-link" href={"./"}>
+                    <i className="fas fa-home text" alt="Home"></i> Home
+                    </a>
+                </li>
+                <li className="nav-item" style={{ cursor: "pointer" }}>
+                    <span className="nav-link" onClick={this.logout}>
+                    <i className="fas fa-door-open"></i> Logout
+                    </span>
+                </li>
+                </ul>
+                </div>
+                :
+                user === 'Government' ?
+                <div>
+                <ul className="navbar-nav">
+                <li className="nav-item">
+                    <a className="nav-link" href={"/patientSearch"}>
+                    <i className="fas fa-user text-blue" alt="Patient Search"></i> Patient Search
+                    </a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link" href={"/dispenserSearch"}>
+                    <i className="fas fa-hospital text-orange" alt="Dispenser Search"></i> Dispenser Search
+                    </a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link" href={"/prescriberSearch"}>
+                    <i className="fas fa-user-md text-success" alt="Prescriber Search"></i> Prescriber Search
+                    </a>
+                </li>
+                </ul>
+                <hr className="my-3"/>
+                <ul className="navbar-nav mb-md-3">
+                <li className="nav-item">
+                    <a className="nav-link" href={"./"}>
+                    <i className="fas fa-home text" alt="Home"></i> Home
+                    </a>
+                </li>
+                <li className="nav-item" style={{ cursor: "pointer" }}>
+                    <span className="nav-link" onClick={this.logout}>
+                    <i className="fas fa-door-open"></i> Logout
+                    </span>
+                </li>
+                </ul>
+                </div>
+                : "" }
+            </div>
             </div>
         </nav>
-      </div>
   );
   }
 }

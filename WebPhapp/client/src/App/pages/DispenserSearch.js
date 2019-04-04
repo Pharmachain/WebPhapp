@@ -73,6 +73,10 @@ class DispenserSearch extends Component {
     return (
       <div>
       {user === 'Government' || user === 'Admin' ?
+      <div>
+      <div className="bg-gradient-orange py-7 py-xl-8 b-10"></div>
+      <section className="section section-lg pt-lg-0 mt--200 m-5">
+
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -128,6 +132,9 @@ class DispenserSearch extends Component {
           </div>
           </div>
         </div>
+      </div>
+
+      </section>
       </div>
       :
       <Error/> }

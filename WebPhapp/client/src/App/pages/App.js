@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 
 import "./App.css";
 import Header from "../components/Header"
+import Footer from "../components/Footer"
 import Login from "./Login"
 import Home from "./Home";
 import Patient from "./Patient";
@@ -67,9 +68,10 @@ class App extends Component {
     const App = () => (
 
       <div>
-        {this.state.headerToggle && <Header/>}
+        {this.state.headerToggle && <Header id={user.sub} role={user.role}/>}
         {/* authenticated routes */ }
         {this.state.user !== '' ?
+          <div className="main-content">
           <Switch>
             <Route path="/login" component={Login}/>
             <Route exact path="/" component={() => <Home id={user.sub} role={user.role}/> }/>
@@ -84,6 +86,8 @@ class App extends Component {
             <Route path="/cancel" component={props => <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/error" component={Error}/>
           </Switch>
+          <Footer/>
+          </div>
           :
           <Switch>
             <Route path="/login" component={Login}/>

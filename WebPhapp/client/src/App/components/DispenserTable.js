@@ -58,13 +58,13 @@ class DispenserTable extends Component {
   }
 }
 
-// The properties of each dispenser id, name, phone number, and location
+// The properties of each dispenser id, name, last name, and date of birth
 DispenserTable.propTypes = {
   dispenserList: PropTypes.arrayOf(
       PropTypes.shape({
         dispenserID: PropTypes.number.isRequired,
         name: PropTypes.string,
-        phone: PropTypes.number,
+        phone: PropTypes.string,
         location: PropTypes.string
       }).isRequired,
     )
