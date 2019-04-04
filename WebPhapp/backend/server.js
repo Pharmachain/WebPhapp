@@ -290,6 +290,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
             return finish('Added prescription to chain.', true);
         }).catch((error) => {
             // Error in adding prescription to blockchain
+            console.log(error);
             return finish('Error: ' + error.toString(), false);
         });
     }
