@@ -24,12 +24,18 @@ class Prescription extends Component {
     onRedeemClick = event => {
         // 'X' or close button in modal
         document.getElementById('close').click(); 
+        
         // Probably add some validation to make sure the user wants to redeem this.
-
         console.log("pre load", this.state.isLoading);
         console.log("pre response", this.state.response);
 
         const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
+
+
+        const sleep = (milliseconds) => {
+            return new Promise(resolve => setTimeout(resolve, milliseconds))
+        }
+
         axios
         .get(redeemQuery)
         .then(response => {
@@ -37,6 +43,12 @@ class Prescription extends Component {
             this.setState({isLoading: false, response: response.status});
             console.log("post load", this.state.isLoading);
             console.log("post response", response.status);
+            
+            sleep(10000).then(() => {
+                var redeemModal = document.getElementById('modal-redeem');
+                redeemModal.style.display = "none";
+            })
+
         }).catch(error => {
             // Prescription not redeemed because....
         });
@@ -375,13 +387,7 @@ class Prescription extends Component {
                                         <button type = "button"
                                             className = "btn icon icon-shape bg-danger text-white rounded-circle"
                                             id = {prescription.prescriptionID}
-                                            onClick = {this.onCancelClick} 
-                                            data-container="body" 
-                                            data-toggle="popover" 
-                                            data-trigger="hover"
-                                            data-color="primary" 
-                                            data-placement="top" 
-                                            data-content="This is a very beautiful popover, show some love.">
+                                            onClick = {this.onCancelClick} >
                                             {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
                                             <span><i className="fas fa-trash"></i></span>
                                         </button>
@@ -389,13 +395,7 @@ class Prescription extends Component {
                                         <button type = "button"
                                             className = "btn icon icon-shape bg-primary text-white rounded-circle"
                                             id = {prescription.prescriptionID}
-                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
-                                            data-container="body" 
-                                            data-toggle="popover" 
-                                            data-trigger="hover"
-                                            data-color="primary" 
-                                            data-placement="top" 
-                                            data-content="This is a very beautiful popover, show some love.">
+                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
                                             {/* <span className="btn-inner--text">Edit This Prescription </span> */}
                                             <span><i className="fas fa-pen-alt"></i></span>
                                         </button>
@@ -404,12 +404,8 @@ class Prescription extends Component {
                                             className = "btn icon icon-shape bg-success text-white rounded-circle"
                                             id={prescription.prescriptionID}
                                             onClick = {this.onRedeemClick}
-                                            data-container="body" 
-                                            data-toggle="popover"
-                                            data-trigger="hover"
-                                            data-color="primary" 
-                                            data-placement="top" 
-                                            data-content="This is a very beautiful popover, show some love.">
+                                            data-toggle="modal" 
+                                            data-target="#modal-redeem">
                                             {/* <span className="btn-inner--text">Redeem This Prescription </span> */}
                                             <span><i className="fas fa-check"></i></span>
                                         </button>

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import axios from "axios";
-import Cookies from 'universal-cookie';
 import jwt from 'jsonwebtoken';
 
 import "./App.css";

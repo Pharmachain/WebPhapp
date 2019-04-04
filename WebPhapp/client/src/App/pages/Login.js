@@ -154,7 +154,7 @@ class Login extends Component {
                   <br/>
                   }
                   <div className="text-center">
-                    <button type="button" className="btn btn-block btn-primary my-4">
+                    <button type="button" className="btn btn-block btn-primary my-4" onClick={this.onClickUserLogin}>
                       Sign In
                     </button>
                   </div>

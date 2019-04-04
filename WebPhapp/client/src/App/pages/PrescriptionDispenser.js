@@ -10,7 +10,6 @@ class PrescriptionDispenser extends Component {
     dispenserID: 0,
     // prescriptions are all the prescriptions given a dispenser id
     prescriptions: [],
-    dispenserID: 0,
     validDispenser: true //TODO
   };
 
@@ -28,7 +27,7 @@ class PrescriptionDispenser extends Component {
     const dispenserID = querystring.ID;
     const id = this.props.id;
     this.setState({dispenserID: dispenserID});
-    if (dispenserID != id) {
+    if (dispenserID !== id) {
       this.setState({validDispenser: false})
     }
 
