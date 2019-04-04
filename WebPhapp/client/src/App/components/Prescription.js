@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import "../style/custom-argon.css"
 
 class Prescription extends Component {
-    state = {};
+    state = {isLoading: false,
+             response: "n/a"};
       
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
@@ -24,19 +26,26 @@ class Prescription extends Component {
         document.getElementById('close').click(); 
         // Probably add some validation to make sure the user wants to redeem this.
 
+        console.log("pre load", this.state.isLoading);
+        console.log("pre response", this.state.response);
+
         const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
         axios
         .get(redeemQuery)
-        .then(results => results.data)
-        //Green out redeemed prescription.
-        // Trigger prescription request 
-        //TODO: green out Rx logo
-        .catch(error => {
+        .then(response => {
+            // Redeem request is finished from backend and has a response
+            this.setState({isLoading: false, response: response.status});
+            console.log("post load", this.state.isLoading);
+            console.log("post response", response.status);
+        }).catch(error => {
             // Prescription not redeemed because....
         });
-        return(
-            <div></div>
-        )
+
+        // Redeem request is loading on backend
+        // this.setState({isLoading: true});
+        this.state.isLoading = true;
+        console.log("is load", this.state.isLoading);
+
     }
 
     // Displays all prescription cards for a patient
@@ -47,10 +56,11 @@ class Prescription extends Component {
             prescriptionCount += 1;
             return(
                 <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{width: '21rem'}} >
+                    {this.state.message}
                     <div className="card-body" >
                         <div className="row">
                             <div className="col">
-                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription {prescription.prescriptionID} &nbsp;
+                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription:
                                     <br/>
                                     <span className="h2 font-weight-bold mb-0">{prescription.drugName}</span>
                                 </h5>
@@ -77,6 +87,21 @@ class Prescription extends Component {
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
                         </button>
+
+                        <button type="button" className="btn btn-block btn-info mb-3" data-toggle="modal" data-target="#modal-redeem">Redeem Modal</button>
+
+                        {/* <div class="popover__wrapper">
+                            <a href="#">
+                                <h2 class="popover__title">Hover:me</h2>
+                            </a>
+                            <div class="popover__content">
+                                <p class="popover__message">Joseph Francis "Joey" Tribbiani, Jr.</p>
+                            </div>
+                        </div> */}
+
+
+                        <button type="button" className="btn btn-block btn-danger mb-3" data-toggle="modal" data-target="#modal-cancel">Cancel Modal</button>
+        
                     </div>
                 </div>
             )
@@ -92,7 +117,7 @@ class Prescription extends Component {
 
     // Displays the table body for the fill dates of a prescription
     displayFillDates(fillDates){
-        if (fillDates === 0) {
+        if (fillDates.length === 0) {
             return (
                 <tr>
                     <td>{"-"}</td>
@@ -131,207 +156,291 @@ class Prescription extends Component {
         return(
             <div className="container">
                 <div className="masonry align-items-left">
-                      {this.displayPrescriptions()}
+                    {/* Display prescriptions */}
+                    {this.displayPrescriptions()}
 
-                      {/* Modal that displays all prescription information */}
-                      {<div className="col-md-4">
-                        <div 
-                            className="modal fade" 
-                            tabIndex="-1" 
-                            id="prescription-modal" 
-                            data-backdrop="false" 
-                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
-                        <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
+                    {/* Modal that displays a loading screen for prescription cancelling */}
+                    <div 
+                        className="modal fade" 
+                        id="modal-cancel" 
+                        tabIndex="-1" 
+                        role="dialog" 
+                        data-keyboard="false"
+                        data-backdrop="false" 
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>>
+                        <div className="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+                            <div className="modal-content bg-gradient-danger">
+                                <div className="modal-header">
+                                    <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
+                                    {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button> */}
+                                </div>
+                                
+                                <div className="modal-body">
+                                    <div className="py-3 text-center">
+                                        <div className="spinner-border text-white" role="status">
+                                            <span className="sr-only">Loading...</span>
+                                        </div>
+                                        <h4 className="heading mt-4">Prescription <strong className="text-lg">Cancelling</strong> in Progress!</h4>
+                                        <p>The prescription is being cancelled on Pharmachain. <br/> Please wait...</p>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    {/* Modal that displays a loading screen for prescription redeeming */}
+                    <div 
+                        className="modal fade" 
+                        id="modal-redeem" 
+                        tabIndex="-1" 
+                        role="dialog" 
+                        data-keyboard="false"
+                        data-backdrop="false" 
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>>
+                        <div className="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+                            <div className="modal-content bg-gradient-info">
+                                <div className="modal-header">
+                                    <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
+                                    {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button> */}
+                                </div>
+                                <div className="modal-body">
+                                    <div className="py-3 text-center">
+                                        <div className="spinner-border text-white" role="status">
+                                            <span className="sr-only">Loading...</span>
+                                        </div>
+                                        <h4 className="heading mt-4">Prescription <strong className="text-lg">Redeeming</strong> in Progress!</h4>
+                                        <p>The prescription is being redeemed on Pharmachain. <br/> Please wait...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    {/* Modal that displays all prescription information */}
+                    {<div className="col-md-4">
+                    <div 
+                        className="modal fade" 
+                        tabIndex="-1" 
+                        id="prescription-modal" 
+                        data-backdrop="false" 
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
+
                         <div className="modal-content">
 
-                            {/* Modal Header */}
-                            <div className="modal-header">
-                                <h3 className="modal-title" id="modal-title-default">Prescription: {drugName}</h3>
-                                <button type="button" className="close" id="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
-                                </button>
-                            </div>
+                        {/* Modal Header */}
+                        <div className="modal-header">
+                            <h3 className="modal-title text-muted" id="modal-title-default">Prescription:</h3> 
+                            &nbsp; 
+                            <h3 className="modal-title">{drugName}</h3>
+                            <button type="button" className="close" id="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"><i className="ni ni-fat-remove"></i></span>
+                            </button>
+                        </div>
 
-                            {/* Modal Body */}
-                            <div className="modal-body">
-                            <div className="row">
-                                <div className="col-auto">
-                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col">
-                                                    <h5 className="card-title text-uppercase text-muted mb-0 text-left">Quantity:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{quantity}</span>
-                                                </div>
-                                                <div className="col-auto">
-                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
-                                                    <i className="fas fa-pills"></i>
-                                                </div>
-                                                </div>
+                        {/* Modal Body */}
+                        <div className="modal-body">
+                        <div className="row">
+                            <div className="col-auto">
+                                <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Quantity:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{quantity}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                            <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                <i className="fas fa-pills"></i>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <br/>
-                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col">
-                                                    <h5 className="card-title text-uppercase text-muted mb-0 text-left">Number of Days For:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{daysFor}</span>
-                                                </div>
-                                                <div className="col-auto">
-                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
-                                                    <i className="ni ni-calendar-grid-58"></i>
-                                                </div>
-                                                </div>
+                                </div>
+                                <br/>
+                                <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Number of Days For:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{daysFor}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                            <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                <i className="ni ni-calendar-grid-58"></i>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <br/>
-                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col">
-                                                    <h5 className="card-title text-uppercase text-muted mb-0 text-left">Refills Left:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{refillsLeft}</span>
-                                                </div>
-                                                <div className="col-auto">
-                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
-                                                    <i className="fas fa-prescription-bottle"></i>
-                                                </div>
-                                                </div>
+                                </div>
+                                <br/>
+                                <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Refills Left:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{refillsLeft}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                            <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                <i className="fas fa-prescription-bottle"></i>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <br/>
-                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col">
-                                                    <h5 className="card-title text-uppercase text-muted mb-0 text-left">Written Date:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{writtenDate}</span>
-                                                </div>
-                                                <div className="col-auto">
-                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
-                                                    <i className="fas fa-user-edit"></i>
-                                                </div>
-                                                </div>
+                                </div>
+                                <br/>
+                                <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Written Date:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{writtenDate}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                            <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                <i className="fas fa-user-edit"></i>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <br/>
-                                    <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col">
-                                                    <h5 className="card-title text-uppercase text-muted mb-0 text-left">Date Cancelled:</h5>
-                                                    <span className="h3 font-weight-bold mb-0">{cancelDate}</span>
-                                                </div>
-                                                <div className="col-auto">
-                                                    <div className="icon icon-shape bg-default text-white rounded-circle shadow">
-                                                        <i className="fas fa-ban"></i>
-                                                    </div>
+                                </div>
+                                <br/>
+                                <div className="card card-stats mb-4 mb-lg-0 shadow" style={{ width: '18rem' }}>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Date Cancelled:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{cancelDate}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                                <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                    <i className="fas fa-ban"></i>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Refill Dates Table */}
-                                <div className="col">
-                                    <div className="card shadow">
-                                        <div className="card-header border-0">
-                                        <h4 className="mb-0 text-left">Past Refill Dates</h4>
-                                        </div>
-                                        <div className="table-responsive">
-                                        <table className="table align-items-center table-flush">
-                                            <thead className="thead-light">
-                                            <tr>
-                                                <th scope="col">Refill Number</th>
-                                                <th scope="col">Date</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                                {this.displayFillDates(formattedDates)}
-                                            </tbody>
-                                        </table>
-                                        </div>
+                            {/* Refill Dates Table */}
+                            <div className="col">
+                                <div className="card shadow">
+                                    <div className="card-header border-0">
+                                    <h4 className="mb-0 text-left">Past Refill Dates</h4>
                                     </div>
-                                    <br/>
+                                    <div className="table-responsive" style={{ height: "350px", overflow: "auto" }}>
+                                    <table className="table align-items-center table-flush">
+                                        <thead className="thead-light">
+                                        <tr>
+                                            <th scope="col">Refill Number</th>
+                                            <th scope="col">Date</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.displayFillDates(formattedDates)}
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                </div>
+                                <br/>
 
-                                    {/* Buttons for modal given certain users... */}
-                                    <div className="row justify-content-center form-inline">
-                                        <div className="form-group justify-content-bottom">                                        
-                                        { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
-                                            <div>
-                                            <button type = "button"
-                                                className = "btn btn-outline-danger"
-                                                style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {this.onCancelClick}>
-                                                <span className="btn-inner--text">Cancel </span>
-                                                <span><i className="fas fa-trash-alt"></i></span>
-                                            </button>
-                                            <button type = "button"
-                                                className = "btn btn-outline-success"
-                                                style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
-                                                <span className="btn-inner--text">Edit </span>
-                                                <span><i className="fas fa-edit"></i></span>
-                                            </button>
-                                            </div>
-                                            :
-                                            user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
-                                            <div>
-                                            <button type = "button"
-                                                className = "btn btn-outline-danger"
-                                                style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {this.onCancelClick}>
-                                                <span className="btn-inner--text">Cancel </span>
-                                                <span><i className="fas fa-trash-alt"></i></span>
-                                            </button>
-                                            <button type = "button"
-                                                className = "btn btn-outline-success"
-                                                style={{width: '8rem'}}
-                                                id = {prescription.prescriptionID}
-                                                onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
-                                                <span className="btn-inner--text">Edit </span>
-                                                <span><i className="fas fa-edit"></i></span>
-                                            </button>
-                                            <button type = "button"
-                                                className = "btn btn-outline-info"
-                                                style={{width: '8rem'}}
-                                                id={prescription.prescriptionID}
-                                                onClick = {this.onRedeemClick}>
-                                                <span className="btn-inner--text">Redeem </span>
-                                                <span><i className="fas fa-prescription-bottle-alt"></i></span>
-                                            </button>
-                                            </div>
-                                            :
-                                            "" }
+                                {/* Buttons for modal given certain users... */}
+                                <div className="row justify-content-center form-inline">
+                                    <div className="form-group justify-content-bottom">                                        
+                                    { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                        <div>
+                                        <div>
+                                        <button type = "button"
+                                            className = "btn icon icon-shape bg-danger text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {this.onCancelClick}>
+                                            {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
+                                            <span><i className="fas fa-trash ni-3x"></i></span>
+                                        </button>
+                                        <button type = "button"
+                                            className = "btn icon icon-shape bg-primary text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}>
+                                            {/* <span className="btn-inner--text">Edit This Prescription </span> */}
+                                            <span><i className="fas fa-pen-alt ni-3x"></i></span>
+                                        </button>
                                         </div>
+                                        </div>
+                                        :
+                                        user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                        <div>
+                                        <button type = "button"
+                                            className = "btn icon icon-shape bg-danger text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {this.onCancelClick} 
+                                            data-container="body" 
+                                            data-toggle="popover" 
+                                            data-trigger="hover"
+                                            data-color="primary" 
+                                            data-placement="top" 
+                                            data-content="This is a very beautiful popover, show some love.">
+                                            {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
+                                            <span><i className="fas fa-trash"></i></span>
+                                        </button>
+                                        &nbsp;
+                                        <button type = "button"
+                                            className = "btn icon icon-shape bg-primary text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
+                                            data-container="body" 
+                                            data-toggle="popover" 
+                                            data-trigger="hover"
+                                            data-color="primary" 
+                                            data-placement="top" 
+                                            data-content="This is a very beautiful popover, show some love.">
+                                            {/* <span className="btn-inner--text">Edit This Prescription </span> */}
+                                            <span><i className="fas fa-pen-alt"></i></span>
+                                        </button>
+                                        &nbsp;
+                                        <button type = "button"
+                                            className = "btn icon icon-shape bg-success text-white rounded-circle"
+                                            id={prescription.prescriptionID}
+                                            onClick = {this.onRedeemClick}
+                                            data-container="body" 
+                                            data-toggle="popover"
+                                            data-trigger="hover"
+                                            data-color="primary" 
+                                            data-placement="top" 
+                                            data-content="This is a very beautiful popover, show some love.">
+                                            {/* <span className="btn-inner--text">Redeem This Prescription </span> */}
+                                            <span><i className="fas fa-check"></i></span>
+                                        </button>
+                                        </div>
+                                        :
+                                        "" }
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        </div>
+                                    
+                        {/* Modal Footer */}
+                        <div className="modal-footer justify-content-center ">
+                            <div className="row text-xs text-uppercase text-muted mb-0">
+                                <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {(prescription && prescription.prescriptionID) || ""} </div>
+                                <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
+                                <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {(prescription && prescription.patientID) || ""}</div>
+                                <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {(prescription && prescription.prescriberID) || ""}</div>
+                                <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
                             </div>
+                        </div>
 
-                            {/* Modal Footer */}
-                            <div className="modal-footer justify-content-center ">
-                                <div className="row text-xs text-uppercase text-muted mb-0">
-                                    <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {(prescription && prescription.prescriptionID) || ""} </div>
-                                    <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
-                                    <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {(prescription && prescription.patientID) || ""}</div>
-                                    <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {(prescription && prescription.prescriberID) || ""}</div>
-                                    <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
-                                </div>
-                            </div>
-
-                            </div>
                         </div>
-                        </div>
-                        </div>
+                    </div>
+                    </div>
+                    </div>
                     }
                 </div>
             </div>
@@ -347,13 +456,12 @@ Prescription.propTypes = {
             drugID: PropTypes.number.isRequired,
             fillDates: PropTypes.arrayOf(PropTypes.string).isRequired,
             writtenDate: PropTypes.string.isRequired,
-            quantity: PropTypes.number.isRequired,
+            quantity: PropTypes.string.isRequired,
             daysFor: PropTypes.number.isRequired,
             refillsLeft: PropTypes.number.isRequired,
             prescriberID: PropTypes.number.isRequired,
             dispenserID: PropTypes.number.isRequired,
-            cancelled: PropTypes.bool.isRequired,
-            cancelDate: PropTypes.string.isRequired,
+            cancelDate: PropTypes.number.isRequired,
         }).isRequired,
     ),
   };

@@ -9,7 +9,8 @@ class PrescriptionDispenser extends Component {
   state = {
     // prescriptions are all the prescriptions given a dispenser id
     prescriptions: [],
-    dispenserID: 0
+    dispenserID: 0,
+    validDispenser: true
   };
 
   // Fetch the prescription on first mount
@@ -24,7 +25,11 @@ class PrescriptionDispenser extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const dispenserID = querystring.ID;
+    const id = this.props.id;
     this.setState({dispenserID: dispenserID});
+    if (dispenserID != id) {
+      this.setState({validDispenser: false})
+    }
 
     axios
       .get(`api/v1/dispensers/prescriptions/all/${dispenserID}`)
@@ -144,10 +149,11 @@ class PrescriptionDispenser extends Component {
   render() {
     // User role from log in
     const user = this.props.role; 
+  
     var prescriptions = this.state.prescriptions;
       return (
         <div>
-        {user === 'Government' || user === 'Admin' ?
+        {(user === 'Dispenser' && this.state.validDispenser) || user === 'Government' || user === 'Admin' ?
           <div>
           {/* Check to see if any prescriptions are found*/}
           {prescriptions ? (

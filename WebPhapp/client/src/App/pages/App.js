@@ -80,7 +80,7 @@ class App extends Component {
             <Route path="/prescriptionAdd" component={props => <PrescriptionAdd {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriptionEdit" component={props => <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/dispenser" component={props => <PrescriptionDispenser {...props} id={user.sub} role={user.role}/>}/>
-            <Route path="/prescriber" component={props => <PrescriptionPrescriber{...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/prescriber" component={props => <PrescriptionPrescriber {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/cancel" component={props => <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/error" component={Error}/>
           </Switch>

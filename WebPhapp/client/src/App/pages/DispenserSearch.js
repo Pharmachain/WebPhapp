@@ -72,7 +72,7 @@ class DispenserSearch extends Component {
     const user = this.props.role; 
     return (
       <div>
-      {user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+      {user === 'Government' || user === 'Admin' ?
       <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
