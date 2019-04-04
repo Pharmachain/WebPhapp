@@ -159,6 +159,7 @@ module.exports = {
     */
     write: async function(patientID, prescriberID, dispenserID, drugID, quantity, fillDates, writtenDate, daysValid, refills, isCancelled, cancelDate) {
         var blockchain = await connectToChain();
+        let currentChainLength = await getChainLength();
 
         // Set up prescription data to be sent.
         let transaction = await blockchain.patient.methods.addPrescription(
@@ -174,7 +175,7 @@ module.exports = {
             isCancelled,
             cancelDate
         );
-        
+
         // Submitting prescription transaction.
         let encodedTransaction = transaction.encodeABI();
         let block = await blockchain.web3.eth.sendTransaction({
@@ -183,9 +184,9 @@ module.exports = {
             to: blockchain.patient.options.address,
             gas: 50000000
         });
-        
-        // Return Transaction object containing transaction hash and other data
-        return block;
+
+        // return prescriptionID of added prescription
+        return currentChainLength + 1;
     },
 
     /*

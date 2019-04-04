@@ -184,7 +184,7 @@ About:
     }
 Examples: 
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":2,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":1,"dispenserID":1}'
     To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
@@ -200,7 +200,7 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
-        console.log(msg);
+        console.log('/api/v1/prescriptions/add: ' + msg);
         res.status(success ? 200 : 400).json(success);
         return;
     }
@@ -274,7 +274,19 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
             prescription.refillsLeft,
             prescription.isCancelled,
             prescription.cancelDate
-        ).then((_) => {
+        ).then((prescriptionID) => {
+            // add index in MySQL for faster lookups if MySQL connection exists
+            if(conn.MySQL) {
+                mysql.PrescriptionIDsByPatientIndex.add(prescription.patientID, prescriptionID, connection)
+                .then(() => {
+                    return finish('Added prescription to chain with index.', true);
+                })
+                .catch((_) => {
+                    return finish('Added prescription but failed to add index.', false);
+                })
+            } else {
+                return finish('Added prescription to chain.', true);
+            }
             return finish('Added prescription to chain.', true);
         }).catch((error) => {
             // Error in adding prescription to blockchain
@@ -357,14 +369,34 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         });
     };
 
-    if(conn.Blockchain){
+    if(conn.Blockchain && conn.MySQL) { // use the MySQL index to find prescriptions.
+        mysql.PrescriptionIDsByPatientIndex.get(patientID, connection)
+        .then((answer) => {
+            prescriptionIDs = answer.rows.map((prescription) => {
+                return prescription.prescription_id;
+            });
+            block_helper.read_batch(prescriptionIDs)
+            .then((answer) => {
+                return handlePrescriptionsCallback(answer.prescriptions);
+            })
+            .catch((error) => {
+                console.log('/api/v1/prescriptions/: error: ', error);
+                return res.status(400).send([]);
+            })
+        })
+        .catch((error) => {
+            console.log('/api/v1/prescriptions/: error: ', error);
+            return res.status(400).send([]);
+        });
+    }
+    else if(conn.Blockchain) { // if MySQL DB is not connected, search the blockchain linearly.
         var field_patientID = 0;
         block_helper.read_by_value(field_patientID, patientID)
         .then((answer) => {
-            handlePrescriptionsCallback(answer.prescriptions);
+            return handlePrescriptionsCallback(answer.prescriptions);
         }).catch((error) => {
-            console.log('error: ', error);
-            res.status(400).send('Error in searching blockchain for prescriptions matching patientID.');
+            console.log('/api/v1/prescriptions/: error: ', error);
+            return res.status(400).send([]);
         });
     }
     else { // search prescriptions from dummy data
@@ -375,7 +407,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
         });
-        handlePrescriptionsCallback(toSend);
+        return handlePrescriptionsCallback(toSend);
     }
 });
 

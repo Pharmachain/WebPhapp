@@ -38,7 +38,7 @@ module.exports = {
     },
 
     // Index for fast lookups of prescriptionIDs given a patientID
-    PrescriptionIDsByPatientIndex = {
+    PrescriptionIDsByPatientIndex: {
         /*
          *  Look up an array of prescriptionIDs given a patientID.
          *  Returns: Promise.
@@ -88,7 +88,6 @@ module.exports = {
          */
         reset: function(connection) {
             var q = `
-            TRUNCATE TABLE seniordesign1.patient_id_index;
             INSERT INTO seniordesign1.patient_id_index
                 (patient_id, prescription_id)
             VALUES
@@ -102,9 +101,11 @@ module.exports = {
             `;
 
             return new Promise((resolve, reject) => {
-                connection.query(q, (error, rows, fields) => {
-                    if (error) reject(error);
-                    resolve({rows, fields});
+                connection.query('TRUNCATE TABLE seniordesign1.patient_id_index;', (_) => {
+                    connection.query(q, (error, rows, fields) => {
+                        if (error) reject(error);
+                        resolve({rows, fields});
+                    });
                 });
             });
         }

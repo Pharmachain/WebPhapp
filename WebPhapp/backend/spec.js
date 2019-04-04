@@ -19,6 +19,25 @@ describe("loading express", function() {
     server.close(done);
   });
 
+  // reset MySQL indices
+  it("mysql-index-reset", function(done) {
+    var conn = require('./connections.js');
+    if(conn.MySQL) {
+      var connection = require('mysql2').createConnection(conn.MySQL);
+      var mysql = require('./mysql_helper.js');
+      mysql.PrescriptionIDsByPatientIndex.reset(connection)
+      .then((_) => {
+        console.log('MySQL indices reset for prescription lookups.');
+        done();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    } else { // on Travis: do nothing.
+      done();
+    }
+  });
+
 
   // // ------------------------------------------------------
   // //             Tests: /api/vi/prescriptions
