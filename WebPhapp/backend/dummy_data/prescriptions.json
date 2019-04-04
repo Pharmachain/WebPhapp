@@ -10,7 +10,7 @@
       "daysFor": 7,
       "refillsLeft": 1,
       "prescriberID": 1,
-      "dispenserID": 1,
+      "dispenserID": 4,
       "cancelDate": 0
     },
     {
@@ -36,7 +36,7 @@
       "daysFor": 14,
       "refillsLeft": 0,
       "prescriberID": 1,
-      "dispenserID": 1,
+      "dispenserID": 3,
       "cancelDate": 0
     },
     {

@@ -29,6 +29,7 @@ apt-get install -y nodejs
 sudo npm install truffle@4.1.14 -g --allow-root
 sudo npm install web3@1.0.0-beta.37 --allow-root --unsafe-perm=true
 sudo npm install @babel/runtime@latest
+sudo npm install -g ethereumjs-testrpc
 
 
 #WebPhapp NPM Initialization

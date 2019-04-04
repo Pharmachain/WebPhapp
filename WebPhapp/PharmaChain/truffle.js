@@ -22,7 +22,14 @@ module.exports = {
 			network_id: "*",
 			gasPrice: 0
 			
+		},
+		testrpc_net: {
+			host:"localhost",
+			port: 8545,
+			network_id: "*",
+			gasPrice: 46000000
 		}
+		
 	},
 	compilers: {
 		solc: {
