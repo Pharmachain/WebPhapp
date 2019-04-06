@@ -7,6 +7,7 @@ import Error from "./Error";
 class PrescriptionPrescriber extends Component {
   // Initialize the state
   state = {
+    prescriberID: 0,
     prescriptions: [],
     isFetching: true
   };
@@ -23,6 +24,7 @@ class PrescriptionPrescriber extends Component {
     // Gets parameter from the URL of 'ID'
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriberID = querystring.ID;
+    this.setState({prescriberID});
 
     axios
       // String interpolation.
@@ -59,12 +61,21 @@ class PrescriptionPrescriber extends Component {
         /* Check to see if any prescriptions are found */
         prescriptions.length ?
         <div>
-        <div className="bg-gradient-success py-7 py-xl-8 b-10"></div>
+        <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
         <section className="section section-lg pt-lg-0 mt--200 m-5">
-        <div>
+        <div className="col-xl-12 order-xl-1 center">
+            <div className="card bg-secondary shadow">
+              <div className="card-header bg-white border-0">
+                  <div className="row align-items-center">
+                    <div className="col-8 text-left">
+                      <h3 className="mb-0">Prescriber: {this.state.prescriberID} Prescriptions</h3>
+                    </div>
+                  </div>
+              </div>
           {/* Render the prescription */}
-          {this.displayPrescriptions()}
-        </div>
+          <div className="card-body"> {this.displayPrescriptions()} </div>
+            </div>
+          </div>
         </section>
         </div>
         : 

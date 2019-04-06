@@ -6,59 +6,184 @@ import "../style/custom-argon.css"
 class Prescription extends Component {
     state = {isLoading: false,
              response: "n/a"};
-      
+     
+    /*
+    Testing onCancelClick
+    Note: Use this onCancelClick function when NOT connected to blockchain
+        - loading modals (followed by success or error modals) require sleep() function to test correct modal rendering
+        - otherwise modals are triggered instantaneously because loading times do not exist when not connected to blockchain
+        - includes useful console.logs of loading and response states
+    */
     // Gets the events id, to cancel the proper prescription.
     onCancelClick = event => {
-        // Probably add some validation to make sure the user wants to delete this.
+        const cancelModal = document.getElementById('modal-cancel');
+        const cancelSuccessModal = document.getElementById('modal-cancel-success');
+        const cancelErrorModal = document.getElementById('modal-cancel-error');
         const cancelQuery = `/api/v1/prescriptions/cancel/${event.currentTarget.id}`
+        const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+        // 'X' or close button in prescription modal
+        document.getElementById('close').click(); 
+        console.log("cancel: before (loading, response): ", this.state.isLoading, this.state.response)
         axios
         .get(cancelQuery)
-        .then(results => results.data);
-        //Grey out cancelled prescription.
-        //TODO: grey out Rx logo
-        // this.props.getPrescriptions();
-        window.location.href=`/cancel`;
+        .then(response => {
+            // Cancel request is finished from backend and has a response
+            this.setState({isLoading: false, response: response.status});
+            console.log("cancel: after (loading, response): ", this.state.isLoading, this.state.response)
+        
+            sleep(5500).then(() => {
+                if(this.state.response === 200) {
+                    document.getElementById('cancel-success').click(); 
+                    sleep(3000).then(() => {
+                        cancelSuccessModal.style.display = "none";
+                        window.location.reload()
+                    })
+                } else {
+                    document.getElementById('cancel-error').click(); 
+                    sleep(3000).then(() => {
+                        cancelErrorModal.style.display = "none";
+                        window.location.reload()
+                    })
+                }
+            })
+        }).catch(error => {
+            // Prescription not cancelled because....
+        });
+        // Cancel request is loading on blockchain
+        this.state.isLoading = true;
+        console.log("cancel: during (loading, response): ", this.state.isLoading, this.state.response)
+        sleep(5000).then(() => {
+            cancelModal.style.display = "none";
+        })
     }
-
+    
+    /*
+    Testing onRedeemClick
+    Note: Use this onRedeemClick function when NOT connected to blockchain
+        - loading modals (followed by success or error modals) require sleep() function to test correct modal rendering
+        - otherwise modals are triggered instantaneously because loading times do not exist when not connected to blockchain
+        - includes useful console.logs of loading and response states
+    */
     // Gets the events id, to redeem the proper prescription.
     onRedeemClick = event => {
-        // 'X' or close button in modal
-        document.getElementById('close').click(); 
-        
-        // Probably add some validation to make sure the user wants to redeem this.
-        console.log("pre load", this.state.isLoading);
-        console.log("pre response", this.state.response);
-
+        const redeemModal = document.getElementById('modal-redeem');
+        const redeemSuccessModal = document.getElementById('modal-redeem-success');
+        const redeemErrorModal = document.getElementById('modal-redeem-error');
         const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
-
-
-        const sleep = (milliseconds) => {
-            return new Promise(resolve => setTimeout(resolve, milliseconds))
-        }
-
+        const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+        // 'X' or close button in prescription modal
+        document.getElementById('close').click(); 
+        console.log("redeem: before (loading, response): ", this.state.isLoading, this.state.response)
         axios
         .get(redeemQuery)
         .then(response => {
             // Redeem request is finished from backend and has a response
             this.setState({isLoading: false, response: response.status});
-            console.log("post load", this.state.isLoading);
-            console.log("post response", response.status);
-            
-            sleep(10000).then(() => {
-                var redeemModal = document.getElementById('modal-redeem');
-                redeemModal.style.display = "none";
+            console.log("redeem: after (loading, response): ", this.state.isLoading, this.state.response)
+        
+            sleep(5500).then(() => {
+                if(this.state.response === 200) {
+                    document.getElementById('redeem-success').click(); 
+                    sleep(3000).then(() => {
+                        redeemSuccessModal.style.display = "none";
+                        window.location.reload()
+                    })
+                } else {
+                    document.getElementById('redeem-error').click(); 
+                    sleep(3000).then(() => {
+                        redeemErrorModal.style.display = "none";
+                        window.location.reload()
+                    })
+                }
             })
-
         }).catch(error => {
             // Prescription not redeemed because....
         });
-
-        // Redeem request is loading on backend
-        // this.setState({isLoading: true});
+        // Redeem request is loading on blockchain
         this.state.isLoading = true;
-        console.log("is load", this.state.isLoading);
-
+        console.log("redeem: during (loading, response): ", this.state.isLoading, this.state.response)
+        sleep(5000).then(() => {
+            redeemModal.style.display = "none";
+        })
     }
+
+    /*
+    Production onRedeemClick
+    Note: Use this onRedeemClick function when connected to blockchain
+    */
+    // // Gets the events id, to redeem the proper prescription.
+    // onRedeemClick = event => {
+    //     const redeemModal = document.getElementById('modal-redeem');
+    //     const redeemSuccessModal = document.getElementById('modal-redeem-success');
+    //     const redeemErrorModal = document.getElementById('modal-redeem-error');
+    //     const redeemQuery = `/api/v1/dispensers/redeem/${event.currentTarget.id}`
+    //     const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+    //     // 'X' or close button in prescription modal
+    //     document.getElementById('close').click(); 
+    //     axios
+    //     .get(redeemQuery)
+    //     .then(response => {
+    //         // Redeem request is finished from backend and has a response
+    //         this.setState({isLoading: false, response: response.status});           
+    //         if(this.state.response === 200) {
+    //             document.getElementById('redeem-success').click(); 
+    //             sleep(3000).then(() => {
+    //                 redeemSuccessModal.style.display = "none";
+    //                 window.location.reload()
+    //             })
+    //         } else {
+    //             document.getElementById('redeem-error').click(); 
+    //             sleep(3000).then(() => {
+    //                 redeemErrorModal.style.display = "none";
+    //                 window.location.reload()
+    //             })
+    //         }
+    //     }).catch(error => {
+    //         // Prescription not redeemed because....
+    //     });
+    //     // Redeem request is loading on blockchain
+    //     this.state.isLoading = true;
+    //     redeemModal.style.display = "none";
+    // }
+    
+    /*
+    Production onCancelClick
+    Note: Use this onCancelClick function when connected to blockchain
+    */
+    // // Gets the events id, to cancel the proper prescription.
+    // onCancelClick = event => {
+    //     const cancelModal = document.getElementById('modal-cancel');
+    //     const cancelSuccessModal = document.getElementById('modal-cancel-success');
+    //     const cancelErrorModal = document.getElementById('modal-cancel-error');
+    //     const cancelQuery = `/api/v1/prescriptions/cancel/${event.currentTarget.id}`
+    //     const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+    //     // 'X' or close button in prescription modal
+    //     document.getElementById('close').click(); 
+    //     axios
+    //     .get(cancelQuery)
+    //     .then(response => {
+    //         // Cancel request is finished from backend and has a response
+    //         this.setState({isLoading: false, response: response.status});        
+    //         if(this.state.response === 200) {
+    //             document.getElementById('cancel-success').click(); 
+    //             sleep(3000).then(() => {
+    //                 cancelSuccessModal.style.display = "none";
+    //                 window.location.reload()
+    //             })
+    //         } else {
+    //             document.getElementById('cancel-error').click(); 
+    //             sleep(3000).then(() => {
+    //                 cancelErrorModal.style.display = "none";
+    //                 window.location.reload()
+    //             })
+    //         }
+    //     }).catch(error => {
+    //         // Prescription not cancelled because....
+    //     });
+    //     // Cancel request is loading on blockchain
+    //     this.state.isLoading = true;
+    //     cancelModal.style.display = "none";
+    // }
 
     // Displays all prescription cards for a patient
     displayPrescriptions = () => {
@@ -99,8 +224,6 @@ class Prescription extends Component {
                             <span className="btn-inner--text">More Info</span>
                         </button>
 
-                        <button type="button" className="btn btn-block btn-info mb-3" data-toggle="modal" data-target="#modal-redeem">Redeem Modal</button>
-
                         {/* <div class="popover__wrapper">
                             <a href="#">
                                 <h2 class="popover__title">Hover:me</h2>
@@ -108,11 +231,7 @@ class Prescription extends Component {
                             <div class="popover__content">
                                 <p class="popover__message">Joseph Francis "Joey" Tribbiani, Jr.</p>
                             </div>
-                        </div> */}
-
-
-                        <button type="button" className="btn btn-block btn-danger mb-3" data-toggle="modal" data-target="#modal-cancel">Cancel Modal</button>
-        
+                        </div> */}                        
                     </div>
                 </div>
             )
@@ -163,10 +282,11 @@ class Prescription extends Component {
         var formattedDates = [];
         for (var i = 0; i < fillDatesLength; i++){
             formattedDates.push(fillDates[i].split(" ", 4).join(" "));
-        }
+        }    
+
         return(
-            <div className="container">
-                <div className="masonry align-items-left justify-content-center">
+            <div className="container justify-content-center">
+                <div className="masonry align-items-left">
                     {this.displayPrescriptions()}
 
                     {/* Modal that displays a loading screen for prescription cancelling */}
@@ -176,15 +296,11 @@ class Prescription extends Component {
                         tabIndex="-1" 
                         role="dialog" 
                         data-keyboard="false"
-                        data-backdrop="false" 
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>>
+                        data-backdrop="false">
                         <div className="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
                             <div className="modal-content bg-gradient-danger">
                                 <div className="modal-header">
                                     <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
-                                    {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">×</span>
-                                    </button> */}
                                 </div>
                                 
                                 <div className="modal-body">
@@ -199,6 +315,42 @@ class Prescription extends Component {
                             </div>
                         </div>
                     </div>
+                     {/* Modal and invisible button that displays success for prescription cancelling */}
+                    <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-cancel-success" id="cancel-success" style={{ display: 'none' }}>Cancel: Success Modal</button>
+                    <div 
+                        className="modal fade" 
+                        id="modal-cancel-success" 
+                        tabIndex="-1" 
+                        role="dialog" 
+                        data-keyboard="false" 
+                        data-backdrop="false"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div className="modal-dialog modal-" role="document">
+                            <div className="alert alert-success alert-dismissible fade show" role="alert">
+                                <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                                <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully cancelled on Pharmachain. Reloading page...</span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Modal and invisible button that displays error for prescription cancelling */}
+                    <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-cancel-error" id="cancel-error" style={{ display: 'none' }}>Cancel: Error Modal</button>
+                    <div 
+                        className="modal fade" 
+                        id="modal-cancel-error" 
+                        tabIndex="-1" 
+                        role="dialog"
+                        data-keyboard="false" 
+                        data-backdrop="false"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div className="modal-dialog modal-" role="document">
+                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
+                                <span className="alert-inner--text"><strong> ERROR: </strong> Unable for prescription to be cancelled on Pharmachain. Reloading page...</span>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     {/* Modal that displays a loading screen for prescription redeeming */}
                     <div 
@@ -207,15 +359,11 @@ class Prescription extends Component {
                         tabIndex="-1" 
                         role="dialog" 
                         data-keyboard="false"
-                        data-backdrop="false" 
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.16)', maxHeight: '100vh', overflowY: 'auto'}}>>
+                        data-backdrop="false">
                         <div className="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
-                            <div className="modal-content bg-gradient-info">
+                            <div className="modal-content bg-gradient-success">
                                 <div className="modal-header">
                                     <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
-                                    {/* <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">×</span>
-                                    </button> */}
                                 </div>
                                 <div className="modal-body">
                                     <div className="py-3 text-center">
@@ -229,6 +377,42 @@ class Prescription extends Component {
                             </div>
                         </div>
                     </div>
+                     {/* Modal and invisible button that displays success for prescription redeeming */}
+                    <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-redeem-success" id="redeem-success" style={{ display: 'none' }}>Redeem: Success Modal</button>
+                    <div 
+                        className="modal fade" 
+                        id="modal-redeem-success" 
+                        tabIndex="-1" 
+                        role="dialog" 
+                        data-keyboard="false" 
+                        data-backdrop="false"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div className="modal-dialog modal-" role="document">
+                            <div className="alert alert-success alert-dismissible fade show" role="alert">
+                                <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                                <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully redeemed on Pharmachain. Reloading page...</span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Modal and invisible button that displays error for prescription redeeming */}
+                    <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-redeem-error" id="redeem-error" style={{ display: 'none' }}>Redeem: Error Modal</button>
+                    <div 
+                        className="modal fade" 
+                        id="modal-redeem-error" 
+                        tabIndex="-1" 
+                        role="dialog"
+                        data-keyboard="false" 
+                        data-backdrop="false"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+                        <div className="modal-dialog modal-" role="document">
+                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
+                                <span className="alert-inner--text"><strong> ERROR: </strong> Unable for prescription to be redeemed on Pharmachain. Reloading page...</span>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     {/* Modal that displays all prescription information */}
                     {<div className="col-md-4">
@@ -343,7 +527,7 @@ class Prescription extends Component {
                                     <div className="card-header border-0">
                                     <h4 className="mb-0 text-left">Past Refill Dates</h4>
                                     </div>
-                                    <div className="table-responsive" style={{ height: "350px", overflow: "auto" }}>
+                                    <div className="table-responsive" style={{ height: '350px', overflow: 'auto' }}>
                                     <table className="table align-items-center table-flush">
                                         <thead className="thead-light">
                                         <tr>
@@ -368,9 +552,11 @@ class Prescription extends Component {
                                         <button type = "button"
                                             className = "btn icon icon-shape bg-danger text-white rounded-circle"
                                             id = {prescription.prescriptionID}
-                                            onClick = {this.onCancelClick}>
+                                            onClick = {this.onCancelClick}
+                                            data-toggle="modal" 
+                                            data-target="#modal-cancel">
                                             {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
-                                            <span><i className="fas fa-trash ni-3x"></i></span>
+                                            <span><i className="fas fa-trash"></i></span>
                                         </button>
                                         <button type = "button"
                                             className = "btn icon icon-shape bg-primary text-white rounded-circle"
@@ -387,7 +573,9 @@ class Prescription extends Component {
                                         <button type = "button"
                                             className = "btn icon icon-shape bg-danger text-white rounded-circle"
                                             id = {prescription.prescriptionID}
-                                            onClick = {this.onCancelClick} >
+                                            onClick = {this.onCancelClick}
+                                            data-toggle="modal" 
+                                            data-target="#modal-cancel">
                                             {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
                                             <span><i className="fas fa-trash"></i></span>
                                         </button>

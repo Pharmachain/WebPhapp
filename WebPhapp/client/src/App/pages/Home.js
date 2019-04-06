@@ -21,13 +21,13 @@ class Home extends Component {
                           <p className="lead text-white">As a patient, you have the ability to view your prescriptions. Select an option below...</p> 
                           :
                           user === 'Prescriber' ?
-                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription. Select an option below...</p> 
                           :
                           user === 'Dispenser' ? 
-                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or dispenser or edit, cancel, or redeem a prescription.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or edit, cancel, or redeem a prescription. Select an option below...</p> 
                           :
                           user === 'Government' ?
-                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber.<br/>Select an option below...</p>
+                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber. Select an option below...</p>
                           :
                           "" }
                     </div>
@@ -52,7 +52,7 @@ class Home extends Component {
                           <i className="fas fa-prescription-bottle"></i>
                           </div>
                           <h6 className="text-primary text-uppercase">View Prescriptions</h6>
-                          <p className="description mt-3">View all of your personal prescriptions. Each prescription has a drugname, quantity, date written, and more.</p>
+                          <p className="description mt-3">View all of your personal prescriptions. Each prescription has a drug name, quantity, date written, and more.</p>
                           <a href={`./patient?ID=${id}`} className="btn btn-primary mt-4">View My Prescriptions</a>
                       </div>
                       </div>

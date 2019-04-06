@@ -75,7 +75,6 @@ class PrescriptionAdd extends Component {
       <div>
       {user === 'Prescriber' || user === 'Admin' ?
       <div className="App">
-          
         <div className="modal fade" id="add-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -89,7 +88,7 @@ class PrescriptionAdd extends Component {
         </div>
 
 
-        <div className="bg-gradient-success py-7 py-xl-8 b-10"></div>
+        <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
         <section className="section section-lg pt-lg-0 mt--200 m-5">
 
         <div className="col-xl-8 order-xl-1 center">

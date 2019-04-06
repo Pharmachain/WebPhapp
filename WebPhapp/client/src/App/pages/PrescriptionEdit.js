@@ -86,6 +86,11 @@ class PrescriptionEdit extends Component {
 
       { this.state.cancelDate === "" ? "" :
         this.state.cancelDate <= 0 && this.state.refillsLeft >= 0 ?
+
+        <div>
+        <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
+        <section className="section section-lg pt-lg-0 mt--200 m-5">
+
         <div className="col-xl-8 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
@@ -205,6 +210,9 @@ class PrescriptionEdit extends Component {
           </form>
           </div>
         </div>
+        </div>
+
+        </section>
         </div>
         :
         <div className="col-8 center">

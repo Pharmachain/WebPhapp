@@ -32,7 +32,7 @@ class PrescriptionDispenser extends Component {
     }
 
     axios
-      .get(`api/v1/dispensers/prescriptions/all/${dispenserID}`)
+      .get(`api/v1/dispensers/prescriptions/open/${dispenserID}`)
       .then(results => results.data)
       .then(prescriptions => this.setState({ prescriptions }));
   };
@@ -94,8 +94,8 @@ class PrescriptionDispenser extends Component {
                           role="tab" 
                           aria-controls="prescription-tab-open" 
                           aria-selected="true">
-                          <i className="fas fa-clipboard-check text-success"></i> 
-                          &nbsp;Open
+                          <i className="fas fa-clipboard-check"></i> 
+                          &nbsp;: Open
                         </a>
                     </li>
                     <li className="nav-item">
@@ -108,8 +108,8 @@ class PrescriptionDispenser extends Component {
                           role="tab" 
                           aria-controls="prescription-tab-historical" 
                           aria-selected="false">
-                          <i className="fas fa-history text-orange"></i> 
-                          &nbsp;Historical
+                          <i className="fas fa-history"></i> 
+                          &nbsp;: Historical
                         </a>
                     </li>
                     <li className="nav-item">
@@ -122,8 +122,8 @@ class PrescriptionDispenser extends Component {
                           role="tab" 
                           aria-controls="prescription-tab-all" 
                           aria-selected="false">
-                          <i className="fas fa-globe-americas text-primary"></i> 
-                          &nbsp;All
+                          <i className="fas fa-globe-americas"></i> 
+                          &nbsp;: All
                         </a>
                     </li>
                 </ul>
@@ -131,7 +131,7 @@ class PrescriptionDispenser extends Component {
 
             <div className="card-body">
               <div className="tab-content">
-                  <div className="tab-pane fade show active" id="2" role="tabpanel" aria-labelledby="prescription-tab-open">
+                  <div className="tab-pane fade show active" id="1" role="tabpanel" aria-labelledby="prescription-tab-open">
                     <Prescription
                       prescriptions = {this.state.prescriptions}
                       role = {this.props.role}
@@ -158,7 +158,7 @@ class PrescriptionDispenser extends Component {
           {/* Check to see if any prescriptions are found*/}
           {prescriptions ? (
             <div>
-            <div className="bg-gradient-orange py-7 py-xl-8 b-10"></div>
+            <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
             <section className="section section-lg pt-lg-0 mt--200 m-5">
             <div>
               {/* Render the prescription */}
