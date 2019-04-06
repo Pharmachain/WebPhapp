@@ -7,7 +7,9 @@ import Error from './Error';
 class PrescriptionEdit extends Component {
   constructor(props){
     super(props);
-    this.state = {cancelDate: ""}
+    this.state = {cancelDate: "",
+                  isLoading: false,
+                  response: "n/a"};
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriptionNo = querystring.ID;
 
@@ -50,18 +52,51 @@ class PrescriptionEdit extends Component {
   }
 
   // Sending the prescription to be changed
-  onEditPrescription = () => {
+  onEditClick = () => {
+    const editModal = document.getElementById('modal-edit');
+    const editSuccessModal = document.getElementById('modal-edit-success');
+    const editErrorModal = document.getElementById('modal-edit-error');
+    var editQuery = `/api/v1/prescriptions/edit`;
+    const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
 
-    var prescriptionEditQuery= `/api/v1/prescriptions/edit`;
+    console.log("edit: before (loading, response): ", this.state.isLoading, this.state.response)
     axios
-        .post(prescriptionEditQuery,{
-        "prescriptionID": this.state.prescriptionID,
-        "quantity": this.state.quantity,
-        "daysFor": this.state.daysFor,
-        "refillsLeft": this.state.refillsLeft,
-        "dispenserID": this.state.dispenserID
-      });
-    /* Send a message back for an error or a success */
+    .post(editQuery,{
+    "prescriptionID": this.state.prescriptionID,
+    "quantity": this.state.quantity,
+    "daysFor": this.state.daysFor,
+    "refillsLeft": this.state.refillsLeft,
+    "dispenserID": this.state.dispenserID
+    })
+    .then(response => {
+        // Edit request is finished from backend and has a response
+        this.setState({isLoading: false, response: response.status});
+        console.log("edit: after (loading, response): ", this.state.isLoading, this.state.response)
+
+        sleep(5500).then(() => {
+            if(this.state.response === 200) {
+                document.getElementById('edit-success').click(); 
+                sleep(3000).then(() => {
+                    editSuccessModal.style.display = "none";
+                    window.location.reload()
+                })
+            } else {
+                document.getElementById('edit-error').click(); 
+                sleep(3000).then(() => {
+                    editErrorModal.style.display = "none";
+                    window.location.reload()
+                })
+            }
+        })
+    }).catch(error => {
+        // Prescription not edited because...
+    });
+    // Edit request is loading on blockchain
+    this.state.isLoading = true;
+    console.log("edit: during (loading, response): ", this.state.isLoading, this.state.response)
+    sleep(5000).then(() => {
+        editModal.style.display = "none";
+    })
 
   }
 
@@ -72,16 +107,65 @@ class PrescriptionEdit extends Component {
     <div>
       {user === 'Prescriber' || user === 'Dispenser' || user === 'Admin' ?
       <div className="App">
-        <div className="modal fade" id="edit-prescription-modal" tabIndex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-          <div className="modal-dialog modal-" role="document">
-              <div className="alert alert-success alert-dismissible fade show" role="alert">
-                  <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
-                  <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully edited.</span>
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                  </button>
-              </div>
-          </div>
+        {/* Modal that displays a loading screen for prescription editing */}
+        <div 
+            className="modal fade" 
+            id="modal-edit" 
+            tabIndex="-1" 
+            role="dialog" 
+            data-keyboard="false"
+            data-backdrop="false">
+            <div className="modal-dialog modal-primary modal-dialog-centered modal-" role="document">
+                <div className="modal-content bg-gradient-primary">
+                    <div className="modal-header">
+                        <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
+                    </div>
+                    
+                    <div className="modal-body">
+                        <div className="py-3 text-center">
+                            <div className="spinner-border text-white" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                            <h4 className="heading mt-4">Prescription <strong className="text-lg">Editing</strong> in Progress!</h4>
+                            <p>The prescription is being edited on Pharmachain. <br/> Please wait...</p>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+        {/* Modal and invisible button that displays success for prescription editing */}
+        <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-edit-success" id="edit-success" style={{ display: 'none' }}>Edit: Success Modal</button>
+        <div 
+            className="modal fade" 
+            id="modal-edit-success" 
+            tabIndex="-1" 
+            role="dialog" 
+            data-keyboard="false" 
+            data-backdrop="false"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+            <div className="modal-dialog modal-" role="document">
+                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                    <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
+                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully edited on Pharmachain. Reloading page...</span>
+                </div>
+            </div>
+        </div>
+        {/* Modal and invisible button that displays error for prescription editing */}
+        <button type="button" className="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-edit-error" id="edit-error" style={{ display: 'none' }}>Edit: Error Modal</button>
+        <div 
+            className="modal fade" 
+            id="modal-edit-error" 
+            tabIndex="-1" 
+            role="dialog"
+            data-keyboard="false" 
+            data-backdrop="false"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+            <div className="modal-dialog modal-" role="document">
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
+                    <span className="alert-inner--text"><strong> ERROR: </strong> Unable for prescription to be edited on Pharmachain. Reloading page...</span>
+                </div>
+            </div>
         </div>
 
       { this.state.cancelDate === "" ? "" :
@@ -142,7 +226,7 @@ class PrescriptionEdit extends Component {
                 </div>
               </div>
             </div>
-            <hr class="my-4"></hr>
+            <hr className="my-4"></hr>
             <div className="row">
               <div className="col-lg-6">
                 <div className="form-group focused">
@@ -197,13 +281,13 @@ class PrescriptionEdit extends Component {
                   Cancel
                 </button>
             </Link>
-            <nbsp> </nbsp>
+            &nbsp;
             <button
               type="button"
               className ="btn btn-success my-4"
+              onClick={this.onEditClick}
               data-toggle="modal"
-              data-target="#edit-prescription-modal"
-              onClick={this.onEditPrescription}>
+              data-target="#modal-edit">
               Confirm
             </button>
             </div>
