@@ -17,7 +17,6 @@ import PrescriptionEdit from "./PrescriptionEdit"
 import PrescriptionDispenser from "./PrescriptionDispenser";
 import PrescriptionPrescriber from "./PrescriptionPrescriber";
 import Error from "./Error";
-import CancelAlert from "./CancelAlert"
 
 class App extends Component {
   constructor(props){
@@ -82,7 +81,6 @@ class App extends Component {
             <Route path="/prescriptionEdit" component={props => <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/dispenser" component={props => <PrescriptionDispenser {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriber" component={props => <PrescriptionPrescriber {...props} id={user.sub} role={user.role}/>}/>
-            <Route path="/cancel" component={props => <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/error" component={Error}/>
           </Switch>
           <Footer/>

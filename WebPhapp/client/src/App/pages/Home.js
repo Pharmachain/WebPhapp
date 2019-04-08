@@ -77,7 +77,7 @@ class Home extends Component {
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-success rounded-circle mb-4">
-                          <i class="fas fa-folder-plus"></i>
+                          <i className="fas fa-folder-plus"></i>
                           </div>
                           <h6 className="text-success text-uppercase">Add Prescription</h6>
                           <p className="description mt-3">Create a new patient prescription order that appears on the blockchain.</p>
@@ -110,7 +110,7 @@ class Home extends Component {
                           <h6 className="text-warning text-uppercase">Dispenser Prescriptions</h6>
                           <p className="description mt-3">View all of your dispenser's prescriptions or the prescriptions that are open or historical.</p>
                           {console.log(id)}
-                          <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Dispenser's Prescriptions</a>                 
+                          <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Prescriptions</a>                 
                       </div>
                       </div>
                       </div>

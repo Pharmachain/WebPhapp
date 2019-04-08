@@ -6,7 +6,7 @@ export class Footer extends React.Component {
         // Returns a footer styled according to the Argon style system
         <div className="App">
         {/* Footer */}
-        <footer className="py-3">
+        <footer className="py-3" style={{ position: 'relative', zIndex: '-1'}}>
           <div className="container p-5">
             <div className="row align-items-center justify-content-xl-between">
               <div className="col-xl-6">

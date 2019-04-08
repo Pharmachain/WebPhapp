@@ -5,29 +5,32 @@ import { Link } from "react-router-dom";
 import Error from './Error';
 
 class PrescriptionEdit extends Component {
-  constructor(props){
-    super(props);
-    this.state = {cancelDate: "",
-                  isLoading: false,
-                  response: "n/a"};
+    constructor(props){
+        super(props);
+            this.state = {
+                cancelDate: "",
+                isLoading: false,
+                response: "n/a"
+            };
     const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     const prescriptionNo = querystring.ID;
 
     axios
       .get(`/api/v1/prescriptions/single/${prescriptionNo}`)
       .then(results => results.data)
-      .then(prescription => this.setState({patientID: prescription.patientID,
-                                          prescriptionID: prescription.prescriptionID,
-                                          drugID: prescription.drugID,
-                                          fillDates: prescription.fillDates,
-                                          writtenDate: prescription.writtenDate,
-                                          quantity: prescription.quantity,
-                                          daysFor: prescription.daysFor,
-                                          refillsLeft: prescription.refillsLeft,
-                                          prescriberID: prescription.prescriberID,
-                                          dispenserID: prescription.dispenserID,
-                                          cancelled: prescription.cancelled,
-                                          cancelDate: prescription.cancelDate
+      .then(prescription => this.setState({
+            patientID: prescription.patientID,
+            prescriptionID: prescription.prescriptionID,
+            drugID: prescription.drugID,
+            fillDates: prescription.fillDates,
+            writtenDate: prescription.writtenDate,
+            quantity: prescription.quantity,
+            daysFor: prescription.daysFor,
+            refillsLeft: prescription.refillsLeft,
+            prescriberID: prescription.prescriberID,
+            dispenserID: prescription.dispenserID,
+            cancelled: prescription.cancelled,
+            cancelDate: prescription.cancelDate
       }));
   }
 
@@ -51,53 +54,102 @@ class PrescriptionEdit extends Component {
     this.setState({dispenserID: event.target.value});
   }
 
-  // Sending the prescription to be changed
+  /*
+  Testing onEditClick
+  Note: Use this onEditClick function when NOT connected to blockchain
+      - loading modals (followed by success or error modals) use sleep() to test correct modal rendering
+      - otherwise modals are triggered instantaneously because loading times do not exist when not connected to blockchain
+      - includes useful console.logs of loading and response states
+  */
+  // // Sending the prescription to be edited
+  // onEditClick = () => {
+  //   const editModal = document.getElementById('modal-edit');
+  //   const editSuccessModal = document.getElementById('modal-edit-success');
+  //   const editErrorModal = document.getElementById('modal-edit-error');
+  //   var editQuery = `/api/v1/prescriptions/edit`;
+  //   const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+
+  //   console.log("edit: before (loading, response): ", this.state.isLoading, this.state.response)
+  //   axios
+  //   .post(editQuery,{
+  //     "prescriptionID": this.state.prescriptionID,
+  //     "quantity": this.state.quantity,
+  //     "daysFor": this.state.daysFor,
+  //     "refillsLeft": this.state.refillsLeft,
+  //     "dispenserID": this.state.dispenserID
+  //   })
+  //   .then(response => {
+  //       // Edit request is finished from backend and has a response
+  //       this.setState({isLoading: false, response: response.status});
+  //       console.log("edit: after (loading, response): ", this.state.isLoading, this.state.response)
+
+  //       sleep(5500).then(() => {
+  //           if(this.state.response === 200) {
+  //               document.getElementById('edit-success').click(); 
+  //               sleep(4000).then(() => {
+  //                   editSuccessModal.style.display = "none";
+  //                   window.location.reload()
+  //               })
+  //           } else {
+  //               document.getElementById('edit-error').click(); 
+  //               sleep(4000).then(() => {
+  //                   editErrorModal.style.display = "none";
+  //                   window.location.reload()
+  //               })
+  //           }
+  //       })
+  //   }).catch(error => {
+  //       // Prescription not edited because...
+  //   });
+  //   // Edit request is loading on blockchain
+  //   this.state.isLoading = true;
+  //   console.log("edit: during (loading, response): ", this.state.isLoading, this.state.response)
+  //   sleep(5000).then(() => {
+  //       editModal.style.display = "none";
+  //   })
+  // }
+
+  /*
+  Production onEditClick
+  Note: Use this onEditClick function when connected to blockchain
+  */
+  // Sending the prescription to be edited
   onEditClick = () => {
     const editModal = document.getElementById('modal-edit');
     const editSuccessModal = document.getElementById('modal-edit-success');
     const editErrorModal = document.getElementById('modal-edit-error');
     var editQuery = `/api/v1/prescriptions/edit`;
     const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
-
-    console.log("edit: before (loading, response): ", this.state.isLoading, this.state.response)
     axios
     .post(editQuery,{
-    "prescriptionID": this.state.prescriptionID,
-    "quantity": this.state.quantity,
-    "daysFor": this.state.daysFor,
-    "refillsLeft": this.state.refillsLeft,
-    "dispenserID": this.state.dispenserID
+      "prescriptionID": this.state.prescriptionID,
+      "quantity": this.state.quantity,
+      "daysFor": this.state.daysFor,
+      "refillsLeft": this.state.refillsLeft,
+      "dispenserID": this.state.dispenserID
     })
     .then(response => {
         // Edit request is finished from backend and has a response
         this.setState({isLoading: false, response: response.status});
-        console.log("edit: after (loading, response): ", this.state.isLoading, this.state.response)
-
-        sleep(5500).then(() => {
-            if(this.state.response === 200) {
-                document.getElementById('edit-success').click(); 
-                sleep(3000).then(() => {
-                    editSuccessModal.style.display = "none";
-                    window.location.reload()
-                })
-            } else {
-                document.getElementById('edit-error').click(); 
-                sleep(3000).then(() => {
-                    editErrorModal.style.display = "none";
-                    window.location.reload()
-                })
-            }
-        })
+        if(this.state.response === 200) {
+            document.getElementById('edit-success').click(); 
+            sleep(4000).then(() => {
+                editSuccessModal.style.display = "none";
+                window.location.reload()
+            })
+        } else {
+            document.getElementById('edit-error').click(); 
+            sleep(4000).then(() => {
+                editErrorModal.style.display = "none";
+                window.location.reload()
+            })
+        }
     }).catch(error => {
         // Prescription not edited because...
     });
     // Edit request is loading on blockchain
     this.state.isLoading = true;
-    console.log("edit: during (loading, response): ", this.state.isLoading, this.state.response)
-    sleep(5000).then(() => {
-        editModal.style.display = "none";
-    })
-
+    editModal.style.display = "none";
   }
 
   render() {
@@ -114,7 +166,8 @@ class PrescriptionEdit extends Component {
             tabIndex="-1" 
             role="dialog" 
             data-keyboard="false"
-            data-backdrop="false">
+            data-backdrop="false"
+            style = {{ maxHeight: '100vh', height: '1000rem' }}>
             <div className="modal-dialog modal-primary modal-dialog-centered modal-" role="document">
                 <div className="modal-content bg-gradient-primary">
                     <div className="modal-header">
@@ -142,11 +195,11 @@ class PrescriptionEdit extends Component {
             role="dialog" 
             data-keyboard="false" 
             data-backdrop="false"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
-                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully edited on Pharmachain. Reloading page...</span>
+                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully <strong><u>edited</u></strong> on Pharmachain. Reloading page...</span>
                 </div>
             </div>
         </div>
@@ -159,17 +212,17 @@ class PrescriptionEdit extends Component {
             role="dialog"
             data-keyboard="false" 
             data-backdrop="false"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto'}}>
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
-                    <span className="alert-inner--text"><strong> ERROR: </strong> Unable for prescription to be edited on Pharmachain. Reloading page...</span>
+                    <span className="alert-inner--text"><strong> ERROR: </strong> Unable to <strong><u>edit</u></strong> prescription on Pharmachain. Reloading page...</span>
                 </div>
             </div>
         </div>
 
       { this.state.cancelDate === "" ? "" :
-        this.state.cancelDate <= 0 && this.state.refillsLeft >= 0 ?
+        this.state.cancelDate === 0 && this.state.refillsLeft > 0 ?
 
         <div>
         <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
