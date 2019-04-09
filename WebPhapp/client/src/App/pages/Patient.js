@@ -128,7 +128,7 @@ class Patient extends Component {
                         : 
                         <div className="row" style={{ height: '20rem'}}>
                         <div className="col-8 center" style={{ marginTop: 'auto', marginBottom: 'auto'}}>
-                            <div className="alert alert-warning" role="alert">
+                            <div className="alert alert-danger" role="alert">
                             <span className="alert-inner--text"><strong>WARNING: </strong> No prescriptions found.</span>
                             </div>
                         </div>
