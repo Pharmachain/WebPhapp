@@ -22,8 +22,10 @@ class App extends Component {
   constructor(props){
     super(props);
 
-    this.state = {user: '',
-            headerToggle: true}
+    this.state = {
+            user: '',
+            headerToggle: true
+        }
 
     this.authenticate_user();
 
@@ -87,7 +89,7 @@ class App extends Component {
           </div>
           :
           <Switch>
-            <Route path="/login" component={Login}/>
+            <Route path="/login" component={Login}/>>
           </Switch>
         }
     </div>

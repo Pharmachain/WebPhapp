@@ -203,7 +203,12 @@ class PrescriptionAdd extends Component {
             role="dialog" 
             data-keyboard="false" 
             data-backdrop="false"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+            style={{ 
+              backgroundColor: 'rgba(0, 0, 0, 0)', 
+              maxHeight: '100vh', 
+              overflowY: 'auto',
+              height: '1000rem', 
+              overflow: 'auto' }}>
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
@@ -220,7 +225,12 @@ class PrescriptionAdd extends Component {
             role="dialog"
             data-keyboard="false" 
             data-backdrop="false"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+            style={{ 
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+              maxHeight: '100vh', 
+              overflowY: 'auto',
+              height: '1000rem', 
+              overflow: 'auto' }}>
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>

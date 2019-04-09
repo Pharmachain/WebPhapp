@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Error from "./Error";
 
 class Home extends Component {
   render() {
@@ -156,7 +157,7 @@ class Home extends Component {
                       </div>
                     </div>
                     :
-                    "" }
+                    <Error/> }
               </div>
               </div>
           </div>

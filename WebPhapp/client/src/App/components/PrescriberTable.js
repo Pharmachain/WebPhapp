@@ -43,7 +43,7 @@ class PrescriberTable extends Component {
         <div className="card-header border-0">
           <h3 className="mb-0">Prescribers</h3>
         </div>
-        <div className="table-responsive">
+        <div className="table-responsive table-hover">
           <table className="table align-items-center table-flush">
             <thead className="thead-light">
               <tr>

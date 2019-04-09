@@ -64,7 +64,7 @@ class Prescription extends Component {
         - otherwise modals are triggered instantaneously because loading times do not exist when not connected to blockchain
         - includes useful console.logs of loading and response states
     */
-    // // Gets the events id, to redeem the proper prescription.
+    // Gets the events id, to redeem the proper prescription.
     // onRedeemClick = event => {
     //     const redeemModal = document.getElementById('modal-redeem');
     //     const redeemSuccessModal = document.getElementById('modal-redeem-success');
@@ -82,7 +82,7 @@ class Prescription extends Component {
     //         console.log("redeem: after (loading, response): ", this.state.isLoading, this.state.response)
         
     //         sleep(5500).then(() => {
-    //             if(this.state.response === 400) {
+    //             if(this.state.response === 200) {
     //                 document.getElementById('redeem-success').click(); 
     //                 sleep(4000).then(() => {
     //                     redeemSuccessModal.style.display = "none";
@@ -187,6 +187,10 @@ class Prescription extends Component {
 
     // Displays all prescription cards for a patient
     displayPrescriptions = () => {
+        // User role from log in
+        const user = this.props.role; 
+
+        // Attributes of a prescription
         var prescriptionCount = -1;
         return this.props.prescriptions.map(prescription => {
             var writtenDate = prescription.writtenDate.split(" ", 4).join(" ");
@@ -211,6 +215,69 @@ class Prescription extends Component {
                                         Date Written: {writtenDate}
                                     </span>
                                 </p>
+                                {/* Buttons for modal given certain users... */}
+                                { user === 'Prescriber' && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                     <div className="btn-group mt-3">
+                                        <br/>
+                                        <button type = "button"
+                                            className = "btn btn-primary text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
+                                            style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}>
+                                            <span><i className="fas fa-pen-alt"></i></span>
+                                        </button>
+                                        &nbsp;
+                                        &nbsp;
+                                        <button type = "button"
+                                            className = "btn btn-danger text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {this.onCancelClick}
+                                            data-toggle="modal" 
+                                            data-target="#modal-cancel"
+                                            style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}>
+                                            <span><i className="fas fa-trash"></i></span>
+                                        </button>
+                                    </div>
+                                    :
+                                    user === 'Dispenser' && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    <div>
+                                        <br/>
+                                        <button type = "button"
+                                            className = "btn btn-success text-white rounded-circle"
+                                            id={prescription.prescriptionID}
+                                            onClick = {this.onRedeemClick}
+                                            data-toggle="modal" 
+                                            data-target="#modal-redeem"
+                                            style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}>
+                                            <span><i className="fas fa-check"></i></span>
+                                        </button>
+                                        &nbsp;
+                                        <button type = "button"
+                                            className = "btn btn-primary text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
+                                            style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}>
+                                            <span><i className="fas fa-pen-alt"></i></span>
+                                        </button>
+                                        &nbsp;
+                                        <button type = "button"
+                                            className = "btn btn-danger text-white rounded-circle"
+                                            id = {prescription.prescriptionID}
+                                            onClick = {this.onCancelClick}
+                                            data-toggle="modal" 
+                                            data-target="#modal-cancel"
+                                            style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}>
+                                            <span><i className="fas fa-trash"></i></span>
+                                        </button>
+                                    </div>
+                                    :
+                                    user === 'Dispenser' || user === 'Prescriber' ?
+                                    <div>
+                                        {/* invisible button for equal height prescription cards */}
+                                        <br/><button type = "button" className = "btn btn-white rounded-circle" disabled style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}></button>
+                                    </div>
+                                    : 
+                                    "" }
                             </div>
                             <div className="col">
                                 <div className="icon icon-shape bg-default text-white rounded-circle shadow lg">
@@ -218,11 +285,14 @@ class Prescription extends Component {
                                 </div>
                             </div>
                         </div>
+
                         <br/>
+                        {/* <div className="card-footer justify-content-center"> */}
                         <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal" id={prescriptionCount} onClick={this.onClickViewPrescription}>
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
                         </button>
+                        {/* </div> */}
                     </div>
                 </div>
             )
@@ -316,7 +386,12 @@ class Prescription extends Component {
                         role="dialog" 
                         data-keyboard="false" 
                         data-backdrop="false"
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+                        style={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0)', 
+                            maxHeight: '100vh', 
+                            overflowY: 'auto', 
+                            height: '1000rem', 
+                            overflow: 'auto' }}>
                         <div className="modal-dialog modal-" role="document">
                             <div className="alert alert-success alert-dismissible fade show" role="alert">
                                 <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
@@ -333,7 +408,12 @@ class Prescription extends Component {
                         role="dialog"
                         data-keyboard="false" 
                         data-backdrop="false"
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+                        style={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0)', 
+                            maxHeight: '100vh', 
+                            overflowY: 'auto',
+                            height: '1000rem', 
+                            overflow: 'auto' }}>
                         <div className="modal-dialog modal-" role="document">
                             <div className="alert alert-danger alert-dismissible fade show" role="alert">
                                 <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
@@ -379,7 +459,12 @@ class Prescription extends Component {
                         role="dialog" 
                         data-keyboard="false" 
                         data-backdrop="false"
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+                        style={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0)', 
+                            maxHeight: '100vh', 
+                            overflowY: 'auto', 
+                            height: '1000rem', 
+                            overflow: 'auto' }}>
                         <div className="modal-dialog modal-" role="document">
                             <div className="alert alert-success alert-dismissible fade show" role="alert">
                                 <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
@@ -396,7 +481,12 @@ class Prescription extends Component {
                         role="dialog"
                         data-keyboard="false" 
                         data-backdrop="false"
-                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)', maxHeight: '100vh', overflowY: 'auto' }}>
+                        style={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0)', 
+                            maxHeight: '100vh', 
+                            overflowY: 'auto', 
+                            height: '1000rem', 
+                            overflow: 'auto' }}>
                         <div className="modal-dialog modal-" role="document">
                             <div className="alert alert-danger alert-dismissible fade show" role="alert">
                                 <span className="alert-inner--icon"><i className="fas fa-bug"></i></span>
@@ -408,14 +498,14 @@ class Prescription extends Component {
 
 
                     {/* Modal that displays all prescription information */}
-                    {<div className="col-md-4">
+                    {<div className="col-md-2">
                     <div className="modal fade" tabIndex="-1" id="prescription-modal" data-backdrop="false" 
                         style={{ 
                             backgroundColor: 'rgba(0, 0, 0, 0)', 
                             maxHeight: '100vh', 
                             height: '1000rem', 
                             overflowY: 'auto', 
-                            overflow: 'auto',  
+                            overflow: 'auto', 
                             filter: 'drop-shadow(0 0 100rem rgba(0, 0, 0, 100)'
                             }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
@@ -434,8 +524,8 @@ class Prescription extends Component {
                         {/* Modal Body */}
                         <div className="modal-body">
                         <div className="row">
-                            <div className="col-md-5 pl-4">
-                                <div className="card card-stats mb-4 mb-lg-0 shadow">
+                            <div className="col-md-5 pl-4 bg-secondary shadow" style={{ height: '28rem', overflow: 'auto' }}>
+                                <div className="card card-stats mb-4 mb-lg-0">
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
@@ -451,7 +541,7 @@ class Prescription extends Component {
                                     </div>
                                 </div>
                                 <br/>
-                                <div className="card card-stats mb-4 mb-lg-0 shadow">
+                                <div className="card card-stats mb-4 mb-lg-0">
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
@@ -467,7 +557,7 @@ class Prescription extends Component {
                                     </div>
                                 </div>
                                 <br/>
-                                <div className="card card-stats mb-4 mb-lg-0 shadow">
+                                <div className="card card-stats mb-4 mb-lg-0">
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
@@ -483,7 +573,7 @@ class Prescription extends Component {
                                     </div>
                                 </div>
                                 <br/>
-                                <div className="card card-stats mb-4 mb-lg-0 shadow">
+                                <div className="card card-stats mb-4 mb-lg-0">
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
@@ -499,7 +589,7 @@ class Prescription extends Component {
                                     </div>
                                 </div>
                                 <br/>
-                                <div className="card card-stats mb-4 mb-lg-0 shadow">
+                                <div className="card card-stats mb-4 mb-lg-0">
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
@@ -518,11 +608,11 @@ class Prescription extends Component {
 
                             {/* Refill Dates Table */}
                             <div className="col-md-7 pr-4">
-                                <div className="card shadow">
+                                <div className="card shadow" style={{ height: '28rem', overflow: 'auto' }}>
                                     <div className="card-header border-0">
                                     <h4 className="mb-0 text-left">Past Refill Dates</h4>
                                     </div>
-                                    <div className="table-responsive" style={{ height: '25rem', overflow: 'auto' }}>
+                                    <div className="table-responsive">
                                     <table className="table align-items-center table-border table-flush">
                                         <thead className="thead-light">
                                         <tr>
@@ -530,99 +620,90 @@ class Prescription extends Component {
                                             <th scope="col">Date</th>
                                         </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody>    
                                             {this.displayFillDates(formattedDates)}
                                         </tbody>
                                     </table>
                                     </div>
                                 </div>
-                                <br/>
+                            </div>
+                            </div>
 
-                                {/* Buttons for modal given certain users... */}
-                                <div className="row justify-content-center form-inline">
-                                    <div className="form-group justify-content-bottom">                                        
-                                    { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
-                                        <div className="btn-group">
-                                        <button type = "button"
-                                            className = "btn icon icon-shape bg-danger text-white rounded-circle"
-                                            id = {prescription.prescriptionID}
-                                            onClick = {this.onCancelClick}
-                                            data-toggle="modal" 
-                                            data-target="#modal-cancel"
-                                            tooltip="Cancel a Prescription" 
-                                            tooltip-position="top"
-                                            tooltip-color="danger">
-                                            {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
-                                            <span><i className="fas fa-trash"></i></span>
-                                        </button>
-                                        &nbsp;
-                                        &nbsp;
-                                        &nbsp;
-                                        <button type = "button"
-                                            className = "btn icon icon-shape bg-primary text-white rounded-circle"
-                                            id = {prescription.prescriptionID}
-                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
-                                            tooltip="Edit a Prescription" 
-                                            tooltip-position="top"
-                                            tooltip-color="primary">
-                                            {/* <span className="btn-inner--text">Edit This Prescription </span> */}
-                                            <span><i className="fas fa-pen-alt ni-3x"></i></span>
-                                        </button>
-                                        </div>
-                                        :
-                                        user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
-                                        <div className="btn-group">
-                                        <button type = "button"
-                                            className = "btn icon icon-shape bg-danger text-white rounded-circle"
-                                            id = {prescription.prescriptionID}
-                                            onClick = {this.onCancelClick}
-                                            data-toggle="modal" 
-                                            data-target="#modal-cancel"
-                                            tooltip="Cancel a Prescription" 
-                                            tooltip-position="top"
-                                            tooltip-color="danger">
-                                            {/* <span className="btn-inner--text">Cancel This Prescription </span> */}
-                                            <span><i className="fas fa-trash"></i></span>
-                                        </button>
-                                        &nbsp;
-                                        &nbsp;
-                                        &nbsp;
-                                        <button type = "button"
-                                            className = "btn icon icon-shape bg-primary text-white rounded-circle"
-                                            id = {prescription.prescriptionID}
-                                            onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
-                                            tooltip="Edit a Prescription" 
-                                            tooltip-position="top"
-                                            tooltip-color="primary">
-                                            {/* <span className="btn-inner--text">Edit This Prescription </span> */}
-                                            <span><i className="fas fa-pen-alt"></i></span>
-                                        </button>
-                                        &nbsp;
-                                        &nbsp;
-                                        &nbsp;
-                                        <button type = "button"
-                                            className = "btn icon icon-shape bg-success text-white rounded-circle"
-                                            id={prescription.prescriptionID}
-                                            onClick = {this.onRedeemClick}
-                                            data-toggle="modal" 
-                                            data-target="#modal-redeem"
-                                            tooltip="Redeem a Prescription" 
-                                            tooltip-position="top"
-                                            tooltip-color="success">
-                                            {/* <span className="btn-inner--text">Redeem This Prescription </span> */}
-                                            <span><i className="fas fa-check"></i></span>
-                                        </button>
-                                        </div>
-                                        :
-                                        "" }
+                            {/* Buttons for modal given certain users... */}
+                            <div className="row justify-content-center form-inline">
+                                <div className="form-group">                                        
+                                { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    <div className="btn-group">
+                                    <button type = "button"
+                                        className = "btn icon icon-shape bg-primary text-white rounded-circle"
+                                        id = {prescription.prescriptionID}
+                                        onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
+                                        tooltip="Edit a Prescription" 
+                                        tooltip-position="top"
+                                        tooltip-color="primary">
+                                        <span><i className="fas fa-pen-alt ni-3x"></i></span>
+                                    </button>
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    <button type = "button"
+                                        className = "btn icon icon-shape bg-danger text-white rounded-circle"
+                                        id = {prescription.prescriptionID}
+                                        onClick = {this.onCancelClick}
+                                        data-toggle="modal" 
+                                        data-target="#modal-cancel"
+                                        tooltip="Cancel a Prescription" 
+                                        tooltip-position="top"
+                                        tooltip-color="danger">
+                                        <span><i className="fas fa-trash"></i></span>
+                                    </button>
                                     </div>
+                                    :
+                                    user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    <div className="btn-group">
+                                    <button type = "button"
+                                        className = "btn icon icon-shape bg-success text-white rounded-circle"
+                                        id={prescription.prescriptionID}
+                                        onClick = {this.onRedeemClick}
+                                        data-toggle="modal" 
+                                        data-target="#modal-redeem"
+                                        tooltip="Redeem a Prescription" 
+                                        tooltip-position="top">
+                                        <span><i className="fas fa-check"></i></span>
+                                    </button>
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    <button type = "button"
+                                        className = "btn icon icon-shape bg-primary text-white rounded-circle"
+                                        id = {prescription.prescriptionID}
+                                        onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
+                                        tooltip="Edit a Prescription" 
+                                        tooltip-position="top">
+                                        <span><i className="fas fa-pen-alt"></i></span>
+                                    </button>
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    <button type = "button"
+                                        className = "btn icon icon-shape bg-danger text-white rounded-circle"
+                                        id = {prescription.prescriptionID}
+                                        onClick = {this.onCancelClick}
+                                        data-toggle="modal" 
+                                        data-target="#modal-cancel"
+                                        tooltip="Cancel a Prescription" 
+                                        tooltip-position="top">
+                                        <span><i className="fas fa-trash"></i></span>
+                                    </button>
+                                    </div>
+                                    :
+                                    "" }
                                 </div>
                             </div>
                         </div>
-                        </div>
-                                    
+                        
                         {/* Modal Footer */}
-                        <div className="modal-footer justify-content-center ">
+                        <div className="modal-footer justify-content-center mt-0">
                             <div className="row text-xs text-uppercase text-muted mb-0">
                                 <div className="col-auto"><i className="fas fa-file-prescription">&nbsp;</i> Prescription ID: {(prescription && prescription.prescriptionID) || ""} </div>
                                 <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
