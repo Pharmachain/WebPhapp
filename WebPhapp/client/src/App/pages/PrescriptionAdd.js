@@ -247,7 +247,7 @@ class PrescriptionAdd extends Component {
           <div className="card-header bg-white border-0">
               <div className="row align-items-center">
                 <div className="col-8 text-left">
-                  <h3 className="mb-0">Prescription Add</h3>
+                  <h3 className="mb-0">Add a Prescription</h3>
                 </div>
               </div>
           </div>
@@ -287,7 +287,11 @@ class PrescriptionAdd extends Component {
                   onChange={this.onKeyDownDispenserID}/>
                 </div>
               </div>
+              </div>
+              
+              <hr className="my-4"></hr>
 
+              <div className="row"> 
               <div className="col-md-6">
                 <div className="form-group focused">
                 <label className="form-control-label">Quantity:</label>
@@ -323,23 +327,36 @@ class PrescriptionAdd extends Component {
 
             </div>
           </form>
-          <Link to={"/"}>
-                <button
-                  type="button"
-                  className="btn btn-danger my-4"
-                  variant="raised">
-                  Cancel
-                </button>
-          </Link>
-          &nbsp;
-          <button
-            type="button"
-            className="btn btn-success my-4"
-            data-toggle="modal"
-            data-target="#modal-add"
-            onClick={this.onAddClick}>
-            Add Prescription
-          </button>
+          <br/>
+          <br/>
+
+          <div className="row">
+            <div className="col-md-6">
+            <Link to={"/"}>
+              <button
+                type="button"
+                className="btn btn-icon btn-block btn-danger">
+                <span><i class="fas fa-times"></i></span>
+                &nbsp;&nbsp;Cancel
+              </button>
+            </Link>
+            &nbsp;
+            </div>
+
+            <div className="col-md-6">
+            <button 
+              className="btn btn-icon btn-block btn-success" 
+              type="button"
+              data-toggle="modal"
+              data-target="#modal-add"
+              onClick={this.onAddClick}>
+              <span><i className="fas fa-plus"></i></span>
+              &nbsp;&nbsp;Add Prescription
+            </button>
+
+            </div>
+          </div>
+
           </div>
           </div>
         </div>

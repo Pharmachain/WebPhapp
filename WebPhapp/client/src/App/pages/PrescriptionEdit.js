@@ -243,7 +243,7 @@ class PrescriptionEdit extends Component {
           <div className="card-header bg-white border-0">
               <div className="row align-items-center">
                 <div className="col-8 text-left">
-                  <h3 className="mb-0">Prescription Edit</h3>
+                  <h3 className="mb-0">Edit Prescription</h3>
                 </div>
               </div>
           </div>
@@ -336,23 +336,36 @@ class PrescriptionEdit extends Component {
                 </div>
               </div>
             </div>
+
+            <br/>
+          <br/>
+
+          <div className="row">
+            <div className="col-md-6">
             <Link to={"/"}>
-                <button
-                  type="button"
-                  className="btn btn-danger my-4"
-                  variant="raised">
-                  Cancel
-                </button>
+              <button
+                type="button"
+                className="btn btn-icon btn-block btn-danger">
+                <span><i class="fas fa-times"></i></span>
+                &nbsp;&nbsp;Cancel
+              </button>
             </Link>
             &nbsp;
-            <button
+            </div>
+
+            <div className="col-md-6">
+            <button 
+              className="btn btn-icon btn-block btn-primary" 
               type="button"
-              className ="btn btn-success my-4"
-              onClick={this.onEditClick}
               data-toggle="modal"
-              data-target="#modal-edit">
-              Confirm
+              data-target="#modal-add"
+              onClick={this.onAddClick}>
+              <span><i className="fas fa-pen-alt"></i></span>
+              &nbsp;&nbsp;Complete Edit
             </button>
+
+            </div>
+            </div>
             </div>
           </form>
           </div>
