@@ -103,7 +103,7 @@ class PrescriptionAdd extends Component {
   //       // Prescription not added because...
   //   });
   //   // Add request is loading on blockchain
-  //   this.state.isLoading = true;
+  //   this.setState({isLoading: true});
   //   console.log("add: during (loading, response): ", this.state.isLoading, this.state.response)
   //   sleep(5000).then(() => {
   //       addModal.style.display = "none";
@@ -155,7 +155,7 @@ class PrescriptionAdd extends Component {
         // Prescription not added because...
     });
     // Add request is loading on blockchain
-    this.state.isLoading = true;
+    this.setState({isLoading: true});
     addModal.style.display = "none";
   }
 

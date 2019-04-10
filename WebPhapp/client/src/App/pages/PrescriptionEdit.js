@@ -101,7 +101,7 @@ class PrescriptionEdit extends Component {
   //       // Prescription not edited because...
   //   });
   //   // Edit request is loading on blockchain
-  //   this.state.isLoading = true;
+  //   this.setState({isLoading: true});
   //   console.log("edit: during (loading, response): ", this.state.isLoading, this.state.response)
   //   sleep(5000).then(() => {
   //       editModal.style.display = "none";
@@ -147,7 +147,7 @@ class PrescriptionEdit extends Component {
         // Prescription not edited because...
     });
     // Edit request is loading on blockchain
-    this.state.isLoading = true;
+    this.setState({isLoading: true});
     editModal.style.display = "none";
   }
 

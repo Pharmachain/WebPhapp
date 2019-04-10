@@ -142,7 +142,7 @@ class Prescription extends Component {
             // Prescription not redeemed because....
         });
         // Redeem request is loading on blockchain
-        this.state.isLoading = true;
+        this.setState({isLoading: true});
         redeemModal.style.display = "none";
     }
     
@@ -181,7 +181,7 @@ class Prescription extends Component {
             // Prescription not cancelled because....
         });
         // Cancel request is loading on blockchain
-        this.state.isLoading = true;
+        this.setState({isLoading: true});
         cancelModal.style.display = "none";
     }
 
@@ -217,7 +217,7 @@ class Prescription extends Component {
                                     </span>
                                 </p>
                                 {/* Buttons for modal given certain users... */}
-                                { user === 'Prescriber' && id == prescription.prescriberID && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                { user === 'Prescriber' && id === String(prescription.prescriberID) && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
                                      <div className="btn-group mt-3">
                                         <br/>
                                         <button type = "button"
@@ -240,7 +240,7 @@ class Prescription extends Component {
                                         </button>
                                     </div>
                                     :
-                                    user === 'Dispenser' && id == prescription.dispenserID && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    user === 'Dispenser' && id === String(prescription.dispenserID) && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div>
                                         <br/>
                                         <button type = "button"
@@ -653,7 +653,7 @@ class Prescription extends Component {
                             {/* Buttons for modal given certain users... */}
                             <div className="row justify-content-center form-inline">
                                 <div className="form-group">                                        
-                                { user === 'Prescriber' && id == prescriberID  && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                { user === 'Prescriber' && id === String(prescriberID)  && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div className="btn-group">
                                     <button type = "button"
                                         className = "btn icon icon-shape bg-primary text-white rounded-circle"
@@ -680,7 +680,7 @@ class Prescription extends Component {
                                     </button>
                                     </div>
                                     :
-                                    user === 'Dispenser' && id == dispenserID && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    user === 'Dispenser' && id === String(dispenserID) && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div className="btn-group">
                                     <button type = "button"
                                         className = "btn icon icon-shape bg-success text-white rounded-circle"
