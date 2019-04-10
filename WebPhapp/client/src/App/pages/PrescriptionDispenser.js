@@ -140,6 +140,7 @@ class PrescriptionDispenser extends Component {
                         <Prescription
                             prescriptions = {this.state.prescriptions}
                             role = {this.props.role}
+                            id = {this.props.id}
                         />
                         </div>
                     </div>

@@ -160,7 +160,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
     fields = new Set([
         changedPrescription.prescriptionID,
         changedPrescription.quantity,
-        changedPrescription.daysValid,
+        changedPrescription.daysFor,
         changedPrescription.refillsLeft,
         changedPrescription.dispenserID
     ]);
@@ -177,7 +177,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
                 changedPrescription.prescriptionID,
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
-                changedPrescription.daysValid,
+                changedPrescription.daysFor,
                 changedPrescription.refillsLeft
             ).then((_) => {
                 return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
@@ -710,10 +710,9 @@ app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescr
 
     var patientID = parseInt(req.params.patientID);
     var token = req.token;
-
     // Ensures that the patientID is the same as the tokens ID.
-    if(settings.env !== "test" || (token.role === Role.Patient && patientID != token.sub)){
-        console.log("PatientIDs do not match...")
+    if(token.role === Role.Patient && (patientID != token.sub) && settings.env !== "test" ){
+        console.log("PatientIDs do not match...");
         res.status(400).send(false);
         return;
     }
@@ -897,8 +896,9 @@ Returns:
     Nothing
 */
 app.get('/api/v1/users/logout', (req,res) => {
+    console.log("anything i guess")
     res.cookie('auth_token','');
-    res.status(200);
+    res.status(200).send(true);
 });
 
 // ------------------------

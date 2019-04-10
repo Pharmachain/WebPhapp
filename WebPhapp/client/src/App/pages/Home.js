@@ -110,7 +110,6 @@ class Home extends Component {
                           </div>
                           <h6 className="text-warning text-uppercase">Dispenser Prescriptions</h6>
                           <p className="description mt-3">View all of your dispenser's prescriptions or the prescriptions that are open or historical.</p>
-                          {console.log(id)}
                           <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Prescriptions</a>                 
                       </div>
                       </div>

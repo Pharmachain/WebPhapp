@@ -187,8 +187,9 @@ class Prescription extends Component {
 
     // Displays all prescription cards for a patient
     displayPrescriptions = () => {
-        // User role from log in
+        // User role and id from log in
         const user = this.props.role; 
+        const id = this.props.id;
 
         // Attributes of a prescription
         var prescriptionCount = -1;
@@ -216,7 +217,7 @@ class Prescription extends Component {
                                     </span>
                                 </p>
                                 {/* Buttons for modal given certain users... */}
-                                { user === 'Prescriber' && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                { user === 'Prescriber' && id == prescription.prescriberID && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
                                      <div className="btn-group mt-3">
                                         <br/>
                                         <button type = "button"
@@ -239,7 +240,7 @@ class Prescription extends Component {
                                         </button>
                                     </div>
                                     :
-                                    user === 'Dispenser' && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    user === 'Dispenser' && id == prescription.dispenserID && prescription.refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div>
                                         <br/>
                                         <button type = "button"
@@ -326,18 +327,22 @@ class Prescription extends Component {
     }
 
     render() {
-        // User role from log in
+        // User role and id from log in
         const user = this.props.role; 
+        const id = this.props.id;
 
         // Attributes of a prescription
         var prescription = this.state.modalPrescription;
         var drugName = (prescription && prescription.drugName) || "";
         var quantity = (prescription && prescription.quantity) || "";
         var daysFor = (prescription && prescription.daysFor) || "";
-        var refillsLeft = (prescription && prescription.refillsLeft);
+        var refillsLeft = prescription && prescription.refillsLeft;
+        var daysBetween = prescription && prescription.daysBetween;
         var writtenDate = prescription && (prescription.writtenDate.split(" ", 4).join(" "));
         var cancelDate = prescription && (prescription.cancelDate <= 0 ? "N/A" : prescription.cancelDate.split(" ", 4).join(" "));
         var fillDates = prescription && prescription.fillDates;
+        var dispenserID = prescription && prescription.dispenserID;
+        var prescriberID = prescription && prescription.prescriberID;
 
         var fillDatesLength = prescription && prescription.fillDates.length;
         var formattedDates = [];
@@ -545,7 +550,7 @@ class Prescription extends Component {
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
-                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Number of Days For:</h5>
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Total Days Valid:</h5>
                                                 <span className="h3 font-weight-bold mb-0 offset-1">{daysFor}</span>
                                             </div>
                                             <div className="col-auto">
@@ -567,6 +572,22 @@ class Prescription extends Component {
                                             <div className="col-auto">
                                             <div className="icon icon-shape bg-default text-white rounded-circle shadow">
                                                 <i className="fas fa-prescription-bottle"></i>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div className="card card-stats mb-4 mb-lg-0">
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Days Until Next Refill:</h5>
+                                                <span className="h3 font-weight-bold mb-0 offset-1">{daysBetween}</span>
+                                            </div>
+                                            <div className="col-auto">
+                                            <div className="icon icon-shape bg-default text-white rounded-circle shadow">
+                                                <i className="fas fa-hourglass-half"></i>
                                             </div>
                                             </div>
                                         </div>
@@ -632,7 +653,7 @@ class Prescription extends Component {
                             {/* Buttons for modal given certain users... */}
                             <div className="row justify-content-center form-inline">
                                 <div className="form-group">                                        
-                                { user === 'Prescriber' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                { user === 'Prescriber' && id == prescriberID  && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div className="btn-group">
                                     <button type = "button"
                                         className = "btn icon icon-shape bg-primary text-white rounded-circle"
@@ -659,7 +680,7 @@ class Prescription extends Component {
                                     </button>
                                     </div>
                                     :
-                                    user === 'Dispenser' && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
+                                    user === 'Dispenser' && id == dispenserID && prescription && refillsLeft > 0 && prescription.cancelDate === 0 ?
                                     <div className="btn-group">
                                     <button type = "button"
                                         className = "btn icon icon-shape bg-success text-white rounded-circle"
@@ -735,6 +756,7 @@ Prescription.propTypes = {
             quantity: PropTypes.string.isRequired,
             daysFor: PropTypes.number.isRequired,
             refillsLeft: PropTypes.number.isRequired,
+            daysBetween: PropTypes.number.isRequired,
             prescriberID: PropTypes.number.isRequired,
             dispenserID: PropTypes.number.isRequired,
             cancelDate: PropTypes.number.isRequired,

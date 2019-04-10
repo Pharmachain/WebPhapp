@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import Error from './Error';
 
 class PrescriptionAdd extends Component {
@@ -332,14 +331,13 @@ class PrescriptionAdd extends Component {
 
           <div className="row">
             <div className="col-md-6">
-            <Link to={"/"}>
               <button
                 type="button"
-                className="btn btn-icon btn-block btn-danger">
-                <span><i class="fas fa-times"></i></span>
+                className="btn btn-icon btn-block btn-danger"
+                onClick={() => window.history.go(-1)}>
+                <span><i className="fas fa-times"></i></span>
                 &nbsp;&nbsp;Cancel
               </button>
-            </Link>
             &nbsp;
             </div>
 

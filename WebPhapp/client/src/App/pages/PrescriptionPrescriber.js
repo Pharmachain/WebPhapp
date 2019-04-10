@@ -59,8 +59,8 @@ class PrescriptionPrescriber extends Component {
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
         role = {this.props.role}
-        />
-    )
+        id = {this.props.id} />
+        )
     }
 
     render() {

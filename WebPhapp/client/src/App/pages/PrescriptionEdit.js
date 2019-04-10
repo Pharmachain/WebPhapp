@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
 import qs from 'qs';
-import { Link } from "react-router-dom";
 import Error from './Error';
 
 class PrescriptionEdit extends Component {
@@ -88,13 +87,13 @@ class PrescriptionEdit extends Component {
   //               document.getElementById('edit-success').click(); 
   //               sleep(4000).then(() => {
   //                   editSuccessModal.style.display = "none";
-  //                   window.location.reload()
+  //                   window.location.href = "./patient?ID=" + this.state.patientID;
   //               })
   //           } else {
   //               document.getElementById('edit-error').click(); 
   //               sleep(4000).then(() => {
   //                   editErrorModal.style.display = "none";
-  //                   window.location.reload()
+  //                   window.location.href = "./patient?ID=" + this.state.patientID;
   //               })
   //           }
   //       })
@@ -135,13 +134,13 @@ class PrescriptionEdit extends Component {
             document.getElementById('edit-success').click(); 
             sleep(4000).then(() => {
                 editSuccessModal.style.display = "none";
-                window.location.reload()
+                window.location.href = "./patient?ID=" + this.state.patientID;
             })
         } else {
             document.getElementById('edit-error').click(); 
             sleep(4000).then(() => {
                 editErrorModal.style.display = "none";
-                window.location.reload()
+                window.location.href = "./patient?ID=" + this.state.patientID;
             })
         }
     }).catch(error => {
@@ -342,14 +341,13 @@ class PrescriptionEdit extends Component {
 
           <div className="row">
             <div className="col-md-6">
-            <Link to={"/"}>
               <button
                 type="button"
-                className="btn btn-icon btn-block btn-danger">
-                <span><i class="fas fa-times"></i></span>
+                className="btn btn-icon btn-block btn-danger"
+                onClick={() => window.history.go(-1)}>
+                <span><i className="fas fa-times"></i></span>
                 &nbsp;&nbsp;Cancel
               </button>
-            </Link>
             &nbsp;
             </div>
 
@@ -358,8 +356,8 @@ class PrescriptionEdit extends Component {
               className="btn btn-icon btn-block btn-primary" 
               type="button"
               data-toggle="modal"
-              data-target="#modal-add"
-              onClick={this.onAddClick}>
+              data-target="#modal-edit"
+              onClick={this.onEditClick}>
               <span><i className="fas fa-pen-alt"></i></span>
               &nbsp;&nbsp;Complete Edit
             </button>
