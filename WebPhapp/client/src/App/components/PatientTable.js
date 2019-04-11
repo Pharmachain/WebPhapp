@@ -6,7 +6,7 @@ class PatientTable extends Component {
   displayPatients = () => {
     return this.props.patientList.map(person => {
       return(
-        <tr className="text-capitalize" key={person.patientID}>
+        <tr key={person.patientID} onClick={() => window.location.href="/patient?ID=" + person.patientID} style={{ cursor: 'pointer' }}>
           <td>
           <a href = {"/patient?ID=" + person.patientID}>
               {person.patientID}</a>

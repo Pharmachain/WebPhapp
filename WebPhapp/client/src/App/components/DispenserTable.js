@@ -6,7 +6,7 @@ class DispenserTable extends Component {
   displayDispensers = () => {
     return this.props.dispenserList.map(dispenser => {
       return(
-        <tr key={dispenser.dispenserID}>
+        <tr key={dispenser.dispenserID} onClick={() => window.location.href="/dispenser?ID=" + dispenser.dispenserID} style={{ cursor: 'pointer' }}>
           <td>
           <a href = {"/dispenser?ID=" + dispenser.dispenserID}>
               {dispenser.dispenserID}</a>

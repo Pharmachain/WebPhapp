@@ -77,7 +77,7 @@ class DispenserSearch extends Component {
       <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
       <section className="section section-lg pt-lg-0 mt--200 m-5">
 
-      <div className="col-xl-8 order-xl-1 center">
+      <div className="col-xl-9 order-xl-1 center">
         <div className="card bg-secondary shadow">
           <div className="card-header bg-white border-0">
             <div className="row align-items-center">

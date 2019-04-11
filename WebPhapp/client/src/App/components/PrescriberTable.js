@@ -6,7 +6,7 @@ class PrescriberTable extends Component {
   displayPrescribers = () => {
     return this.props.prescriberList.map(prescriber => {
       return(
-        <tr key={prescriber.prescriberID}>
+        <tr key={prescriber.prescriberID} onClick={() => window.location.href="/prescriber?ID=" + prescriber.prescriberID} style={{ cursor: 'pointer' }}>
           <td>
           <a href = {"/prescriber?ID=" + prescriber.prescriberID}>
               {prescriber.prescriberID}</a>
