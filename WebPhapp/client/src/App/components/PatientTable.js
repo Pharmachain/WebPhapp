@@ -6,7 +6,7 @@ class PatientTable extends Component {
   displayPatients = () => {
     return this.props.patientList.map(person => {
       return(
-        <tr key={person.patientID}>
+        <tr className="text-capitalize" key={person.patientID}>
           <td>
           <a href = {"/patient?ID=" + person.patientID}>
               {person.patientID}</a>

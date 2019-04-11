@@ -64,7 +64,7 @@ DispenserTable.propTypes = {
       PropTypes.shape({
         dispenserID: PropTypes.number.isRequired,
         name: PropTypes.string,
-        phone: PropTypes.string,
+        phone: PropTypes.number,
         location: PropTypes.string
       }).isRequired,
     )

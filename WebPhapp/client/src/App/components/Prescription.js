@@ -473,7 +473,7 @@ class Prescription extends Component {
                         <div className="modal-dialog modal-" role="document">
                             <div className="alert alert-success alert-dismissible fade show" role="alert">
                                 <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
-                                <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully <strong><u>redeemed</u></strong> on Pharmachain. Reloading page...</span>
+                                <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription <strong><u>redeemed</u></strong> on Pharmachain. Reloading page...</span>
                             </div>
                         </div>
                     </div>
@@ -659,7 +659,7 @@ class Prescription extends Component {
                                         className = "btn icon icon-shape bg-primary text-white rounded-circle"
                                         id = {prescription.prescriptionID}
                                         onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
-                                        tooltip="Edit a Prescription" 
+                                        tooltip="Edit Prescription" 
                                         tooltip-position="top"
                                         tooltip-color="primary">
                                         <span><i className="fas fa-pen-alt ni-3x"></i></span>
@@ -673,7 +673,7 @@ class Prescription extends Component {
                                         onClick = {this.onCancelClick}
                                         data-toggle="modal" 
                                         data-target="#modal-cancel"
-                                        tooltip="Cancel a Prescription" 
+                                        tooltip="Cancel Prescription" 
                                         tooltip-position="top"
                                         tooltip-color="danger">
                                         <span><i className="fas fa-trash"></i></span>
@@ -688,7 +688,7 @@ class Prescription extends Component {
                                         onClick = {this.onRedeemClick}
                                         data-toggle="modal" 
                                         data-target="#modal-redeem"
-                                        tooltip="Redeem a Prescription" 
+                                        tooltip="Redeem Prescription" 
                                         tooltip-position="top">
                                         <span><i className="fas fa-check"></i></span>
                                     </button>
@@ -699,7 +699,7 @@ class Prescription extends Component {
                                         className = "btn icon icon-shape bg-primary text-white rounded-circle"
                                         id = {prescription.prescriptionID}
                                         onClick = {(e) => window.location.href=`/prescriptionEdit?ID=${e.currentTarget.id}`}
-                                        tooltip="Edit a Prescription" 
+                                        tooltip="Edit Prescription" 
                                         tooltip-position="top">
                                         <span><i className="fas fa-pen-alt"></i></span>
                                     </button>
@@ -712,7 +712,7 @@ class Prescription extends Component {
                                         onClick = {this.onCancelClick}
                                         data-toggle="modal" 
                                         data-target="#modal-cancel"
-                                        tooltip="Cancel a Prescription" 
+                                        tooltip="Cancel Prescription" 
                                         tooltip-position="top">
                                         <span><i className="fas fa-trash"></i></span>
                                     </button>

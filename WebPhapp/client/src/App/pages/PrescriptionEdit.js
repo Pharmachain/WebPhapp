@@ -203,7 +203,7 @@ class PrescriptionEdit extends Component {
             <div className="modal-dialog modal-" role="document">
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <span className="alert-inner--icon"><i className="fas fa-check-circle"></i></span>
-                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription successfully <strong><u>edited</u></strong> on Pharmachain. Reloading page...</span>
+                    <span className="alert-inner--text"><strong> SUCCESS: </strong> Prescription <strong><u>edited</u></strong> on Pharmachain. Navigating to previous page...</span>
                 </div>
             </div>
         </div>

@@ -109,7 +109,7 @@ class Patient extends Component {
                             </p>
                             </div>
                             <div className="col">
-                            <p className="description mt-3">
+                            <p className="description mt-3 text-capitalize">
                                 <strong>
                                 {this.state.patientID}
                                 <br/>
