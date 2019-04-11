@@ -349,7 +349,7 @@ class PrescriptionAdd extends Component {
               data-target="#modal-add"
               onClick={this.onAddClick}>
               <span><i className="fas fa-plus"></i></span>
-              &nbsp;&nbsp;Add Prescription
+              &nbsp;&nbsp;Add
             </button>
 
             </div>

@@ -359,7 +359,7 @@ class PrescriptionEdit extends Component {
               data-target="#modal-edit"
               onClick={this.onEditClick}>
               <span><i className="fas fa-pen-alt"></i></span>
-              &nbsp;&nbsp;Complete Edit
+              &nbsp;&nbsp;Done
             </button>
 
             </div>
