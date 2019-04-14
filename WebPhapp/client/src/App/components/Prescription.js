@@ -197,14 +197,31 @@ class Prescription extends Component {
             var writtenDate = prescription.writtenDate.split(" ", 4).join(" ");
             prescriptionCount += 1;
             return(
-                <div className="card card-stats mb-4 ml-4"  key={prescription.prescriptionID} style={{ width: '21rem' }} >
+                <div className="card mb-4 ml-4"  key={prescription.prescriptionID} >
                     <div className="card-body" >
                         <div className="row">
-                            <div className="col">
-                                <h5 className="card-title text-uppercase text-muted text-left mb-0">Prescription:
-                                    <br/>
-                                    <span className="h2 font-weight-bold mb-0">{prescription.drugName}</span>
-                                </h5>
+                            <div className="col center">
+                                
+                                <div className="row text-left">
+                                    {/* <div className="icon icon-shape bg-default text-white rounded-circle shadow lg offset-1">
+                                            <i className="fas fa-file-prescription"></i>
+                                    </div> */}
+                                    <div className="col text-left">
+                                    <h5 className="card-title text-uppercase text-muted mb-0">
+                                        Prescription:
+                                        <br/>
+                                        <span className="h2 font-weight-bold mb-0">
+                                        {prescription.drugName}
+                                        </span>
+                                    </h5>
+                                    </div>
+                                    <div className="col text-right">
+                                    <div className="icon icon-shape bg-default text-white rounded-circle shadow lg">
+                                            <i className="fas fa-file-prescription"></i>
+                                    </div>
+                                    </div>
+                                </div>
+                                
                                 <p className="mt-3 mb-0 text-muted text-sm text-left">
                                     <span className="text-nowrap">
                                         Quantity: {prescription.quantity}
@@ -275,25 +292,18 @@ class Prescription extends Component {
                                     user === 'Dispenser' || user === 'Prescriber' ?
                                     <div>
                                         {/* invisible button for equal height prescription cards */}
-                                        <br/><button type = "button" className = "btn btn-white rounded-circle" disabled style={{ width: '2.375rem', height: '2.375rem', padding: '0' }}></button>
+                                        <br/><div className = "rounded-circle" disabled style={{ width: '2.375rem', height: '2.375rem', padding: '0',  backgroundPosition: '0px' }}/>
                                     </div>
                                     : 
                                     "" }
                             </div>
-                            <div className="col">
-                                <div className="icon icon-shape bg-default text-white rounded-circle shadow lg">
-                                    <i className="fas fa-file-prescription"></i>
-                                </div>
-                            </div>
                         </div>
 
                         <br/>
-                        {/* <div className="card-footer justify-content-center"> */}
                         <button className="btn btn-icon btn-3 btn-outline-primary btn-block" type="button" data-toggle="modal" data-target="#prescription-modal" id={prescriptionCount} onClick={this.onClickViewPrescription}>
                             <span className="btn-inner--icon"><i className="ni ni-bullet-list-67"></i></span>
                             <span className="btn-inner--text">More Info</span>
                         </button>
-                        {/* </div> */}
                     </div>
                 </div>
             )
@@ -353,8 +363,9 @@ class Prescription extends Component {
         return(
             <div className="container justify-content-center">
                 <div className="masonry align-items-left">
-                    {this.displayPrescriptions()}
-
+                    <div className="card-columns">
+                        {this.displayPrescriptions()}
+                    </div>
                     {/* Modal that displays a loading screen for prescription cancelling */}
                     <div 
                         className="modal fade" 
