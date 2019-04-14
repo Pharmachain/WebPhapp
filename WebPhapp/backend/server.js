@@ -107,7 +107,7 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Pre
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
          block_helper.verifyChainIndex(prescriptionID)
          .then((_) => {
-            block_helper.cancel(prescriptionID, date)
+            block_helper.cancel(prescriptionID, req.token.sub, req.token.role === Role.Prescriber, date)
             .then((answer) => {
                 return finish(answer.toString(), true);
             })
@@ -172,9 +172,14 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
          // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
          block_helper.verifyChainIndex(changedPrescription.prescriptionID)
          .then((_) => {
+
+            const role = req.token.role; 
+            const id = req.token.sub;
             // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
             block_helper.update(
                 changedPrescription.prescriptionID,
+                id, 
+                role === Role.Prescriber,
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysFor,
@@ -931,7 +936,7 @@ app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispen
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
         block_helper.verifyChainIndex(prescriptionID)
         .then((_) => {
-            block_helper.redeem(prescriptionID, fillDate)
+            block_helper.redeem(prescriptionID, req.token.sub, req.token.role === Role.Prescriber, fillDate)
             .then((_) => {
                 return finish('/api/v1/dispensers/redeem: redeemed prescription with ID ' + prescriptionID.toString(), true);
             })
