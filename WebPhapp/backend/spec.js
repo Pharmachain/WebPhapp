@@ -229,7 +229,8 @@ describe("loading express", function() {
       daysFor:0,
       refillsLeft:0,
       prescriberID:0,
-      dispenserID:0
+      dispenserID:0,
+      daysBetween:0
     })
     .expect(200)
     .expect(function(res) {
