@@ -1,26 +1,25 @@
 import React, { Component } from "react";
-import { withRouter } from 'react-router-dom'
 import axios from "axios";
 import qs from 'qs';
 import Prescription from "../components/Prescription";
 import Error from "./Error";
 
-class Patient extends Component {
+class PrescriptionPrescriber extends Component {
     // Initialize the state
     state = {
-        patientID: 0,
+        prescriberID: 0,
         first: "",
         last: "",
-        dob: "",
+        phone: "",
+        location: "",
         prescriptions: [],
-        isFetching: true,
-        validPatient: true //TODO
+        isFetching: true
     };
 
     // Fetch the prescription on first mount
     componentDidMount() {
         this.getPrescriptions();
-        this.getPatientInfo();
+        this.getPrescriberInfo();
     }
 
     // Retrieves the items in a prescription from the Express app
@@ -28,38 +27,38 @@ class Patient extends Component {
     getPrescriptions = () => {
         // Gets parameter from the URL of 'ID'
         const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
-        const patientID = querystring.ID;
-        this.setState({patientID});
+        const prescriberID = querystring.ID;
+        this.setState({prescriberID});
 
         axios
             // String interpolation.
-            .get(`/api/v1/prescriptions/${patientID}`)
+            .get(`/api/v1/prescribers/prescriptions/${prescriberID}`)
             .then(results => results.data)
             .then(prescriptions => this.setState({ prescriptions, isFetching: false }));
     };
 
-    // Retrieves the patient information from the Express app
-    // ex. api/v1/patients/1
-    getPatientInfo = () => {
+    // Retrieves the items in a prescription from the Express app
+    // ex. api/v1/prescriptions/01
+    getPrescriberInfo = () => {
         // Gets parameter from the URL of 'ID'
         const querystring = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
-        const patientID = querystring.ID;
+        const prescriberID = querystring.ID;
 
         axios
-            // String interpolation
-            .get(`api/v1/patients/${patientID}`)
+            // String interpolation.
+            .get(`/api/v1/prescribers/single/${prescriberID}`)
             .then(results => results.data)
-            .then(patientInfo => this.setState({ first: patientInfo['first'], last: patientInfo['last'], dob: patientInfo['dob'] }));
-    }
+            .then(prescriberInfo => this.setState({ first: prescriberInfo['first'], last: prescriberInfo['last'], phone: prescriberInfo['phone'], location: prescriberInfo['location'] }));
+    };
 
     // displayPrescriptions() displays the properties of a prescription using Prescription
-    // @return: returns all prescriptions for a patient id
+    // @return: returns all prescriptions for a prescriber id
     displayPrescriptions = () => {
     return(
         <Prescription
         prescriptions = {this.state.prescriptions}
         getPrescriptions = {this.getPrescriptions}
-        role = {this.props.role} 
+        role = {this.props.role}
         id = {this.props.id} />
         )
     }
@@ -73,7 +72,7 @@ class Patient extends Component {
         return (
             /* Logic to render prescriptions or warning conditionally */
             <div>
-            {user === 'Patient' || user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+            {user === 'Government' || user === 'Admin' ?
             <div>
             { isFetching ? ""
                 :          
@@ -84,43 +83,48 @@ class Patient extends Component {
                 <section className="section section-lg pt-lg-0 mt--200 m-5">
                 <div className="col-xl-12 order-xl-1 center">
                     <div className="card bg-secondary shadow">
+
                     <div className="card-header bg-white border-0">
                         <div className="row align-items-center">
-                            <div className="col-8 text-left">
-                            <h3 className="mb-0 text-capitalize">{this.state.first}'s Prescriptions</h3>
-                            </div>
+                        <div className="col-8 text-left">
+                            <h3 className="mb-0">{this.state.first}'s Prescriptions</h3>
+                        </div>
                         </div>
                         <br/>
                         <div className="col-lg-6">
-                        <div className="card-body py-2">
-                            <div className="icon icon-shape icon-shape-primary rounded-circle mb-4">
-                                <i className="fas fa-user"></i>
+                            <div className="card-body py-2">
+                            <div className="icon icon-shape icon-shape-success rounded-circle mb-4">
+                                <i className="fas fa-user-md"></i>
                             </div>
-                            <h4 className="text-primary text-uppercase mb-3">Patient Information: </h4>
+                            <h4 className="text-success text-uppercase">Prescriber Information: </h4>
                             <hr className="my-1"></hr>
                             <div className="row">
                             <div className="col">
                             <p className="description mt-3">
-                                Patient ID
+                                Prescriber ID
                                 <br/>
                                 Name
                                 <br/>
-                                Date of Birth
+                                Phone
+                                <br/>
+                                Location
                             </p>
                             </div>
                             <div className="col">
                             <p className="description mt-3">
                                 <strong>
-                                {this.state.patientID}
+                                {this.state.prescriberID}
                                 <br/>
                                 {this.state.first + " " + this.state.last}
                                 <br/>
-                                {this.state.dob}
+                                {this.state.phone}
+                                <br/>
+                                {this.state.location}
                                 </strong>
                             </p>
                             </div>
                             </div>
-                        </div>
+                            </div>
                         </div>
                     </div>
                     {/* Render the prescription */}
@@ -147,4 +151,4 @@ class Patient extends Component {
     }
 }
 
-export default withRouter(Patient);
+export default PrescriptionPrescriber;
