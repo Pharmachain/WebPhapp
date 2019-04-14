@@ -66,6 +66,32 @@ module.exports = {
             });
         });
     },
+    
+    /*
+    Insert a user into the DB
+    Args:
+        username: Username to insert
+        password: The salted and hashed password
+        role: The type of user being inserted
+        connection: MySQL Connection object
+    Returns: Promise.
+        Upon resolution, returns the insertion ID of the row.
+    */
+    insertUser: function(username, password, role, role_id, connection) {
+        var q = `
+        INSERT INTO users (role, role_id, username, password)
+        VALUES (?,?,?,?);
+        SELECT LAST_INSERT_ID();
+        `;
+
+        return new Promise((resolve, reject) => {
+            var values = [role.toString(), role_id, username, password];
+            connection.query(q, values, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
 
     /*
     Get all dispensers.
@@ -124,6 +150,30 @@ module.exports = {
     },
 
     /*
+    Insert the salt into the DB
+    Args:
+        userID: userID to insert
+        salt: Salt value for the user
+        connection: MySQL Connection object
+    Returns: Promise.
+        Nothing is inside of the promise.
+    */
+    insertSalt: function(userID, salt, connection){
+        var q = `
+        INSERT INTO salts
+        VALUES (?,?);
+        `;
+
+        return new Promise((resolve, reject) => {
+            var values = [userID,salt];
+            connection.query(q, values, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
+
+    /*
     Search for all prescribers that have matching first and last name substrings.
     Args:
         first: first name substring to search for
@@ -160,6 +210,30 @@ module.exports = {
             });
         });
     },
+    
+    /*
+    Get the value of a salt, given the username
+    Args:
+        username: the username of the user
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the salt of a given user.
+    */
+    getSaltByUsername: function(username, connection){
+        var q = `
+        SELECT salt
+        FROM salts s, users u
+        WHERE s.id = u.id AND u.username = ?
+        LIMIT 1;
+        `;
+        return new Promise((resolve, reject) => {
+            var values = [username];
+            connection.query(q, values, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
 
     /*
     Get a single prescriber by ID.
@@ -185,6 +259,34 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             connection.query(q, prescriberID, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
+    
+    /*
+    Updates the count of the role index for the users
+    Args:
+        role: The type of user being addded to the system
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the Role id for the user. 
+    */
+    updateRoleCount: function(role, connection){
+        var q = `
+        UPDATE Role_Id_Count as R
+        SET R.id_number = (R.id_number + 1)
+        WHERE R.role = ?;
+
+        SELECT id_number
+        FROM Role_Id_Count
+        WHERE role = ?;
+        `;
+
+        return new Promise((resolve, reject) => {
+            var values = [role, role];
+            connection.query(q, values, (error, rows, fields) => {
                 if (error) reject(error);
                 resolve({rows, fields});
             });
@@ -217,5 +319,29 @@ module.exports = {
                 resolve({rows, fields});
             });
         });
-    }
+    },
+
+    /*
+    Get the username and password
+    Args:
+        username: the username of the user
+        password: Password that has been salted and hashed
+        connection: MySQL Connection object
+    Returns: Promise
+        Upon resolution the user with the username and password
+    */
+    getUserValidation: function(username, password, connection){
+        var q = `
+        SELECT role_id, role
+        FROM users
+        WHERE username = ? AND password = ?
+        `;
+        return new Promise((resolve, reject) => {
+            var values = [username,password];
+            connection.query(q, values, (error, rows, fields) => {
+                if (error) reject(error);
+                resolve({rows, fields});
+            });
+        });
+    },
 }
