@@ -105,7 +105,7 @@ export class Header extends React.Component {
                 </li>
                 <li className="nav-item">
                     <a className="nav-link" href={"/dispenser?ID=" + id}>
-                    <i className="fas fa-file-prescription text-orange" alt="View Prescriptions"></i> View Prescriptions
+                    <i className="fas fa-mortar-pestle text-orange" alt="View Prescriptions"></i> View Prescriptions
                     </a>
                 </li>
                 </ul>

@@ -4,7 +4,7 @@ import Prescription from "../components/Prescription";
 import qs from 'qs';
 import Error from './Error';
 
-class PrescriptionDispenser extends Component {
+class Dispenser extends Component {
     // Initialize the state
     state = {
     dispenserID: 0,
@@ -86,7 +86,7 @@ class PrescriptionDispenser extends Component {
     // @return: returns all prescriptions for a patient id
     displayPrescriptions = () => {
         return(    
-            <div className="card-body"> 
+            <div className="card-body px-0"> 
                 <div className="nav-wrapper">
                     <ul className="nav nav-tabs nav-justified flex-column flex-md-row justify-content-center" id="prescription" role="tablist">
                         <li className="nav-item">
@@ -236,4 +236,4 @@ class PrescriptionDispenser extends Component {
     }
 };
 
-export default PrescriptionDispenser;
+export default Dispenser;

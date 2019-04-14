@@ -19,16 +19,16 @@ class Home extends Component {
                     <div className="col-lg-6">
                         <h1 className="display-3 text-white">Welcome {user}!</h1> 
                         { user === 'Patient' ? 
-                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions. Select an option below...</p> 
+                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions. <br/> Select an option below...</p> 
                           :
                           user === 'Prescriber' ?
-                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription. Select an option below...</p> 
+                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription. <br/> Select an option below...</p> 
                           :
                           user === 'Dispenser' ? 
-                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or edit, cancel, or redeem a prescription. Select an option below...</p> 
+                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or edit, cancel, or redeem a prescription. <br/> Select an option below...</p> 
                           :
                           user === 'Government' ?
-                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber. Select an option below...</p>
+                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber. <br/> Select an option below...</p>
                           :
                           "" }
                     </div>
@@ -81,7 +81,7 @@ class Home extends Component {
                           <i className="fas fa-folder-plus"></i>
                           </div>
                           <h6 className="text-success text-uppercase">Add Prescription</h6>
-                          <p className="description mt-3">Create a new patient prescription order that appears on the blockchain.</p>
+                          <p className="description mt-3">Create a new prescription order for a patient that will appear on the pharmaceutical blockchain.</p>
                           <a href="./prescriptionAdd" className="btn btn-success mt-4">Add a Prescription</a>
                       </div>
                       </div>
@@ -106,11 +106,11 @@ class Home extends Component {
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-warning rounded-circle mb-4">
-                          <i className="fas fa-file-prescription"></i>
+                          <i className="fas fa-mortar-pestle"></i>
                           </div>
-                          <h6 className="text-warning text-uppercase">Dispenser Prescriptions</h6>
+                          <h6 className="text-warning text-uppercase">View Prescriptions</h6>
                           <p className="description mt-3">View all of your dispenser's prescriptions or the prescriptions that are open or historical.</p>
-                          <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Prescriptions</a>                 
+                          <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Dispenser's R<sub>x</sub></a>                 
                       </div>
                       </div>
                       </div>
@@ -137,7 +137,7 @@ class Home extends Component {
                           <i className="fas fa-hospital"></i>
                           </div>
                           <h6 className="text-warning text-uppercase">Dispenser Search</h6>
-                          <p className="description mt-3">Search a dispenser by ID, name, or location and view all of its corresponding prescriptions.</p>
+                          <p className="description mt-3">Search a dispenser by ID or name and view all of its prescriptions that are either open or historical.</p>
                           <a href="./dispenserSearch" className="btn btn-warning mt-4">Search by Dispenser</a>
                       </div>
                       </div>

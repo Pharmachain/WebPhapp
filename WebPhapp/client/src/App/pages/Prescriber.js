@@ -4,7 +4,7 @@ import qs from 'qs';
 import Prescription from "../components/Prescription";
 import Error from "./Error";
 
-class PrescriptionPrescriber extends Component {
+class Prescriber extends Component {
     // Initialize the state
     state = {
         prescriberID: 0,
@@ -151,4 +151,4 @@ class PrescriptionPrescriber extends Component {
     }
 }
 
-export default PrescriptionPrescriber;
+export default Prescriber;
