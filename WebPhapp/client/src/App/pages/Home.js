@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Error from "./Error";
 
 class Home extends Component {
   render() {
@@ -18,16 +19,16 @@ class Home extends Component {
                     <div className="col-lg-6">
                         <h1 className="display-3 text-white">Welcome {user}!</h1> 
                         { user === 'Patient' ? 
-                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a patient, you have the ability to view your prescriptions. Select an option below...</p> 
                           :
                           user === 'Prescriber' ?
-                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a prescriber, you have the ability to search by patient or add, edit, or cancel a prescription. Select an option below...</p> 
                           :
                           user === 'Dispenser' ? 
-                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or dispenser or edit, cancel, or redeem a prescription.<br/>Select an option below...</p> 
+                          <p className="lead text-white">As a dispenser, you have the ability to search by patient or edit, cancel, or redeem a prescription. Select an option below...</p> 
                           :
                           user === 'Government' ?
-                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber.<br/>Select an option below...</p>
+                          <p className="lead  text-white">As a government overseer, you have the read-only ability to search by patient, dispenser, or prescriber. Select an option below...</p>
                           :
                           "" }
                     </div>
@@ -44,15 +45,15 @@ class Home extends Component {
               <div className="row justify-content-center">
               <div className="col-lg-12">
                   { user === 'Patient' ? 
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-primary rounded-circle mb-4">
-                          <i class="fas fa-prescription-bottle"></i>
+                          <i className="fas fa-prescription-bottle"></i>
                           </div>
                           <h6 className="text-primary text-uppercase">View Prescriptions</h6>
-                          <p className="description mt-3">View all of your personal prescriptions. Each prescription has a drugname, quantity, date written, and more.</p>
+                          <p className="description mt-3">View all of your personal prescriptions. Each prescription has a drug name, quantity, date written, and more.</p>
                           <a href={`./patient?ID=${id}`} className="btn btn-primary mt-4">View My Prescriptions</a>
                       </div>
                       </div>
@@ -60,7 +61,7 @@ class Home extends Component {
                     </div>
                     :
                     user === 'Prescriber' ?
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
@@ -77,7 +78,7 @@ class Home extends Component {
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-success rounded-circle mb-4">
-                          <i class="fas fa-folder-plus"></i>
+                          <i className="fas fa-folder-plus"></i>
                           </div>
                           <h6 className="text-success text-uppercase">Add Prescription</h6>
                           <p className="description mt-3">Create a new patient prescription order that appears on the blockchain.</p>
@@ -88,7 +89,7 @@ class Home extends Component {
                     </div>
                     :
                     user === 'Dispenser' ? 
-                    <div className="row row-grid">
+                    <div className="row row-grid justify-content-center">
                       <div className="col-lg-4">
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
@@ -105,11 +106,11 @@ class Home extends Component {
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-warning rounded-circle mb-4">
-                          <i className="fas fa-hospital"></i>
+                          <i className="fas fa-file-prescription"></i>
                           </div>
-                          <h6 className="text-warning text-uppercase">Dispenser Search</h6>
-                          <p className="description mt-3">Search a dispenser by ID, name, or location and view all of its corresponding prescriptions.</p>
-                          <a href="./dispenserSearch" className="btn btn-warning mt-4">Search by Dispenser</a>
+                          <h6 className="text-warning text-uppercase">Dispenser Prescriptions</h6>
+                          <p className="description mt-3">View all of your dispenser's prescriptions or the prescriptions that are open or historical.</p>
+                          <a href={"./dispenser?ID=" + id} className="btn btn-warning mt-4">View Prescriptions</a>                 
                       </div>
                       </div>
                       </div>
@@ -155,7 +156,7 @@ class Home extends Component {
                       </div>
                     </div>
                     :
-                    "" }
+                    <Error/> }
               </div>
               </div>
           </div>

@@ -1,28 +1,31 @@
 import React, { Component } from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import axios from "axios";
-import Cookies from 'universal-cookie';
 import jwt from 'jsonwebtoken';
 
 import "./App.css";
 import Header from "../components/Header"
+import Footer from "../components/Footer"
 import Login from "./Login"
 import Home from "./Home";
 import Patient from "./Patient";
 import PatientSearch from "./PatientSearch"
 import DispenserSearch from "./DispenserSearch"
+import PrescriberSearch from "./PrescriberSearch"
 import PrescriptionAdd from "./PrescriptionAdd"
 import PrescriptionEdit from "./PrescriptionEdit"
-import PrescriptionRedeem from "./PrescriptionRedeem";
+import PrescriptionDispenser from "./PrescriptionDispenser";
+import PrescriptionPrescriber from "./PrescriptionPrescriber";
 import Error from "./Error";
-import CancelAlert from "./CancelAlert"
 
 class App extends Component {
   constructor(props){
     super(props);
 
-    this.state = {user: '',
-            headerToggle: true}
+    this.state = {
+            user: '',
+            headerToggle: true
+        }
 
     this.authenticate_user();
 
@@ -65,24 +68,28 @@ class App extends Component {
     const App = () => (
 
       <div>
-        {this.state.headerToggle && <Header/>}
+        {this.state.headerToggle && <Header id={user.sub} role={user.role}/>}
         {/* authenticated routes */ }
         {this.state.user !== '' ?
+          <div className="main-content">
           <Switch>
             <Route path="/login" component={Login}/>
             <Route exact path="/" component={() => <Home id={user.sub} role={user.role}/> }/>
             <Route path="/patient" component={props => <Patient {...props} id={user.sub} role={user.role} />}/>
             <Route path="/patientSearch" component={props => <PatientSearch {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/dispenserSearch" component={props => <DispenserSearch {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/prescriberSearch" component={props => <PrescriberSearch {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriptionAdd" component={props => <PrescriptionAdd {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/prescriptionEdit" component={props => <PrescriptionEdit {...props} id={user.sub} role={user.role}/>}/>
-            <Route path="/prescriptionRedeem" component={props => <PrescriptionRedeem {...props} id={user.sub} role={user.role}/>}/>
-            <Route path="/cancel" component={props => <CancelAlert {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/dispenser" component={props => <PrescriptionDispenser {...props} id={user.sub} role={user.role}/>}/>
+            <Route path="/prescriber" component={props => <PrescriptionPrescriber {...props} id={user.sub} role={user.role}/>}/>
             <Route path="/error" component={Error}/>
           </Switch>
+          <Footer/>
+          </div>
           :
           <Switch>
-            <Route path="/login" component={Login}/>
+            <Route path="/login" component={Login}/>>
           </Switch>
         }
     </div>
