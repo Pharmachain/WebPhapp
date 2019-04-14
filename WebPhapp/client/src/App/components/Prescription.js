@@ -197,20 +197,16 @@ class Prescription extends Component {
             var writtenDate = prescription.writtenDate.split(" ", 4).join(" ");
             prescriptionCount += 1;
             return(
-                <div className="card mb-4 ml-4"  key={prescription.prescriptionID} >
-                    <div className="card-body" >
+                <div className="card mb-4 ml-4"  key={prescription.prescriptionID} style={{width:'15rem'}}>
+                    <div className="card-body">
                         <div className="row">
                             <div className="col center">
-                                
                                 <div className="row text-left">
-                                    {/* <div className="icon icon-shape bg-default text-white rounded-circle shadow lg offset-1">
-                                            <i className="fas fa-file-prescription"></i>
-                                    </div> */}
                                     <div className="col text-left">
                                     <h5 className="card-title text-uppercase text-muted mb-0">
                                         Prescription:
                                         <br/>
-                                        <span className="h2 font-weight-bold mb-0">
+                                        <span className="h3 font-weight-bold mb-0">
                                         {prescription.drugName}
                                         </span>
                                     </h5>
@@ -363,9 +359,8 @@ class Prescription extends Component {
         return(
             <div className="container justify-content-center">
                 <div className="masonry align-items-left">
-                    <div className="card-columns">
-                        {this.displayPrescriptions()}
-                    </div>
+                    {this.displayPrescriptions()}
+                    
                     {/* Modal that displays a loading screen for prescription cancelling */}
                     <div 
                         className="modal fade" 
