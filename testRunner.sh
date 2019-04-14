@@ -88,9 +88,11 @@ if $c_option; then
 
     # Run the test contracts
     cd ../../PharmaChain
+    testrpc &
+    sleep 15s
     sudo truffle version
     sudo truffle migrate
-    sudo truffle test
+    sudo truffle test --network testrpc_net
     sudo node deploy.js
     sudo node load_data.js
     cd ../../

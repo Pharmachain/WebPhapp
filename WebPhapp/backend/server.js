@@ -1,15 +1,23 @@
 const express = require('express');
 const path = require('path');
-var bodyParser = require('body-parser');
-var fs = require("fs");
-var conn = require('./connections.js') // private file not under VC.
-
+const bodyParser = require('body-parser');
+const fs = require("fs");
+const crypto = require('crypto');
 const app = express();
-app.use(bodyParser.json() );        // to support JSON-encoded bodies
+const cookieParser = require('cookie-parser');
+const pbkdf2 = require('pbkdf2');
+
+const conn = require('./connections.js') // private file not under VC.
+const auth = require('./auth_helper.js');
+const Role = require("./role.js");
+const settings = require('./settings.js');
+
+app.use(bodyParser.json());        // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+app.use(cookieParser());
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -52,6 +60,31 @@ function convertDatesToString(prescription){
 }
 
 /*
+    Given a list of prescriptions, organize them in decreasing, chronological order.
+    prescriptions: An array of prescription objects
+    attribute: A value to determine the mode of the function.
+        1 for the written date to organize, anything else for fillDates
+    returns an array of organized prescriptions
+*/
+function orderPrescriptions(prescriptions, attribute){
+    return prescriptions.sort((pres1, pres2) => {
+        if(attribute === 1){
+            return  pres2.writtenDate - pres1.writtenDate;
+        }
+
+        if(pres1.fillDates.length === 0 ){
+            return 1;
+        }
+        else if(pres2.fillDates.length === 0){
+            return -1;
+        }
+        else{
+            return pres2.fillDates[pres2.fillDates.length-1] - pres1.fillDates[pres1.fillDates.length-1];
+        }
+    });
+}
+
+/*
 An api endpoint that cancels a prescription associated with a given prescriptionID.
 Example:
     Directly in terminal:
@@ -59,7 +92,7 @@ Example:
     To be used in Axois call:
         .get("api/v1/prescriptions/cancel/0")
 */
-app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
+app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var date = new Date().getTime();
 
@@ -70,13 +103,17 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', (req,res) => {
         return;
     }
 
-    //TODO Check for auth to do this.
-    //TODO Check for valid prescriptionID
-
     if(conn.Blockchain) {
-        block_helper.cancel(prescriptionID, date)
-        .then((answer) => {
-            return finish(answer.toString(), true);
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+         block_helper.verifyChainIndex(prescriptionID)
+         .then((_) => {
+            block_helper.cancel(prescriptionID, date)
+            .then((answer) => {
+                return finish(answer.toString(), true);
+            })
+            .catch((error) => {
+                return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
+            });
         })
         .catch((error) => {
             return finish('/api/v1/prescriptions/cancel: error: ' + error.toString(), false);
@@ -109,8 +146,9 @@ Examples:
 Returns:
     true (and status code 200) if prescription edited, false (and status code 400) otherwise.
 */
-app.post('/api/v1/prescriptions/edit',(req,res) => {
-    //TODO auth check needed here with cookie that goes with request headers
+
+app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dispenser]), (req,res) => {
+
     const changedPrescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -123,7 +161,7 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
     fields = new Set([
         changedPrescription.prescriptionID,
         changedPrescription.quantity,
-        changedPrescription.daysValid,
+        changedPrescription.daysFor,
         changedPrescription.refillsLeft,
         changedPrescription.dispenserID,
         changedPrescription.daysBetween
@@ -133,16 +171,24 @@ app.post('/api/v1/prescriptions/edit',(req,res) => {
     }
 
     if(conn.Blockchain){
-        // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
-        block_helper.update(
-            changedPrescription.prescriptionID,
-            changedPrescription.dispenserID,
-            changedPrescription.quantity,
-            changedPrescription.daysValid,
-            changedPrescription.refillsLeft,
-            changedPrescription.daysBetween 
-        ).then((_) => {
-            return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
+
+         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+         block_helper.verifyChainIndex(changedPrescription.prescriptionID)
+         .then((_) => {
+            // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
+            block_helper.update(
+                changedPrescription.prescriptionID,
+                changedPrescription.dispenserID,
+                changedPrescription.quantity,
+                changedPrescription.daysFor,
+                changedPrescription.refillsLeft
+                changedPrescription.daysBetween
+            ).then((_) => {
+                return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
+            })
+            .catch((error) => {
+                return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
+            });
         })
         .catch((error) => {
             return finish('/api/v1/prescriptions/edit: error: ' + error.toString(), false);
@@ -173,7 +219,7 @@ About:
         dispensorID,
         daysBetween
     }
-Examples: 
+Examples:
     Directly in terminal:
         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Typplication/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":0,
         "dispenserID":0,"daysBetween":30}'
@@ -187,7 +233,7 @@ Returns:
 Note on daysValid field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
-app.post('/api/v1/prescriptions/add',(req,res) => {
+app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -284,6 +330,8 @@ app.post('/api/v1/prescriptions/add',(req,res) => {
 
 /*
 An api endpoint that returns all of the prescriptions associated with a patient ID
+Roles:
+    TODO: Role.Patient needs to be restricted further to one's own patientID only.
 Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/prescriptions/1"
@@ -296,8 +344,15 @@ Returns:
         prescriberID, dispenserID, cancelDate, daysBetween, drugName
     ]
 */
-app.get('/api/v1/prescriptions/:patientID', (req,res) => {
+app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+    if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
                     ' prescription(s) for patient ID ' + patientID.toString();
@@ -309,6 +364,7 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
             return;
         }
 
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
@@ -366,10 +422,103 @@ app.get('/api/v1/prescriptions/:patientID', (req,res) => {
     else { // search prescriptions from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
-    
+
         var toSend = [];
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
+        });
+        handlePrescriptionsCallback(toSend);
+    }
+});
+
+/*
+An api endpoint that returns all of the prescriptions associated with a prescriber ID
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescriptions/prescriber/1"
+    To be used in Axois call:
+        .get("api/v1/prescriptions/prescriber/1")
+Returns:
+    A list of prescription objects each with fields: [
+        prescriptionID, patientID, drugID, fillDates,
+        writtenDate, quantity, daysFor, refillsLeft,
+        prescriberID, dispenserID, cancelDate, drugName
+    ]
+*/
+app.get('/api/v1/prescriptions/prescriber/:prescriberID', (req,res) => {
+    var prescriberID = parseInt(req.params.prescriberID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        var msg = '/api/v1/prescriptions/prescriber: Sent ' + prescriptions.length.toString() +
+                    ' prescription(s) for prescriberID ' + prescriberID.toString();
+
+        // if no prescriptions for a prescriber ID, return early
+        if (prescriptions.length === 0) {
+            console.log(msg);
+            res.json([]);
+            return;
+        }
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            for (var i = 0; i < prescriptions.length; i++){
+                prescriptions[i].drugName = "drugName";
+            }
+            res.json(prescriptions);
+            return;
+        }
+
+        // Look up the drug names given the list of drugIDs in MySQL
+        var drugIDs = prescriptions.map((prescription) => {
+            return prescription.drugID;
+        })
+
+        mysql.getDrugNamesFromIDs(drugIDs, connection)
+        .then((answer) => {
+            for (var i = 0; i < prescriptions.length; i++){
+                var drug = answer.rows.filter((row) => {
+                    return (row.ID === prescriptions[i].drugID);
+                });
+
+                // Could be undefined on return
+                if(drug.length !== 0) {
+                    prescriptions[i].drugName = drug[0].NAME;
+                }
+                else {
+                    prescriptions[i].drugName = "drugName";
+                }
+            }
+
+            console.log(msg);
+            res.json(prescriptions);
+        })
+        .catch((error) => {
+            console.log("/api/v1/prescriptions/prescriber: error: ", error);
+            res.status(400).send({});
+        });
+    };
+
+    if(conn.Blockchain){
+        var field_prescriberID = 0;
+        block_helper.read_by_value(field_prescriberID, prescriberID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        }).catch((error) => {
+            console.log('/api/v1/prescriptions/prescriber: error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching prescriberID.');
+        });
+    }
+    else { // search prescriptions from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+    
+        var toSend = [];
+        prescriptions.forEach(prescription => {
+            if (prescription.prescriberID === prescriberID) toSend.push(prescription);
         });
         handlePrescriptionsCallback(toSend);
     }
@@ -399,8 +548,18 @@ Returns:
         drugName
     ]
 */
-app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
+app.get('/api/v1/prescriptions/single/:prescriptionID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
+
+    // Need check for prescriptions
     var prescriptionID = parseInt(req.params.prescriptionID);
+    // Ensures that the patientID is the same as the tokens ID.
+    var token = req.token;
+
+    if((token.role === Role.Patient && prescriptionID != token.sub) && settings.env !== "test"){
+        console.log("PatientIDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
     var handlePrescriptionCallback = function(prescription) {
         // '==' catches both null and undefined
         if (prescription == null) {
@@ -439,13 +598,21 @@ app.get('/api/v1/prescriptions/single/:prescriptionID', (req,res) => {
     };
 
     if(conn.Blockchain){
-        block_helper.read(prescriptionID)
-        .then((answer) => {
-            handlePrescriptionCallback(answer.prescription);
+        // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
+        block_helper.verifyChainIndex(prescriptionID)
+        .then((_) => {
+            block_helper.read(prescriptionID)
+            .then((answer) => {
+                handlePrescriptionCallback(answer.prescription);
+            }).catch((error) => {
+                console.log('error: ', error);
+                res.status(400).send('Error searching for prescription by prescriptionID.');
+            });
         }).catch((error) => {
             console.log('error: ', error);
             res.status(400).send('Error searching for prescription by prescriptionID.');
         });
+
     }
     else { // load prescription from dummy data
         var prescriptions = readJsonFileSync(
@@ -497,10 +664,11 @@ Returns:
 Relevant Express Docs:
     https://expressjs.com/en/api.html#req.query
 */
-app.get('/api/v1/patients', (req,res) => {
+app.get('/api/v1/patients', auth.checkAuth([Role.Prescriber, Role.Government, Role.Dispenser]), (req,res) => {
     var first = req.query.first;
     var last = req.query.last;
 
+    // Need to check for the role of a patient here...
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
         __dirname + '/' + "dummy_data/patients.json").patients;
@@ -511,13 +679,13 @@ app.get('/api/v1/patients', (req,res) => {
             // if no query given, return all patients
             return true;
         } else if( last === undefined ){
-            return (elem.first.includes(first.toLowerCase()));
+            return (elem.first.toLowerCase().includes(first.toLowerCase()));
         }
         else if( first === undefined ){
-            return (elem.last.includes(last.toLowerCase()));
+            return (elem.last.toLowerCase().includes(last.toLowerCase()));
         }
-        return (elem.first.includes(first.toLowerCase()))
-                && (elem.last.includes(last.toLowerCase()));
+        return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                && (elem.last.toLowerCase().includes(last.toLowerCase()));
     });
 
     // log the backend process to the terminal
@@ -549,8 +717,16 @@ Returns:
         "dob": "10-05-1996"
     }
 */
-app.get('/api/v1/patients/:patientID', (req,res) => {
+app.get('/api/v1/patients/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), function(req,res) {
+
     var patientID = parseInt(req.params.patientID);
+    var token = req.token;
+    // Ensures that the patientID is the same as the tokens ID.
+    if(token.role === Role.Patient && (patientID != token.sub) && settings.env !== "test" ){
+        console.log("PatientIDs do not match...");
+        res.status(400).send(false);
+        return;
+    }
 
     // will be replaced with DB call once we determine user auth.
     var all_patients = readJsonFileSync(
@@ -558,7 +734,7 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
 
     var matchingPatient = all_patients.find(function(patient){
         return patient.patientID === patientID;
-    })
+    });
 
     // log the backend process to the terminal
     var msg = '/api/v1/patients/:patientID: ';
@@ -573,9 +749,173 @@ app.get('/api/v1/patients/:patientID', (req,res) => {
     res.json(matchingPatient);
 });
 
+app.post('/api/v1/users/me', (req,res) => {
+    const userInfo = req.body;
+    console.log(userInfo);
+    var token = auth.createToken(1, userInfo.role);
+    console.log(token);
+    res.json(token);
+})
+
+/*
+About:
+    The api endpoint to create a user.
+    Expects a username, password and role.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/add' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacob","role":"Patient"}'
+Returns:
+    Success or failure with message
+Authentication:
+    Admin only (Role.Admin)
+*/
+app.post('/api/v1/users/add', (req,res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+        userInfo.role
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/add: error: Not all fields");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validates the role
+    const checkRole = Object.keys(Role).filter(role => userInfo.role === role);
+    if(checkRole.length === 0){
+        console.log("/api/v1/users/add: Invalid role");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Salts: Making the random table attack near impossible.
+    var salt = crypto.randomBytes(64).toString('base64');
+
+    // Hash the password
+    var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+    mysql.updateRoleCount(userInfo.role, connection).then(results => {
+        // Grabs the query, not the insertion.
+        const role_id = results.rows[1][0].id_number;
+        return mysql.insertUser(userInfo.username, hashedPassword, userInfo.role, role_id, connection);
+    }).then(result => {
+        const id = result.rows[0].insertId;
+        return mysql.insertSalt(id, salt, connection);
+    }).then(() => {
+        console.log("/api/v1/users/add: User created of role", userInfo.role, );
+        res.status(200).send(true);
+    }).catch((error) => {
+        console.log("/api/v1/users/add: error: ", error);
+        res.status(400).send(false);
+    });
+});
+
+/*
+About:
+    The api endpoint to login as a user.
+    Expects a username and password.
+Examples:
+    curl 'http://localhost:5000/api/v1/users/login' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"username":"mdulin2","password":"jacobispink"}'
+Returns:
+    A failure message or a auth to authenticate to the next page.
+*/
+app.post('/api/v1/users/login', (req, res) => {
+    const userInfo = req.body;
+
+    // validate fields exist that should
+    fields = [
+        userInfo.username,
+        userInfo.password,
+    ];
+    fieldsSet = new Set(fields);
+    if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log("/api/v1/users/login: error: Missing Fields");
+        res.status(403).send(false);
+        return;
+    }
+
+    // Validate the logged in user
+    mysql.getSaltByUsername(userInfo.username, connection)
+    .then(salt => {
+
+        if(salt.rows.length === 0){
+            console.log("/api/v1/users/login: error: User not found.");
+            res.status(403).send(false);
+            return;
+        }
+
+        // Salt the password with the user specific salt
+        salt = salt.rows[0].salt;
+        var hashedPassword = pbkdf2.pbkdf2Sync(userInfo.password, salt, 1, 32, 'sha512').toString('base64');
+
+        // See if the password matches
+        return mysql.getUserValidation(userInfo.username, hashedPassword, connection);
+    }).then(user => {
+        if(user.rows.length === 0){
+            console.log('/api/v1/users/login: Failed attempt');
+            res.status(403).send(false);
+            return;
+        }
+
+        // Login is complete. Send back a auth for the user to advance on.
+        var token = auth.createToken(user.rows[0].role_id, user.rows[0].role);
+
+        // Set the cookie AND send the token.
+        const options = {
+            httpOnly: true,
+            sameSite: true
+        }
+        res.cookie('auth_token',token, options);
+        res.json(token);
+
+    }).catch(error => {
+        console.log(error);
+    });
+});
+
+/*
+About:
+    On the frontend, each time a web request is made for a webpage or api the  token needs to be verified. This reauth will verify the token, then send the user a new token.
+Example: NOTE - The 'jwt' must be a valid jwt token for the user.
+    curl "http://localhost:5000/api/v1/users/reauth" --cookie 'jwt=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiUGF0aWVudCIsInN1YiI6IjEyIiwiaWF0IjoxNTUxMzMzNTYwLCJleHAiOjE1NTEzMzcxNjB9.dR-JZF1VBQU7jEU9nROa_Ky8X7U5w5_H3m2ZpT61_eakRriHMPAQOANLbIVuXfZFeXAaBD0VYM2h4Dmj54WW-L7yn5PJqnlEOJzS1ut4-B1NkfgIXJEdUIFjIedNpkJ9nfN7G7_kSjJ3jpA-pqV8CZHtgINUQggbxp_UrAJd7iUN3Fa58hrQJ3_40ge7seLgI15LLIFUOQV0JQR3VbSPUL5wfZI6XKEXAeAIhuz7YXPxodPZVAxk6a0h4jmfnaxWD777vdiaW_7djYUlIwVD3OWcOGV4EojcIYvUyM8c9MrsRij1LNHEMBr5BuElYcV2ZqgxKE3ek9k1gyu3pMKpOQ'
+Returns:
+    jwt token or error
+*/
+app.get('/api/v1/users/reauth', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
+    if(settings.env === 'test'){
+        res.status(200);
+        return;
+    }
+
+    var token = auth.createToken(req.token.sub, req.token.role);
+    const options = {
+        httpOnly: true,
+        sameSite: true
+    }
+    res.cookie('auth_token',token, options);
+    res.status(200).send(token);
+});
+
+/*
+About:
+    Users need to be able to logout. So, this request just clears the auth_token cookie for the user.
+Returns:
+    Nothing
+*/
+app.get('/api/v1/users/logout', (req,res) => {
+    console.log("anything i guess")
+    res.cookie('auth_token','');
+    res.status(200).send(true);
+});
+
 // ------------------------
 //       dispensers
 // ------------------------
+const FIELD_DISPENSER_ID_INT = 2; // blockchain index of the dispenserID field
 
 /*
 About:
@@ -588,7 +928,7 @@ Examples:
 Returns:
     true if redeemed, false otherwise
 */
-app.get('/api/v1/dispensers/redeem/:prescriptionID', (req, res) => {
+app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispenser]), (req, res) => {
     var prescriptionID = parseInt(req.params.prescriptionID);
     var fillDate = new Date().getTime();
 
@@ -631,43 +971,105 @@ Examples:
     Directly in terminal:
         >>> curl "http://localhost:5000/api/v1/dispensers/prescriptions/all/1"
     To be used in Axois call:
-        .get("/api/v1/dispensers/prescriptions/1")
+        .get("/api/v1/dispensers/prescriptions/all/1")
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/all/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // take only prescriptions with matching dispenserID
         prescriptions = prescriptions.filter(
             prescription => prescription.dispenserID === dispenserID
         );
 
+        var valid_return_msg = 'Sending all ' + prescriptions.length.toString()
+                        + ' prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
+        prescriptions = orderPrescriptions(prescriptions,1);
+
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/all: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/all: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/all: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
@@ -689,8 +1091,15 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...")
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take historical prescriptions with dispenserID
         prescriptions = prescriptions.filter(
@@ -699,32 +1108,85 @@ app.get('/api/v1/dispensers/prescriptions/historical/:dispenserID', (req, res) =
                 (prescription.cancelDate > 0 || prescription.refillsLeft < 1) // there is no cancel date if cancelDate is 0 or -1
         );
 
+        var valid_return_msg = 'Sending ' + prescriptions.length.toString()
+                        + ' historical prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
+        prescriptions = orderPrescriptions(prescriptions,1);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' historical prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/historical: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
-    
+
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/historical/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/historical: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/historical: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
@@ -746,43 +1208,103 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
+app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req, res) => {
     var dispenserID = parseInt(req.params.dispenserID);
+    const token = req.token;
+    if((token.role === Role.Dispenser && dispenserID != token.sub) && settings.env !== "test"){
+        console.log("Dispenser IDs do not match...");
+        res.status(400).send(false);
+        return;
+    }
+
     var handlePrescriptionsCallback = function(prescriptions) {
         // only take open prescriptions with dispenserID
         prescriptions = prescriptions.filter(
-            prescription => 
+            prescription =>
                 prescription.dispenserID === dispenserID
                 && prescription.refillsLeft > 0
                 && prescription.cancelDate < 1 // there is no cancel date if cancelDate is 0 or -1
         );
 
+        var valid_return_msg = 'Sending ' + prescriptions.length.toString()
+                        + ' open prescription(s) related to dispenserID ' + dispenserID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
+        prescriptions = orderPrescriptions(prescriptions,0);
         // Convert date integers to strings
         prescriptions = prescriptions.map(
             prescription => convertDatesToString(prescription)
         );
 
-        console.log('Sending ' + prescriptions.length.toString()
-                        + ' open prescription(s) related to dispenserID ' + dispenserID.toString());
-        res.status(200).send(prescriptions);
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/dispensers/prescriptions/open: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
     }
 
     // Error if dispenser ID is null or undefined
     if(dispenserID == null) {
-        console.log('/api/v1/dispensers/prescriptions/open/:dispenserID: No ID match');
+        console.log('/api/v1/dispensers/prescriptions/open: error: No ID match');
         res.status(400).send([]);
         return;
     }
 
     if(conn.Blockchain) {
-        var field_dispenserID = 2;
-        block_helper.read_by_value(field_dispenserID, dispenserID)
+        block_helper.read_by_value(FIELD_DISPENSER_ID_INT, dispenserID)
         .then((answer) => {
             handlePrescriptionsCallback(answer.prescriptions);
         })
         .catch((error) => {
-            console.log('error: ', error);
+            console.log('/api/v1/dispensers/prescriptions/open: error: ', error);
             res.status(400).send('Error in searching blockchain for prescriptions matching dispenserID.');
+            return;
         });
     }
     else { // search from dummy data
@@ -794,48 +1316,476 @@ app.get('/api/v1/dispensers/prescriptions/open/:dispenserID', (req, res) => {
 
 /*
 About:
-    An api endpoint that returns a list of all dispensers given a name to match on.
-    String matching is case insensitive.
+    An api endpoint that returns a single dispenser given a dispenserID.
 Examples:
     Directly in terminal:
-        >>> curl "http://localhost:5000/api/v1/dispensers/walgreens"
+        >>> curl "http://localhost:5000/api/v1/dispensers/single/1"
     To be used in Axois call:
-        .get("/api/v1/dispensers/walgreens")
+        .get("/api/v1/dispensers/single/1")
+Returns:
+    {
+        dispenserID (int),
+        name (string),
+        phone (int),
+        location (string)
+    }
+*/
+app.get('/api/v1/dispensers/single/:dispenserID', (req,res) => { // auth.checkAuth([Role.Government]),
+    var dispenserID = parseInt(req.params.dispenserID);
+    var finish = function(dispensers) {
+        if(dispensers.length > 1) {
+            console.log('/api/v1/dispensers/single/: error: too many dispenserID matches');
+            res.status(400).send(false);
+        }
+        else if(dispensers.length === 0) {
+            console.log('/api/v1/dispensers/single/: error: no dispenserID match');
+            res.status(400).send(false);
+        }
+        else {
+            dispenser = dispensers[0]
+            console.log('/api/v1/dispensers/single/: returning dispenser with ID ' + dispenserID.toString());
+            res.status(200).send(dispenser);
+        }
+    };
+
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+        dispensers = dispensers.filter(function(elem) {
+            return dispenserID === elem.dispenserID;
+        });
+        return finish(dispensers);
+    }
+    
+    mysql.getDispenserByID(dispenserID, connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        return finish(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/single/: error: ', error);
+        return res.status(400).send({});
+    });
+});
+
+/*
+About:
+    An api endpoint that returns all dispensers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers/all"
+    To be used in Axois call:
+        .get("/api/v1/dispensers/all")
 Returns:
     [
         {
             dispenserID (int),
             name (string),
-            location (string),
-            phone (int)
+            phone (int),
+            location (string)
         },
         ...
     ]
 */
-app.get('/api/v1/dispensers/:name', (req, res) => {
-    var name = req.params.name;
+app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),    
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
 
-    // if dispenser ID is null or undefined, return all
-    if(name == null) {
-        console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning all dispensers');
-        res.status(200).send([]);
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
+    }
+
+    mysql.getDispensers(connection)
+    .then((answer) => {
+        var dispensers = answer.rows.map((dispenser) => {
+            dispenser['dispenserID'] = dispenser['id'];
+            delete dispenser['id'];
+            return dispenser;
+        });
+        console.log('/api/v1/dispensers/all: returning ' + dispensers.length + ' dispensers.');
+        return res.status(200).send(dispensers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/dispensers/all: error: ', error);
+        return res.status(400).send([]);
+    });
+});
+
+/*
+About:
+    An api endpoint that returns a list of all dispensers given a name to match on.
+    String matching is case insensitive.
+    Returns all dispensers if no name is given.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/dispensers?name=walgreens"
+    To be used in Axois call:
+        .get("/api/v1/dispensers?name=walgreens")
+Returns:
+    [
+        {
+            dispenserID (int),
+            name (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/dispensers', (req, res) => {
+    var name = req.query.name; 
+    var finish = function(success, dispensers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + dispensers.length.toString() + ' dispensers.';
+        } else {
+            msg = 'error: ' + error;
+        }
+        console.log('/api/v1/dispensers: ' + msg);
+        res.status(success ? 200 : 400).send(dispensers);
+    };
+
+    // if no connection string (Travis testing), grab dispensers from json files
+    if (!conn.MySQL) {
+        var dispensers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/dispensers.json").dispensers;
+
+        dispensers = dispensers.filter(function(elem) {
+            // if no query given, return all dispensers
+            if(name === undefined) return true;
+
+            // case insensitive: match substrings in dispenser name
+            return elem.name.toLowerCase().includes(name.toLowerCase());
+        });
+        return finish(true, dispensers);
+    }
+
+    // otherwise, grab dispensers from MySQL
+    if (name == undefined)  name = '';
+    mysql.getDispensersByName(name, connection)
+    .then((answer) => {
+        var dispensers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            dispensers.push({
+                dispenserID: answer.rows[i].id,
+                name: answer.rows[i].name,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
+        }
+        return finish(true, dispensers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
+    });
+});
+
+// ------------------------
+//        Prescriber
+// ------------------------
+
+/*
+About:
+    An api endpoint that returns all prescribers.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/all"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/all")
+Returns:
+    [
+        {
+            prescriberID (int),
+            first (string),
+            last (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers/all', (req,res) => { // auth.checkAuth([Role.Government]),
+    // if no connection string (Travis testing), grab prescribers from json files
+    if (!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    }
+
+    mysql.getPrescribers(connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        console.log('/api/v1/prescribers/all: returning ' + prescribers.length + ' prescribers.');
+        return res.status(200).send(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/all: error: ', error);
+        return res.status(400).send([]);
+    });
+});
+
+/*
+About:
+    An api endpoint that returns a single prescriber given a prescriberID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/single/1"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/single/1")
+Returns:
+    {
+        prescriberID (int),
+        first (string),
+        last (string),
+        phone (int),
+        location (string)
+    }
+*/
+app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkAuth([Role.Government]),
+    var prescriberID = parseInt(req.params.prescriberID);
+    var finish = function(prescribers) {
+        if(prescribers.length > 1) {
+            console.log('/api/v1/prescribers/single/: error: too many prescriberID matches');
+            res.status(400).send(false);
+        }
+        else if(prescribers.length === 0) {
+            console.log('/api/v1/prescribers/single/: error: no prescriberID match');
+            res.status(400).send(false);
+        }
+        else {
+            var prescriber = prescribers[0]
+            console.log('/api/v1/prescribers/single/: returning prescriber with ID ' + prescriberID.toString());
+            res.status(200).send(prescriber);
+        }
+    }
+    
+    if(!conn.MySQL) {
+        var prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        prescribers = prescribers.filter(function(elem) {
+            return prescriberID === elem.prescriberID;
+        });
+        return finish(prescribers);
+    }
+
+    mysql.getPrescriberByID(prescriberID, connection)
+    .then((answer) => {
+        var prescribers = answer.rows.map((prescriber) => {
+            prescriber['prescriberID'] = prescriber['id'];
+            delete prescriber['id'];
+            return prescriber;
+        });
+        return finish(prescribers);
+    })
+    .catch((error) => {
+        console.log('/api/v1/prescribers/single/: error: ', error);
+        return res.status(400).send({});
+    });
+});
+
+/*
+About:
+    An api endpoint that returns a list of all prescribers given a name to match on.
+    String matching is case insensitive.
+    Examples:
+        Directly in terminal:
+            By both first and last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred&last=beckey"
+            By just first name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?first=fred"
+            By just last name:
+                >>> curl "http://localhost:5000/api/v1/prescribers?last=beckey"
+        To be used in Axois call:
+            .get("/api/v1/prescribers?first=fred&last=beckey")
+Returns:
+    [
+        {
+            prescriberID (int),
+            first (string),
+            last  (string),
+            phone (int),
+            location (string)
+        },
+        ...
+    ]
+*/
+app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Government]),
+    var first = req.query.first;
+    var last = req.query.last;
+    var finish = function(success, prescribers, error='') {
+        var msg;
+        if(success) {
+            msg = 'returning ' + prescribers.length.toString() + ' prescriber match(es) for';
+            if(first !== undefined) msg += ' [first name: ' + first.toLowerCase() + ']';
+            if(last !== undefined) msg += ' [last name: ' + last.toLowerCase() + ']';
+        } else {
+            msg = 'error: ' + error;
+        }
+        console.log('/api/v1/prescribers: ' + msg);
+        res.status(success ? 200 : 400).send(prescribers);
+    };
+
+    // if no connection string (Travis testing), grab dispensers from json files
+    if(!conn.MySQL) {
+        var all_prescribers = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescribers.json").prescribers;
+
+        // Searching for substrings
+        var matchingPrescribers = all_prescribers.filter(function(elem) {
+            if( first === undefined && last === undefined ){
+                // if no query given, return all patients
+                return true;
+            } else if( last === undefined ){
+                return (elem.first.toLowerCase().includes(first.toLowerCase()));
+            }
+            else if( first === undefined ){
+                return (elem.last.toLowerCase().includes(last.toLowerCase()));
+            }
+            return (elem.first.toLowerCase().includes(first.toLowerCase()))
+                    && (elem.last.toLowerCase().includes(last.toLowerCase()));
+        });
+
+        return finish(true, matchingPrescribers);
+    }
+
+    // otherwise, grab prescribers from MySQL
+    mysql.getPrescribersByName(first, last, connection)
+    .then((answer) => {
+        var prescribers = [];
+        for (var i = 0; i < answer.rows.length; i++){
+            prescribers.push({
+                prescriberID: answer.rows[i].id,
+                first: answer.rows[i].first,
+                last: answer.rows[i].last,
+                location: answer.rows[i].location,
+                phone: answer.rows[i].phone
+            });
+        }
+        return finish(true, prescribers);
+    })
+    .catch((error) => {
+        return finish(false, [], error);
+    });
+});
+
+/*
+About:
+    An api endpoint that returns all related prescriptions for a given prescriberID.
+Examples:
+    Directly in terminal:
+        >>> curl "http://localhost:5000/api/v1/prescribers/prescriptions/1"
+    To be used in Axois call:
+        .get("/api/v1/prescribers/prescriptions/1")
+Returns:
+    list<Prescription>
+*/
+app.get('/api/v1/prescribers/prescriptions/:prescriberID', (req, res) => {
+    var prescriberID = parseInt(req.params.prescriberID);
+    var handlePrescriptionsCallback = function(prescriptions) {
+        // take only prescriptions with matching prescriberID
+        prescriptions = prescriptions.filter(
+            prescription => prescription.prescriberID === prescriberID
+        );
+
+        var valid_return_msg = 'Sending all ' + prescriptions.length.toString()
+                        + ' prescription(s) related to prescriberID ' + prescriberID.toString();
+
+        // if no prescriptions, return early
+        if(prescriptions.length === 0) {
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+
+        // Convert date integers to strings
+        prescriptions = prescriptions.map(
+            prescription => convertDatesToString(prescription)
+        );
+
+        // if no connection string (Travis testing), fill drugName with dummy info
+        if (!conn.MySQL) {
+            prescriptions = prescriptions.map(
+                prescription => {
+                    prescription.drugName = "drugName";
+                    return prescription;
+                }
+            );
+
+            console.log(valid_return_msg);
+            res.status(200).send(prescriptions);
+            return;
+        }
+        else {
+            // Look up the drug names given the list of drugIDs in MySQL
+            var drugIDs = prescriptions.map((prescription) => {
+                return prescription.drugID;
+            })
+
+            mysql.getDrugNamesFromIDs(drugIDs, connection)
+            .then((answer) => {
+                for (var i = 0; i < prescriptions.length; i++){
+                    var drug = answer.rows.filter((row) => {
+                        return (row.ID === prescriptions[i].drugID);
+                    });
+
+                    // Could be undefined on return
+                    if(drug.length !== 0) {
+                        prescriptions[i].drugName = drug[0].NAME;
+                    }
+                    else {
+                        prescriptions[i].drugName = "drugName";
+                    }
+                }
+
+                console.log(valid_return_msg);
+                res.status(200).send(prescriptions);
+                return;
+            })
+            .catch((error) => {
+                console.log("/api/v1/prescribers/prescriptions: error: ", error);
+                res.status(400).send([]);
+                return;
+            });
+        }
+    }
+
+    // Error if dispenser ID is null or undefined
+    if(prescriberID == null) {
+        console.log('/api/v1/prescribers/prescriptions: error: No ID match');
+        res.status(400).send([]);
         return;
     }
 
-    var dispensers = readJsonFileSync(
-        __dirname + '/' + "dummy_data/dispensers.json").dispensers;
-
-    dispensers = dispensers.filter(function(elem) {
-        // if no query given, return all dispensers
-        if(name === undefined) return true;
-
-        // case insensitive: match substrings in dispenser name
-        return elem.name.toLowerCase().includes(name.toLowerCase());
-    });
-
-    console.log('/api/v1/dispensers/prescriptions/:dispenserID: returning ' 
-                    + dispensers.length.toString() + ' dispensers.');
-    res.status(200).send(dispensers);
+    if(conn.Blockchain) {
+        block_helper.read_by_value(1, prescriberID)
+        .then((answer) => {
+            handlePrescriptionsCallback(answer.prescriptions);
+        })
+        .catch((error) => {
+            console.log('/api/v1/prescribers/prescriptions: error: ', error);
+            res.status(400).send('Error in searching blockchain for prescriptions matching prescriberID.');
+            return;
+        });
+    }
+    else { // search from dummy data
+        var prescriptions = readJsonFileSync(
+            __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
+        handlePrescriptionsCallback(prescriptions);
+    }
 });
 
 // ------------------------
