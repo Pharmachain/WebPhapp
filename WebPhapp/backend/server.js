@@ -181,7 +181,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysFor,
-                changedPrescription.refillsLeft
+                changedPrescription.refillsLeft,
                 changedPrescription.daysBetween
             ).then((_) => {
                 return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);

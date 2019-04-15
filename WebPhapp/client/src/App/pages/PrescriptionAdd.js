@@ -12,6 +12,7 @@ class PrescriptionAdd extends Component {
     refillsLeft: 0,
     prescriberID: 0,
     dispenserID: 0,
+    daysBetween: 0,
     message: '',
 
     isLoading: false,
@@ -133,7 +134,8 @@ class PrescriptionAdd extends Component {
         "daysFor": this.state.daysFor,
         "refillsLeft": this.state.refillsLeft,
         "prescriberID": this.state.prescriberID,
-        "dispenserID": this.state.dispenserID
+        "dispenserID": this.state.dispenserID,
+        "daysBetween": this.state.daysBetween
     })
     .then(response => {
       // Add request is finished from backend and has a response

@@ -29,7 +29,8 @@ class PrescriptionEdit extends Component {
             prescriberID: prescription.prescriberID,
             dispenserID: prescription.dispenserID,
             cancelled: prescription.cancelled,
-            cancelDate: prescription.cancelDate
+            cancelDate: prescription.cancelDate,
+            daysBetween: prescription.daysBetween
       }));
   }
 
@@ -125,7 +126,8 @@ class PrescriptionEdit extends Component {
       "quantity": this.state.quantity,
       "daysFor": this.state.daysFor,
       "refillsLeft": this.state.refillsLeft,
-      "dispenserID": this.state.dispenserID
+      "dispenserID": this.state.dispenserID,
+      "daysBetween": this.state.daysBetween
     })
     .then(response => {
         // Edit request is finished from backend and has a response
