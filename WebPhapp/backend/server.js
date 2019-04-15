@@ -435,7 +435,7 @@ Returns:
         prescriberID, dispenserID, cancelDate, drugName
     ]
 */
-app.get('/api/v1/prescriptions/prescriber/:prescriberID', (req,res) => {
+app.get('/api/v1/prescriptions/prescriber/:prescriberID', auth.checkAuth([Role.Prescriber, Role.Government]), (req,res) => {
     var prescriberID = parseInt(req.params.prescriberID);
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = '/api/v1/prescriptions/prescriber: Sent ' + prescriptions.length.toString() +
@@ -1319,7 +1319,7 @@ Returns:
         location (string)
     }
 */
-app.get('/api/v1/dispensers/single/:dispenserID', (req,res) => { // auth.checkAuth([Role.Government]),
+app.get('/api/v1/dispensers/single/:dispenserID', auth.checkAuth([Role.Dispenser, Role.Government]), (req,res) => {
     var dispenserID = parseInt(req.params.dispenserID);
     var finish = function(dispensers) {
         if(dispensers.length > 1) {
@@ -1381,7 +1381,7 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/dispensers/all', (req,res) => { // auth.checkAuth([Role.Government]),    
+app.get('/api/v1/dispensers/all', auth.checkAuth([Role.Government]), (req,res) => {
     // if no connection string (Travis testing), grab dispensers from json files
     if (!conn.MySQL) {
         var dispensers = readJsonFileSync(
@@ -1428,7 +1428,7 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/dispensers', (req, res) => {
+app.get('/api/v1/dispensers', auth.checkAuth([Role.Prescriber, Role.Government]), (req, res) => {
     var name = req.query.name; 
     var finish = function(success, dispensers, error='') {
         var msg;
@@ -1500,7 +1500,7 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/prescribers/all', (req,res) => { // auth.checkAuth([Role.Government]),
+app.get('/api/v1/prescribers/all', auth.checkAuth([Role.Government]), (req,res) => {
     // if no connection string (Travis testing), grab prescribers from json files
     if (!conn.MySQL) {
         var prescribers = readJsonFileSync(
@@ -1543,7 +1543,7 @@ Returns:
         location (string)
     }
 */
-app.get('/api/v1/prescribers/single/:prescriberID',(req,res) => { // auth.checkAuth([Role.Government]),
+app.get('/api/v1/prescribers/single/:prescriberID', auth.checkAuth([Role.Prescriber, Role.Government]), (req,res) => {
     var prescriberID = parseInt(req.params.prescriberID);
     var finish = function(prescribers) {
         if(prescribers.length > 1) {
@@ -1612,7 +1612,7 @@ Returns:
         ...
     ]
 */
-app.get('/api/v1/prescribers', (req, res) => { // auth.checkAuth([Role.Government]),
+app.get('/api/v1/prescribers', auth.checkAuth([Role.Government]), (req, res) => {
     var first = req.query.first;
     var last = req.query.last;
     var finish = function(success, prescribers, error='') {
@@ -1682,7 +1682,7 @@ Examples:
 Returns:
     list<Prescription>
 */
-app.get('/api/v1/prescribers/prescriptions/:prescriberID', (req, res) => {
+app.get('/api/v1/prescribers/prescriptions/:prescriberID', auth.checkAuth([Role.Prescriber, Role.Government]), (req, res) => {
     var prescriberID = parseInt(req.params.prescriberID);
     var handlePrescriptionsCallback = function(prescriptions) {
         // take only prescriptions with matching prescriberID
