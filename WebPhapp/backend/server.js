@@ -216,7 +216,7 @@ About:
     }
 Examples:
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysValid":0,"refills":0,"prescriberID":0,"dispenserID":0}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":1,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":3,"dispenserID":3}'
     To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
@@ -224,7 +224,7 @@ Examples:
         }
 Returns:
     true if prescription is added, false if not.
-Note on daysValid field:
+Note on daysFor field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
 app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
