@@ -230,7 +230,7 @@ Examples:
         }
 Returns:
     true if prescription is added, false if not.
-Note on daysValid field:
+Note on daysFor field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
 app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
