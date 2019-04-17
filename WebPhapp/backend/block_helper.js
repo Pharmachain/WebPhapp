@@ -184,9 +184,9 @@ module.exports = {
             to: blockchain.patient.options.address,
             gas: 50000000
         });
-
-        // return prescriptionID of added prescription
-        return currentChainLength + 1;
+        
+        // Return Transaction object containing transaction hash and other data
+        return currentChainLength;
     },
 
     /*
