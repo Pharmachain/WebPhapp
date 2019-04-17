@@ -44,6 +44,11 @@ class PrescriptionEdit extends Component {
     this.setState({daysFor: event.target.value});
   }
 
+  // Updating value in the daysBetween state
+  onKeyDownDaysBetween = event => {
+    this.setState({daysBetween: event.target.value});
+  }
+
   // Updating value in the refillsLeft state
   onKeyDownRefillsLeft = event => {
     this.setState({refillsLeft: event.target.value});
@@ -258,7 +263,7 @@ class PrescriptionEdit extends Component {
                   <input disabled
                   type="p"
                   className="form-control"
-                  placeholder={`Prescription ID: ${this.state.prescriptionID}`}/>
+                  placeholder={this.state.prescriptionID}/>
                 </div>
               </div>
               <div className="col-lg-6">
@@ -267,7 +272,7 @@ class PrescriptionEdit extends Component {
                   <input disabled
                   type="p"
                   className="form-control"
-                  placeholder={`Patient ID: ${this.state.patientID}`}
+                  placeholder={this.state.patientID}
                   onChange={this.onKeyDownPatientID}/>
                 </div>
               </div>
@@ -276,7 +281,7 @@ class PrescriptionEdit extends Component {
                   <label className="form-control-label">Drug ID:</label>
                   <input disabled
                   type="p"
-                  placeholder={`Drug ID: ${this.state.drugID}`}
+                  placeholder={this.state.drugID}
                   className="form-control"/>
                 </div>
               </div>
@@ -286,12 +291,23 @@ class PrescriptionEdit extends Component {
                   <input disabled
                   type="p"
                   className="form-control"
-                  placeholder={`Prescriber ID: ${this.state.prescriberID}`}/>
+                  placeholder={this.state.prescriberID}/>
                 </div>
               </div>
             </div>
             <hr className="my-4"></hr>
             <div className="row">
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Dispenser ID:</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Enter the dispenser's ID"
+                  value = {this.state.dispenserID}
+                  onChange={this.onKeyDownDispenserID}/>
+                </div>
+              </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
                   <label className="form-control-label">Quantity:</label>
@@ -305,13 +321,24 @@ class PrescriptionEdit extends Component {
               </div>
               <div className="col-lg-6">
                 <div className="form-group focused">
-                  <label className="form-control-label">Days For:</label>
+                  <label className="form-control-label">Total Days Valid:</label>
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Enter the number of days for"
+                  placeholder="Enter the number of days"
                   value = {this.state.daysFor}
                   onChange={this.onKeyDownDaysFor}/>
+                </div>
+              </div>
+              <div className="col-lg-6">
+                <div className="form-group focused">
+                  <label className="form-control-label">Days Until Next Refill:</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Enter the number of days"
+                  value = {this.state.daysBetween}
+                  onChange={this.onKeyDownDaysBetween}/>
                 </div>
               </div>
               <div className="col-lg-6">
@@ -323,17 +350,6 @@ class PrescriptionEdit extends Component {
                   placeholder="Enter the number of refills left"
                   value = {this.state.refillsLeft}
                   onChange={this.onKeyDownRefillsLeft}/>
-                </div>
-              </div>
-              <div className="col-lg-6">
-                <div className="form-group focused">
-                  <label className="form-control-label">Dispenser ID:</label>
-                  <input
-                  type="p"
-                  className="form-control"
-                  placeholder="Enter the dispenser's ID"
-                  value = {this.state.dispenserID}
-                  onChange={this.onKeyDownDispenserID}/>
                 </div>
               </div>
             </div>
