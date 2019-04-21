@@ -21,7 +21,7 @@ contract TestPrescriptionData is PrescriptionBase{
         drugID : 34,
         drugQuantity: "300mg",
         fulfillmentDates: fu,
-        dateWritten: 1542357074,
+        dateWritten: "0x333",
         daysValid: 200,
         refillsLeft: 8,
         isCancelled: false,
@@ -41,7 +41,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint64 drugID;
         string memory drugQuantity;
         uint64[16] memory fulfillmentDates;
-        uint64 dateWritten;
+        bytes dateWritten;
 
         //Max local args is 16, limit reached. So last 4 values are not compared
         (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , ) = p.getPatientPrescription(index);

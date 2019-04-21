@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const app = express();
 const cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
+const chacha = require('chacha20');
 
 const conn = require('./connections.js') // private file not under VC.
 const auth = require('./auth_helper.js');
@@ -227,7 +228,7 @@ Returns:
 Note on daysFor field:
     https://github.com/Pharmachain/WebPhapp/pull/40/files#r259635589
 */
-app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res) => {
+app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),async (req,res) => {
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
@@ -291,6 +292,20 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
     prescription.isCancelled = false;
     prescription.cancelDate = 0; // 0 means no date- not cancelled.
 
+    key = Buffer.alloc(256);
+    key.write("Hello there!");
+    let nonce = await block_helper.getChainLength();
+    nonce_buffer = Buffer.alloc(96);
+    nonce_buffer.write(nonce.toString());
+    
+    var writtenDate = chacha.encrypt(key, nonce_buffer,Buffer.from(prescription.writtenDate.toString()));
+
+    //console.log(key);
+    //console.log(nonce_buffer);
+    console.log(Buffer.from(prescription.writtenDate.toString()))
+    //console.log(writtenDate.toString());
+    //console.log(nonce);
+    console.log(writtenDate);
     // TODO: index this prescription in MySQL.
     console.log('Adding prescription to chain for patientID ' + prescription.patientID.toString() + '...');
     if(conn.Blockchain) {
@@ -301,7 +316,7 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
             prescription.drugID,
             prescription.quantity,
             prescription.fillDates,
-            prescription.writtenDate,
+            writtenDate,
             prescription.daysFor,
             prescription.refillsLeft,
             prescription.isCancelled,

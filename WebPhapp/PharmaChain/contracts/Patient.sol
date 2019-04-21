@@ -19,7 +19,7 @@ contract Patient is PrescriptionData, PrescriptionAccessControl{
         uint64 drugID,
         string memory drugQuantity, 
         uint64[16] memory fulfillmentDates,
-        uint64 dateWritten,  
+        bytes dateWritten,  
         uint16 daysValid,
         uint8 refillsLeft,
         bool isCancelled, 

@@ -353,5 +353,22 @@ module.exports = {
             if(error) reject(error);
             resolve(true);
         });
+    },
+
+    getChainLength: async function() {
+        var blockchain = await connectToChain();
+        let chainLength;
+        let error;
+
+        try {
+            chainLength = await blockchain.patient.methods.getDrugChainLength().call({from: blockchain.account});
+        } catch (err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve(chainLength);
+        });
     }
 }

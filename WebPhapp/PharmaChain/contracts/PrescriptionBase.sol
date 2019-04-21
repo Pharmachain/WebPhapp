@@ -41,7 +41,7 @@ contract PrescriptionBase {
         // Arrays must be static in order to pass them around. So, this is constrained to 16 value, at the moment.
         uint64[16] fulfillmentDates;
         // The date the prescription was prescribed
-        uint64 dateWritten; 
+        bytes dateWritten; 
         // The amount of days that the prescription is valid for pickup. 
         uint16 daysValid;
         // The amount of fills that the drug is allowed.

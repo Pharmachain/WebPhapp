@@ -1,6 +1,7 @@
 let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
+let chacha = require("chacha20")
 
 /*  This function takes an index and returns a prescription from the drugChain.
     User input: prescription index on the drugChain.
@@ -29,8 +30,19 @@ async function read(index_value){
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
 
     let values = await Patient.methods.getPrescription(index_value).call({from: account});
-    console.log(values);
-    return values;
+    //console.log(values["6"]);
+    key = Buffer.alloc(256);
+    key.write("Hello there!");
+    //console.log(key);
+    nonce = Buffer.alloc(96);
+    nonce.write(index_value.toString());
+    //console.log(nonce);
+    converted = Buffer.from(values["6"].substring(2), 'hex');
+    console.log(converted)
+    result_final1 = chacha.decrypt(key, nonce, converted);
+    //console.log(nonce);
+    console.log(result_final1.toString());
+    return result_final1.toString();
 
 }
 

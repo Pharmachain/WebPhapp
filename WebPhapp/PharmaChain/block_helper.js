@@ -1,5 +1,5 @@
 //Helper Functions to work with the blockchain
-
+let chacha20 = require("chacha20");
 let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
