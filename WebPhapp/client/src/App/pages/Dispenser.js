@@ -178,7 +178,7 @@ class Dispenser extends Component {
                         <div className="col-lg-6">
                             <div className="card-body py-2">
                             <div className="icon icon-shape icon-shape-warning rounded-circle mb-4">
-                                <i className="fas fa-hospital"></i>
+                                <i className="fas fa-hospital-alt"></i>
                             </div>
                             <h4 className="text-warning text-uppercase">Dispenser Information: </h4>
                             <hr className="my-1"></hr>

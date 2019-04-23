@@ -736,7 +736,7 @@ class Prescription extends Component {
                                 <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
                                 <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {(prescription && prescription.patientID) || ""}</div>
                                 <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {(prescription && prescription.prescriberID) || ""}</div>
-                                <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
+                                <div className="col-auto"><i className="fas fa-hospital-alt">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
                             </div>
                         </div>
 

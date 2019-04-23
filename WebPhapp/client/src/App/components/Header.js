@@ -20,7 +20,7 @@ export class Header extends React.Component {
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main" aria-controls="sidenav-main" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
-            <a className="navbar-brand pt-0" href="./">
+            <a className="navbar-brand m-0 p-0"  href="./">
                 <img src="./assets/img/brand/pharmachain-blue.png" className="navbar-brand-img" alt="Pharmachain"/>
             </a>
             <ul className="nav align-items-center d-md-none"></ul>
@@ -134,7 +134,7 @@ export class Header extends React.Component {
                 </li>
                 <li className="nav-item">
                     <a className="nav-link" href={"/dispenserSearch"}>
-                    <i className="fas fa-hospital text-orange" alt="Dispenser Search"></i> Dispenser Search
+                    <i className="fas fa-hospital-alt text-orange" alt="Dispenser Search"></i> Dispenser Search
                     </a>
                 </li>
                 <li className="nav-item">

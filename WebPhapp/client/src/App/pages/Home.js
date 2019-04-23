@@ -134,7 +134,7 @@ class Home extends Component {
                       <div className="card card-lift--hover shadow border-0">
                       <div className="card-body py-5">
                           <div className="icon icon-shape icon-shape-warning rounded-circle mb-4">
-                          <i className="fas fa-hospital"></i>
+                          <i className="fas fa-hospital-alt"></i>
                           </div>
                           <h6 className="text-warning text-uppercase">Dispenser Search</h6>
                           <p className="description mt-3">Search a dispenser by ID or name and view all of its prescriptions that are either open or historical.</p>

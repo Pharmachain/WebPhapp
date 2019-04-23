@@ -87,14 +87,14 @@ module.exports = {
 
             var jwt_token = req.cookies['auth_token'];
             if(jwt_token == 'undefined'){
-                res.status(400).send(false);
+                res.status(403).send(false);
                 return;
             }
 
             const token = verifyToken(jwt_token);
             // All verified data passed this if statement.
             if(token === false){
-                res.status(400).send(false);
+                res.status(403).send(false);
                 return;
             }
 
@@ -102,7 +102,7 @@ module.exports = {
             const checkRole = roles.filter(validatedRole => validatedRole === token.role);
 
             if(checkRole.length !== 1 && token.role !== 'Admin'){
-                res.status(400).send(false);
+                res.status(403).send(false);
                 return;
             }
 
