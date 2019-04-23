@@ -159,6 +159,7 @@ module.exports = {
     */
     write: async function(patientID, prescriberID, dispenserID, drugID, quantity, fillDates, writtenDate, daysValid, refills, isCancelled, cancelDate) {
         var blockchain = await connectToChain();
+        let currentChainLength = await getChainLength();
 
         // Set up prescription data to be sent.
         let transaction = await blockchain.patient.methods.addPrescription(
@@ -174,7 +175,7 @@ module.exports = {
             isCancelled,
             cancelDate
         );
-        
+
         // Submitting prescription transaction.
         let encodedTransaction = transaction.encodeABI();
         let block = await blockchain.web3.eth.sendTransaction({
@@ -185,7 +186,7 @@ module.exports = {
         });
         
         // Return Transaction object containing transaction hash and other data
-        return block;
+        return currentChainLength;
     },
 
     /*
@@ -352,6 +353,38 @@ module.exports = {
         return new Promise((resolve, reject) => {
             if(error) reject(error);
             resolve(true);
+        });
+    },
+
+    /*
+    This function takes an array of prescriptionIDs and returns an array of the corresponding prescriptions
+    Args:
+        batch (int[])
+    Returns:
+        list of prescriptions that satisfy the query
+    Example:
+        read_batch([0, 3, 4])
+            This example will search for prescriptions 0, 3, and 4
+            and return an array of these prescriptions.
+    */
+    read_batch: async function(IDs) {
+        var blockchain = await connectToChain();
+        
+        var prescriptions = [];
+        var error;
+        try {
+            for(i = 0; i < IDs.length; i++){
+                let values = await blockchain.patient.methods.getPrescription(IDs[i]).call({from: blockchain.account});
+                prescriptions.push(valuesToPrescription(values, IDs[i]));
+            }
+        }
+        catch(err) {
+            error = err;
+        }
+
+        return new Promise((resolve, reject) => {
+            if(error) reject(error);
+            resolve({prescriptions});
         });
     }
 }

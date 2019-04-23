@@ -2,14 +2,23 @@ let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
 
+const conn = require('../backend/connections.js');
+// establish a connection to the remote MySQL DB
+if(conn.MySQL) {
+    var connection = require('mysql2').createConnection(conn.MySQL);
+    var mysql = require('../backend/mysql_helper.js');
+}
 
 /* 
- * Loads 10,000 prescriptions to the blockchain for stress test purposes.
+ * Loads 10,000 prescriptions to the blockchain for stress test purposes. (w/ MySQL index update)
  * PatientID is random integer in [1, 50].
  * Use to run benchmark speed tests for route /api/v1/prescriptions/:patientID.
  * Usage: sudo node loadStressData.js
  */
 async function loadStressData(){
+    // start by reseting the mysql index
+    // await mysql.PrescriptionIDsByPatientIndex.reset(connection);
+    console.log('index table reset.');
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -28,29 +37,32 @@ async function loadStressData(){
     });
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');    
     
-    var numToAdd = 10000;
+    var numToAdd = 20000;
     var startTime = new Date().toLocaleTimeString();
     console.log("Start: " + startTime);
     console.log("Adding " + numToAdd.toString() + " prescriptions to the blockchain.");
-    var p = {
-        "prescriptionID": 1,
-        "patientID": 1,
-        "drugID": 12,
-        "fillDates": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "writtenDate": 1537574400000,
-        "quantity": "1mg",
-        "daysFor": 7,
-        "refillsLeft": 1,
-        "prescriberID": 1,
-        "dispenserID": 4,
-        "cancelDate": 0,
-        "isCancelled": false
-    };
+    var p;
+    var currentChainLength = await Patient.methods.getDrugChainLength().call({from: account});
+    currentChainLength = parseInt(currentChainLength);
 	for(var j = 0; j < numToAdd; j++) {
+        p = {
+            "prescriptionID": 1,
+            "patientID": Math.floor(Math.random() * 50) + 1, // patientID: int in [1, 50]
+            "drugID": 12,
+            "fillDates": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "writtenDate": 1537574400000,
+            "quantity": "1mg",
+            "daysFor": 7,
+            "refillsLeft": 1,
+            "prescriberID": Math.floor(Math.random() * 50) + 1, // p.prescriberID: int in [1, 50]
+            "dispenserID": Math.floor(Math.random() * 50) + 1, // p.dispenserID: int in [1, 50]
+            "cancelDate": 0,
+            "isCancelled": false
+        };
 	    let transaction = await Patient.methods.addPrescription(
-            Math.floor(Math.random() * 50) + 1, // patientID: int in [1, 50]
-            Math.floor(Math.random() * 50) + 1, // p.prescriberID: int in [1, 50]
-            Math.floor(Math.random() * 50) + 1, // p.dispenserID: int in [1, 50]
+            p.patientID,
+            p.prescriberID,
+            p.dispenserID,
             p.drugID,
             p.quantity,
             p.fillDates,
@@ -69,7 +81,10 @@ async function loadStressData(){
 		gas: 50000000
         });
         
-        if(j % 1000 === 0) console.log("added " + j.toString() + " prescriptions.");
+        // add index
+        await mysql.PrescriptionIDsByPatientIndex.add(p.patientID, currentChainLength, connection);
+        currentChainLength += 1;
+        if(j % 10 === 0) console.log("added " + j.toString() + " prescriptions.");
     }
     
     console.log("Done adding prescriptions.");

@@ -2,12 +2,23 @@ let fs = require("fs");
 let Web3 = require("web3");
 let net = require("net");
 
+const conn = require('../backend/connections.js');
+// establish a connection to the remote MySQL DB
+if(conn.MySQL) {
+    var connection = require('mysql2').createConnection(conn.MySQL);
+    var mysql = require('../backend/mysql_helper.js');
+}
 
 /* Helper script to check if dummy data exists on the blockchain
  * If it exists do nothing, else upload json dummy data in ../backend/dummy_data/prescriptions.json
  * Usage: sudo node load_data.js
  */
 async function loadPrescriptions(){
+	if(conn.MySQL) {
+		await mysql.PrescriptionIDsByPatientIndex.reset(connection);
+		connection.close();
+		console.log('index table in MySQL reset.');
+	}
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -28,19 +39,22 @@ async function loadPrescriptions(){
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
 
     let length = await Patient.methods.getDrugChainLength().call({from: account});
-    
-    if(length == 0){
+    if(length > 0) {
+		console.log("Existing prescriptions found, dummy data not loaded.");
+		return;
+	}
+
 	console.log("No prescriptions found, adding dummy data.");
 	var obj = JSON.parse(fs.readFileSync('../backend/dummy_data/prescriptions.json', 'utf8'));
-	for (var j = 0; j < obj.prescriptions.length; j++){
-	    p = obj.prescriptions[j];
-            
+	for (var j = 0; j < obj.prescriptions.length; j++) {
+		p = obj.prescriptions[j];
+			
 		//Temp variable to store fillDates
 		let fillDates = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-		for (var i = 0; i < p.fillDates.length; i++){
-			if(p.fillDates[i] > 0){
+		for (var i = 0; i < p.fillDates.length; i++) {
+			if(p.fillDates[i] > 0) {
 				fillDates[i] = p.fillDates[i]
-				}
+			}
 		}
 		
 		if(p.cancelDate <= 0){
@@ -51,32 +65,28 @@ async function loadPrescriptions(){
 			p.isCancelled = true;
 		}
 
-	    let transaction = await Patient.methods.addPrescription(
-		p.patientID,
-		p.prescriberID,
-		p.dispenserID,
-		p.drugID,
-		p.quantity,
-		fillDates,
-		p.writtenDate,
-		p.daysFor,
-		p.refillsLeft,
-		p.isCancelled,
-		p.cancelDate
-	    );
+		let transaction = await Patient.methods.addPrescription(
+			p.patientID,
+			p.prescriberID,
+			p.dispenserID,
+			p.drugID,
+			p.quantity,
+			fillDates,
+			p.writtenDate,
+			p.daysFor,
+			p.refillsLeft,
+			p.isCancelled,
+			p.cancelDate
+		);
 	
-	    let encoded_transaction = transaction.encodeABI();
-	    let block = await web3.eth.sendTransaction({
-		data: encoded_transaction,
-		from: account,
-		to: Patient.options.address,
-		gas: 50000000
-	    });
+		let encoded_transaction = transaction.encodeABI();
+		await web3.eth.sendTransaction({
+			data: encoded_transaction,
+			from: account,
+			to: Patient.options.address,
+			gas: 50000000
+		});
 	}
-    } else {
-	console.log("Existing prescriptions found, dummy data not loaded.");
-    }
-    return
 }
 
 loadPrescriptions();
