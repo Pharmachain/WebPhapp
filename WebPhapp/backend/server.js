@@ -7,7 +7,7 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
 
-const conn = require('./connections.js') // private file not under VC.
+const conn = require('./connections.js'); // private file not under VC.
 const auth = require('./auth_helper.js');
 const Role = require("./role.js");
 const settings = require('./settings.js');
@@ -295,7 +295,6 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
     prescription.isCancelled = false;
     prescription.cancelDate = 0; // 0 means no date- not cancelled.
 
-    // TODO: index this prescription in MySQL.
     console.log('Adding prescription to chain for patientID ' + prescription.patientID.toString() + '...');
     if(conn.Blockchain) {
         block_helper.write(
@@ -310,25 +309,21 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]),(req,res
             prescription.refillsLeft,
             prescription.isCancelled,
             prescription.cancelDate
-            ).then((prescriptionID) => {
-                // add index in MySQL for faster lookups if MySQL connection exists
-                if(conn.MySQL) {
-                    mysql.PrescriptionIDsByPatientIndex.add(prescription.patientID, prescriptionID, connection)
-                    .then((answer) => {
-                        return finish('Added prescription to chain with index.', true);
-                    })
-                    .catch((_) => {
-                        return finish('Added prescription but failed to add index.', false);
-                    })
-                } else {
-                    return finish('Added prescription to chain.', true);
-                }
-            return finish('Added prescription to chain.', true);
+        ).then((prescriptionID) => {
+            // add index in MySQL for faster lookups if MySQL connection exists
+            if(conn.MySQL && settings.indexPrescriptions) {
+                mysql.PrescriptionIDsByPatientIndex.add(prescription.patientID, prescriptionID, connection)
+                .then((_) => {
+                    return finish('Added prescription to chain with index.', true);
+                })
+                .catch((_) => {
+                    return finish('Added prescription but failed to add index.', false);
+                });
+            } else {
+                return finish('Added prescription to chain.', true);
+            }
         }).catch((error) => {
-            console.log(error);
-            // Error in adding prescription to blockchain
-            console.log(error);
-            return finish('Error: ' + error.toString(), false);
+            return finish('Error: ' + error.toString(), false); // Error in adding prescription to blockchain
         });
     }
     else {
@@ -353,13 +348,11 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
-
     var patientID = parseInt(req.params.patientID);
     var token = req.token;
     if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
         console.log("PatientIDs do not match...")
-        res.status(400).send(false);
-        return;
+        return res.status(400).send(false);
     }
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
@@ -368,8 +361,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
         // if no prescriptions for a patient ID, return early
         if (prescriptions.length === 0) {
             console.log(msg);
-            res.json([]);
-            return;
+            return res.status(200).send([]);
         }
 
         prescriptions = orderPrescriptions(prescriptions,1);
@@ -383,8 +375,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
             for (var i = 0; i < prescriptions.length; i++){
                 prescriptions[i].drugName = "drugName";
             }
-            res.json(prescriptions);
-            return;
+            return res.status(200).send(prescriptions);
         }
 
         // Look up the drug names given the list of drugIDs in MySQL
@@ -409,15 +400,14 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
             }
 
             console.log(msg);
-            res.json(prescriptions);
+            return res.status(200).send(prescriptions);
         })
         .catch((error) => {
             console.log("/api/v1/prescriptions: error: ", error);
-            res.status(400).send({});
+            return res.status(400).send(false);
         });
     };
-
-    if(conn.Blockchain && conn.MySQL) { // use the MySQL index to find prescriptions.
+    if(conn.Blockchain && conn.MySQL && settings.indexPrescriptions) { // use the MySQL index to find prescriptions.
         mysql.PrescriptionIDsByPatientIndex.get(patientID, connection)
         .then((answer) => {
             prescriptionIDs = answer.rows.map((prescription) => {
@@ -428,12 +418,12 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
                 return handlePrescriptionsCallback(answer.prescriptions);
             })
             .catch((error) => {
-                console.log('/api/v1/prescriptions/: error: ', error);
+                console.log('/api/v1/prescriptions/:patientID: error: ', error);
                 return res.status(400).send([]);
             })
         })
         .catch((error) => {
-            console.log('/api/v1/prescriptions/: error: ', error);
+            console.log('/api/v1/prescriptions/:patientID: error: ', error);
             return res.status(400).send([]);
         });
     } else if(conn.Blockchain) { // if MySQL DB is not connected, search the blockchain linearly.
@@ -442,7 +432,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
         .then((answer) => {
             return handlePrescriptionsCallback(answer.prescriptions);
         }).catch((error) => {
-            console.log('/api/v1/prescriptions/: error: ', error);
+            console.log('/api/v1/prescriptions/:patientID: error: ', error);
             return res.status(400).send([]);
         });
     } else { // search prescriptions from dummy data
