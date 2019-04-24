@@ -67,7 +67,7 @@ class PrescriptionAdd extends Component {
 
   //   this.setState({prescriberID: id});
 
-  //   console.log("edit: before (loading, response): ", this.state.isLoading, this.state.response)
+  //   console.log("add: before (loading, response): ", this.state.isLoading, this.state.response)
   //   /* Send a message back for an error or a success */
   //   axios
   //   .post(addQuery,{
@@ -139,12 +139,14 @@ class PrescriptionAdd extends Component {
       // Add request is finished from backend and has a response
       this.setState({isLoading: false, response: response.status});
       if(this.state.response === 200) {
+          addModal.style.display = "none";
           document.getElementById('add-success').click(); 
           sleep(4000).then(() => {
               addSuccessModal.style.display = "none";
               window.location.reload()
           })
       } else {
+          addModal.style.display = "none";
           document.getElementById('add-error').click(); 
           sleep(4000).then(() => {
               addErrorModal.style.display = "none";
@@ -156,7 +158,6 @@ class PrescriptionAdd extends Component {
     });
     // Add request is loading on blockchain
     this.setState({isLoading: true});
-    addModal.style.display = "none";
   }
 
   render() {
@@ -175,7 +176,7 @@ class PrescriptionAdd extends Component {
             data-keyboard="false"
             data-backdrop="false"
             style = {{ maxHeight: '100vh', height: '1000rem' }}>
-            <div className="modal-dialog modal-primary modal-dialog-centered modal-" role="document">
+            <div className="modal-dialog modal-primary modal-dialog-centered" role="document">
                 <div className="modal-content bg-gradient-success">
                     <div className="modal-header">
                         <h6 className="modal-title text-uppercase"><i className="fas fa-exclamation-circle">&nbsp;&nbsp;</i>Your attention is required</h6>
