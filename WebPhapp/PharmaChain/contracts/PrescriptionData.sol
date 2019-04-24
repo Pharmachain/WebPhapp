@@ -51,12 +51,29 @@ contract PrescriptionData is PrescriptionBase {
 
     function updatePrescription(
         uint chainIndex,
+        uint128 senderID,
+        bool isPrescriber,
         uint128 dispenserID,
         string memory drugQuantity,
         uint16 daysValid,
         uint8 refillsLeft) public returns(uint) {
     	
         Prescription storage p = drugChain[chainIndex];
+
+        if(isPrescriber){
+
+            if(senderID != p.prescriberID){
+                return 2;
+            }
+
+        } else {
+
+            if(senderID != p.dispenserID){
+                return 3;
+            }
+
+        }
+
         if(p.isCancelled == true){
             //Prescription cancelled, cannot edit, error
             return 1;
@@ -100,8 +117,23 @@ contract PrescriptionData is PrescriptionBase {
         return drugChain.length - 1;
     }
 
-    function cancelPrescription(uint chainIndex, uint64 date) public returns (uint) {
-    	// Prescription storage p = drugChain[chainIndex];
+    function cancelPrescription(uint chainIndex, uint senderID, bool isPrescriber, uint64 date) public returns (uint) {
+    	Prescription storage p = drugChain[chainIndex];
+
+        if(isPrescriber){
+
+            if(senderID != p.prescriberID){
+                return 2;
+            }
+
+        } else {
+
+            if(senderID != p.dispenserID){
+                return 3;
+            }
+
+        }
+
         if(drugChain[chainIndex].isCancelled) {
 		    // Prescription already cancelled, error
             return 1;
@@ -112,8 +144,22 @@ contract PrescriptionData is PrescriptionBase {
         return 0;
     }
 
-    function redeemPrescription(uint chainIndex, uint64 date) public returns (uint) {
+    function redeemPrescription(uint chainIndex, uint senderID, bool isPrescriber, uint64 date) public returns (uint) {
         Prescription storage p = drugChain[chainIndex];
+        if(isPrescriber){
+
+            if(senderID != p.prescriberID){
+                return 2;
+            }
+
+        } else {
+
+            if(senderID != p.dispenserID){
+                return 3;
+            }
+
+        }
+        
         if(p.isCancelled) {
             //cannot refill cancelled prescription
             return 1;

@@ -194,13 +194,15 @@ module.exports = {
 	decrementing refills left, and adding a new date to fulfillmentDates
     Args:
         chainIndex (int)
+        senderID (int)
+        isPrescriber (bool)
         date (int)
     Returns:
         Transaction object
     Example:
-        redeem(0, 123456543)
+        redeem(0, 1, true, 123456543)
     */
-    redeem: async function(chainIndex, date) {
+    redeem: async function(chainIndex, senderID, isPrescriber, date) {
         var blockchain = await connectToChain();
         var error;
         var block;
@@ -216,7 +218,7 @@ module.exports = {
                 throw new Error('cannot redeem a prescription with no refills left.');
             }
 
-            let transaction = await blockchain.patient.methods.redeemPrescription(chainIndex, date);
+            let transaction = await blockchain.patient.methods.redeemPrescription(chainIndex, senderID, isPrescriber, date);
             // Submitting prescription transaction.
             let encodedTransaction = transaction.encodeABI();
             block = await blockchain.web3.eth.sendTransaction({
@@ -241,19 +243,21 @@ module.exports = {
         preventing it from being updated or altered
     Args:
         chainIndex (int)
+        senderID (int)
+        isPrescriber (bool)
         date (int)
     Returns:
         Transaction object.
     Example:
-        cancel(0, 123456543)
+        cancel(0, 1, true 123456543)
     */
-    cancel: async function(chainIndex, date) {
+    cancel: async function(chainIndex, senderID, isPrescriber, date) {
         var blockchain = await connectToChain();
         var error;
         var block;
 
         try {
-            let transaction = await blockchain.patient.methods.cancelPrescription(chainIndex, date);
+            let transaction = await blockchain.patient.methods.cancelPrescription(chainIndex, senderID, isPrescriber, date);
             // Submitting prescription transaction.
             let encodedTransaction = transaction.encodeABI();
             block = await blockchain.web3.eth.sendTransaction({
@@ -278,6 +282,8 @@ module.exports = {
         altering its dispenserID, quantity, daysValid, and refillsLeft
     Args:
         chainIndex (int)
+        senderID (int)
+        isPrescriber(bool)
         dispenserID (int)
         quantity (string)
         daysFor (int)
@@ -285,11 +291,11 @@ module.exports = {
     Returns:
         Transaction Object.
     Example:
-        update(0, 2, '300MG', 16, 1)
+        update(0, 1, True, 2, '300MG', 16, 1)
     Note:
         we have a daysFor vs daysValid problem here
     */
-    update: async function(chainIndex, dispenserID, quantity, daysValid, refillsLeft) {
+    update: async function(chainIndex, senderID, isPrescriber, dispenserID, quantity, daysValid, refillsLeft) {
         var blockchain = await connectToChain();
         var error;
         var block;
@@ -307,6 +313,8 @@ module.exports = {
 
                 let transaction = await blockchain.patient.methods.updatePrescription(
                     chainIndex,
+                    senderID,
+                    isPrescriber,
                     dispenserID,
                     quantity,
                     daysValid,
