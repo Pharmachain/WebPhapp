@@ -7,7 +7,7 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const pbkdf2 = require('pbkdf2');
 
-const conn = require('./connections.js') // private file not under VC.
+const conn = require('./connections.js'); // private file not under VC.
 const auth = require('./auth_helper.js');
 const Role = require("./role.js");
 const settings = require('./settings.js');
@@ -161,7 +161,7 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Pre
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
          block_helper.verifyChainIndex(prescriptionID)
          .then((_) => {
-            block_helper.cancel(prescriptionID, date)
+            block_helper.cancel(prescriptionID, req.token.sub, req.token.role === Role.Prescriber, date)
             .then((answer) => {
                 return finish(answer.toString(), true);
             })
@@ -190,8 +190,8 @@ Takes an object of shape:
     }
 Examples:
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/edit' -H 'Acceptapplication/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"prescriptionID": 0,"quantity":"99mg","daysValid":98,"refillsLeft":97,"dispenserID":96}'
-    To be used in an axios call:
+         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":2,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":1,"dispenserID":1}'
+             To be used in an axios call:
         .post("/api/v1/prescription/edit",{
             prescriptionID: 0,
             ....
@@ -206,7 +206,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
 
     // finish takes a string message and a boolean (true if successful)
     function finish(msg, success){
-        console.log(msg);
+        console.log('/api/v1/prescriptions/edit: ' + msg);
         res.status(success ? 200 : 400).json(success);
     }
 
@@ -231,9 +231,14 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
          // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
          block_helper.verifyChainIndex(changedPrescription.prescriptionID)
          .then((_) => {
+
+            const role = req.token.role; 
+            const id = req.token.sub;
             // Filled or cancelled prescriptions cannot be altered: a check is performed in block_helper.update()
             block_helper.update(
                 changedPrescription.prescriptionID,
+                id, 
+                role === Role.Prescriber,
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysFor,
@@ -290,9 +295,13 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
     const prescription = req.body;
 
     // finish takes a string message and a boolean (true if successful)
+    let set = false;
     function finish(msg, success){
-        console.log(msg);
-        res.status(success ? 200 : 400).json(success);
+        if(!set){
+            console.log('/api/v1/prescriptions/add: ' + msg);
+            res.status(success ? 200 : 400).json(success);
+        }
+        set = true;
         return;
     }
 
@@ -355,7 +364,6 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
     prescription.isCancelled = false;
     prescription.cancelDate = 0; // 0 means no date- not cancelled.
 
-    // TODO: index this prescription in MySQL.
     console.log('Adding prescription to chain for patientID ' + prescription.patientID.toString() + '...');
     if(conn.Blockchain) {
         block_helper.write(
@@ -370,11 +378,21 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
             prescription.refillsLeft,
             prescription.isCancelled,
             prescription.cancelDate
-        ).then((_) => {
-            return finish('Added prescription to chain.', true);
+        ).then((prescriptionID) => {
+            // add index in MySQL for faster lookups if MySQL connection exists
+            if(conn.MySQL && settings.indexPrescriptions) {
+                mysql.PrescriptionIDsByPatientIndex.add(prescription.patientID, prescriptionID, connection)
+                .then((_) => {
+                    return finish('Added prescription to chain with index.', true);
+                })
+                .catch((_) => {
+                    return finish('Added prescription but failed to add index.', false);
+                });
+            } else {
+                return finish('Added prescription to chain.', true);
+            }
         }).catch((error) => {
-            // Error in adding prescription to blockchain
-            return finish('Error: ' + error.toString(), false);
+            return finish('Error: ' + error.toString(), false); // Error in adding prescription to blockchain
         });
     }
     else {
@@ -399,13 +417,11 @@ Returns:
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
-
     var patientID = parseInt(req.params.patientID);
     var token = req.token;
     if((token.role === Role.Patient && patientID != token.sub) && settings.env !== "test"){
         console.log("PatientIDs do not match...")
-        res.status(400).send(false);
-        return;
+        return res.status(400).send(false);
     }
     var handlePrescriptionsCallback = function(prescriptions) {
         var msg = 'Sent ' + prescriptions.length.toString() +
@@ -414,8 +430,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
         // if no prescriptions for a patient ID, return early
         if (prescriptions.length === 0) {
             console.log(msg);
-            res.json([]);
-            return;
+            return res.status(200).send([]);
         }
 
         prescriptions = orderPrescriptions(prescriptions,1);
@@ -429,8 +444,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
             for (var i = 0; i < prescriptions.length; i++){
                 prescriptions[i].drugName = "drugName";
             }
-            res.json(prescriptions);
-            return;
+            return res.status(200).send(prescriptions);
         }
 
         // Look up the drug names given the list of drugIDs in MySQL
@@ -455,25 +469,42 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
             }
 
             console.log(msg);
-            res.json(prescriptions);
+            return res.status(200).send(prescriptions);
         })
         .catch((error) => {
             console.log("/api/v1/prescriptions: error: ", error);
-            res.status(400).send({});
+            return res.status(400).send(false);
         });
     };
-
-    if(conn.Blockchain){
+    if(conn.Blockchain && conn.MySQL && settings.indexPrescriptions) { // use the MySQL index to find prescriptions.
+        mysql.PrescriptionIDsByPatientIndex.get(patientID, connection)
+        .then((answer) => {
+            prescriptionIDs = answer.rows.map((prescription) => {
+                return prescription.prescription_id;
+            });
+            block_helper.read_batch(prescriptionIDs)
+            .then((answer) => {
+                return handlePrescriptionsCallback(answer.prescriptions);
+            })
+            .catch((error) => {
+                console.log('/api/v1/prescriptions/:patientID: error: ', error);
+                return res.status(400).send([]);
+            })
+        })
+        .catch((error) => {
+            console.log('/api/v1/prescriptions/:patientID: error: ', error);
+            return res.status(400).send([]);
+        });
+    } else if(conn.Blockchain) { // if MySQL DB is not connected, search the blockchain linearly.
         var field_patientID = 0;
         block_helper.read_by_value(field_patientID, patientID)
         .then((answer) => {
-            handlePrescriptionsCallback(answer.prescriptions);
+            return handlePrescriptionsCallback(answer.prescriptions);
         }).catch((error) => {
-            console.log('error: ', error);
-            res.status(400).send('Error in searching blockchain for prescriptions matching patientID.');
+            console.log('/api/v1/prescriptions/:patientID: error: ', error);
+            return res.status(400).send([]);
         });
-    }
-    else { // search prescriptions from dummy data
+    } else { // search prescriptions from dummy data
         var prescriptions = readJsonFileSync(
             __dirname + '/' + "dummy_data/prescriptions.json").prescriptions;
 
@@ -481,7 +512,7 @@ app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.P
         prescriptions.forEach(prescription => {
             if (prescription.patientID === patientID) toSend.push(prescription);
         });
-        handlePrescriptionsCallback(toSend);
+        return handlePrescriptionsCallback(toSend);
     }
 });
 
@@ -995,7 +1026,7 @@ app.get('/api/v1/dispensers/redeem/:prescriptionID', auth.checkAuth([Role.Dispen
         // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
         block_helper.verifyChainIndex(prescriptionID)
         .then((_) => {
-            block_helper.redeem(prescriptionID, fillDate)
+            block_helper.redeem(prescriptionID, req.token.sub, req.token.role === Role.Prescriber, fillDate)
             .then((_) => {
                 return finish('/api/v1/dispensers/redeem: redeemed prescription with ID ' + prescriptionID.toString(), true);
             })

@@ -126,24 +126,24 @@ class Prescription extends Component {
             // Redeem request is finished from backend and has a response
             this.setState({isLoading: false, response: response.status});           
             if(this.state.response === 200) {
+                redeemModal.style.display = "none";
                 document.getElementById('redeem-success').click(); 
                 sleep(3000).then(() => {
                     redeemSuccessModal.style.display = "none";
                     window.location.reload()
                 })
-            } else {
-                document.getElementById('redeem-error').click(); 
-                sleep(3000).then(() => {
-                    redeemErrorModal.style.display = "none";
-                    window.location.reload()
-                })
-            }
+            } 
         }).catch(error => {
-            // Prescription not redeemed because....
+            // Prescription not redeemed because...
+            redeemModal.style.display = "none";
+            document.getElementById('redeem-error').click(); 
+            sleep(3000).then(() => {
+                redeemErrorModal.style.display = "none";
+                window.location.reload()
+            })
         });
         // Redeem request is loading on blockchain
         this.setState({isLoading: true});
-        redeemModal.style.display = "none";
     }
     
     /*
@@ -165,24 +165,24 @@ class Prescription extends Component {
             // Cancel request is finished from backend and has a response
             this.setState({isLoading: false, response: response.status});        
             if(this.state.response === 200) {
+                cancelModal.style.display = "none";
                 document.getElementById('cancel-success').click(); 
                 sleep(3000).then(() => {
                     cancelSuccessModal.style.display = "none";
                     window.location.reload()
                 })
-            } else {
-                document.getElementById('cancel-error').click(); 
-                sleep(3000).then(() => {
-                    cancelErrorModal.style.display = "none";
-                    window.location.reload()
-                })
             }
         }).catch(error => {
-            // Prescription not cancelled because....
+            // Prescription not cancelled because...
+            cancelModal.style.display = "none";
+            document.getElementById('cancel-error').click(); 
+            sleep(3000).then(() => {
+                cancelErrorModal.style.display = "none";
+                window.location.reload()
+            })
         });
         // Cancel request is loading on blockchain
         this.setState({isLoading: true});
-        cancelModal.style.display = "none";
     }
 
     // Displays all prescription cards for a patient
@@ -516,7 +516,7 @@ class Prescription extends Component {
                             height: '1000rem', 
                             overflowY: 'auto', 
                             overflow: 'auto', 
-                            filter: 'drop-shadow(0 0 100rem rgba(0, 0, 0, 100)'
+                            filter: 'drop-shadow(0 0 100rem rgba(0, 0, 0, 0.16)'
                             }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal" role="document" >
                         <div className="modal-content">

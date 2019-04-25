@@ -69,6 +69,8 @@ contract TestPrescriptionData is PrescriptionBase{
 
         p.updatePrescription(
             index,
+            data.prescriberID,
+            true,
             3,
             data.drugQuantity,
             data.daysValid,
@@ -89,7 +91,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
         data.isCancelled, data.cancelDate);
-        uint256 canceled = p.cancelPrescription(index, 10);
+        uint256 canceled = p.cancelPrescription(index, data.prescriberID, true, 10);
         Assert.equal(uint256(canceled),uint64(0), "Prescription not cancelled...");
     }
     
@@ -98,7 +100,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
             data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
             data.isCancelled, data.cancelDate);
-        uint redeem = p.redeemPrescription(index, 10);
+        uint redeem = p.redeemPrescription(index, 1, true, 10);
  
         uint256 patientID;
         uint128 prescriberID;

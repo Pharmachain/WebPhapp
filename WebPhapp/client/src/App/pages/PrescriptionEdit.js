@@ -131,24 +131,24 @@ class PrescriptionEdit extends Component {
         // Edit request is finished from backend and has a response
         this.setState({isLoading: false, response: response.status});
         if(this.state.response === 200) {
+            editModal.style.display = "none";
             document.getElementById('edit-success').click(); 
             sleep(4000).then(() => {
                 editSuccessModal.style.display = "none";
                 window.location.href = "./patient?ID=" + this.state.patientID;
             })
-        } else {
-            document.getElementById('edit-error').click(); 
-            sleep(4000).then(() => {
-                editErrorModal.style.display = "none";
-                window.location.href = "./patient?ID=" + this.state.patientID;
-            })
         }
     }).catch(error => {
         // Prescription not edited because...
+        editModal.style.display = "none";
+        document.getElementById('edit-error').click(); 
+        sleep(4000).then(() => {
+            editErrorModal.style.display = "none";
+            window.location.href = "./patient?ID=" + this.state.patientID;
+        })
     });
     // Edit request is loading on blockchain
     this.setState({isLoading: true});
-    editModal.style.display = "none";
   }
 
   render() {
@@ -231,7 +231,8 @@ class PrescriptionEdit extends Component {
         </div>
 
       { this.state.cancelDate === "" ? "" :
-        this.state.cancelDate === 0 && this.state.refillsLeft > 0 ?
+        this.state.cancelDate === 0 && this.state.refillsLeft >= 0 ?
+        
 
         <div>
         <div className="bg-gradient-primary py-7 py-xl-8 b-10"></div>
