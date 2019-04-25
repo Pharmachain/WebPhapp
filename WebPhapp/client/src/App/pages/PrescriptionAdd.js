@@ -91,16 +91,15 @@ class PrescriptionAdd extends Component {
   //                 addSuccessModal.style.display = "none";
   //                 window.location.reload()
   //             })
-  //         } else {
-  //             document.getElementById('add-error').click(); 
-  //             sleep(4000).then(() => {
-  //                 addErrorModal.style.display = "none";
-  //                 window.location.reload()
-  //             })
   //         }
   //     })
   //   }).catch(error => {
   //       // Prescription not added because...
+  //       document.getElementById('add-error').click(); 
+  //       sleep(4000).then(() => {
+  //           addErrorModal.style.display = "none";
+  //           window.location.reload()
+  //       })
   //   });
   //   // Add request is loading on blockchain
   //   this.setState({isLoading: true});
@@ -144,15 +143,14 @@ class PrescriptionAdd extends Component {
               addSuccessModal.style.display = "none";
               window.location.reload()
           })
-      } else {
-          document.getElementById('add-error').click(); 
-          sleep(4000).then(() => {
-              addErrorModal.style.display = "none";
-              window.location.reload()
-          })
       }
     }).catch(error => {
         // Prescription not added because...
+        document.getElementById('add-error').click(); 
+        sleep(4000).then(() => {
+            addErrorModal.style.display = "none";
+            window.location.reload()
+        })
     });
     // Add request is loading on blockchain
     this.setState({isLoading: true});

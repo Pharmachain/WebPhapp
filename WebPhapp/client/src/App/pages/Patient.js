@@ -49,7 +49,7 @@ class Patient extends Component {
             // String interpolation
             .get(`api/v1/patients/${patientID}`)
             .then(results => results.data)
-            .then(patientInfo => this.setState({ first: patientInfo['first'], last: patientInfo['last'], dob: patientInfo['dob'] }));
+            .then(patientInfo => this.setState({ first: patientInfo['first'] !== undefined ? patientInfo['first'] : "undefined", last: patientInfo['last'], dob: patientInfo['dob'] }));
     }
 
     // displayPrescriptions() displays the properties of a prescription using Prescription
@@ -69,11 +69,15 @@ class Patient extends Component {
         const user = this.props.role; 
         const prescriptions = this.state.prescriptions;
         const {isFetching} = this.state;
+        if (this.state.first === "undefined") {
+            this.state.validPatient = false;
+        }
+        const validPatient = this.state.validPatient;
         
         return (
             /* Logic to render prescriptions or warning conditionally */
             <div>
-            {user === 'Patient' || user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin' ?
+            {(user === 'Patient' || user === 'Prescriber' || user === 'Dispenser' || user === 'Government' || user === 'Admin') && validPatient ?
             <div>
             { isFetching ? ""
                 :          
