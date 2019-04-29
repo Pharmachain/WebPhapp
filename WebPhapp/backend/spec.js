@@ -265,8 +265,8 @@ describe("loading express", function() {
     request(server)
     .post("/api/v1/prescriptions/add")
     .send({
-      patientID: 0,
-      drugID: 0,
+      patientID: 1,
+      drugID: 15,
       quantity:"0",
       daysFor:0,
       refillsLeft:0,

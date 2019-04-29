@@ -102,7 +102,7 @@ async function validPrescription(prescription, checkType){
 
     // TODO prescriberID should be vaild
     // Validating refills
-    if(isNaN(prescription.refillsLeft) || parseInt(prescription.refillsLeft) <= 0 || parseInt(prescription.refillsLeft) >= 15){
+    if(isNaN(prescription.refillsLeft) || parseInt(prescription.refillsLeft) < 0 || parseInt(prescription.refillsLeft) >= 15){
         return "refill count incorrect (0-15 is valid).";
     }
     // Validate daysFor
