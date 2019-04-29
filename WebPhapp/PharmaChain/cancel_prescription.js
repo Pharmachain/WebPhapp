@@ -6,11 +6,13 @@ let net = require("net");
     User input: prescription arguments
     Args:
         chainIndex (int)
+        senderID (int)
+        isPrescriber (bool)
         date (int)
     Example: 
-        sudo node cancel_prescription.js 0 10
+        sudo node cancel_prescription.js 0 1 true 10
 */
-async function cancel( chainIndex, date){
+async function cancel(chainIndex, senderID, isPrescriber, date){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -30,7 +32,7 @@ async function cancel( chainIndex, date){
 
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.cancelPrescription(chainIndex, date);
+    let transaction = await Patient.methods.cancelPrescription(chainIndex, senderID, isPrescriber, date);
     
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
@@ -49,6 +51,8 @@ async function cancel( chainIndex, date){
 // Main: 
 let args = process.argv
 let chainIndex= args[2];
-let date = args[3];
+let senderID = args[3];
+let isPrescriber = args[4];
+let date = args[5];
 
-cancel(chainIndex, date);
+cancel(chainIndex, senderID, isPrescriber, date);
