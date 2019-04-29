@@ -13,7 +13,8 @@ class Prescriber extends Component {
         phone: "",
         location: "",
         prescriptions: [],
-        isFetching: true
+        isFetching: true,
+        validPrescriber: true
     };
 
     // Fetch the prescription on first mount
@@ -48,7 +49,10 @@ class Prescriber extends Component {
             // String interpolation.
             .get(`/api/v1/prescribers/single/${prescriberID}`)
             .then(results => results.data)
-            .then(prescriberInfo => this.setState({ first: prescriberInfo['first'], last: prescriberInfo['last'], phone: prescriberInfo['phone'], location: prescriberInfo['location'] }));
+            .then(prescriberInfo => this.setState({ first: prescriberInfo['first'] !== undefined ? prescriberInfo['first'] : 'undefined', last: prescriberInfo['last'], phone: prescriberInfo['phone'], location: prescriberInfo['location'] }))
+            .catch(e => {
+               this.setState({ first: 'undefined' })
+            });
     };
 
     // displayPrescriptions() displays the properties of a prescription using Prescription
@@ -69,10 +73,15 @@ class Prescriber extends Component {
         const prescriptions = this.state.prescriptions;
         const {isFetching} = this.state;
         
+        if (this.state.first === 'undefined') {
+            this.state.validPrescriber = false;
+        }
+        const validPrescriber = this.state.validPrescriber;
+        
         return (
             /* Logic to render prescriptions or warning conditionally */
             <div>
-            {user === 'Government' || user === 'Admin' ?
+            {(user === 'Government' || user === 'Admin') && validPrescriber ?
             <div>
             { isFetching ? ""
                 :          

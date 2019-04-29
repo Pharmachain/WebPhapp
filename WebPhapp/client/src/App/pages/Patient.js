@@ -14,7 +14,7 @@ class Patient extends Component {
         dob: "",
         prescriptions: [],
         isFetching: true,
-        validPatient: true //TODO
+        validPatient: true
     };
 
     // Fetch the prescription on first mount
@@ -49,7 +49,7 @@ class Patient extends Component {
             // String interpolation
             .get(`api/v1/patients/${patientID}`)
             .then(results => results.data)
-            .then(patientInfo => this.setState({ first: patientInfo['first'] !== undefined ? patientInfo['first'] : "undefined", last: patientInfo['last'], dob: patientInfo['dob'] }));
+            .then(patientInfo => this.setState({ first: patientInfo['first'] !== undefined ? patientInfo['first'] : 'undefined', last: patientInfo['last'], dob: patientInfo['dob'] }));
     }
 
     // displayPrescriptions() displays the properties of a prescription using Prescription
@@ -69,7 +69,7 @@ class Patient extends Component {
         const user = this.props.role; 
         const prescriptions = this.state.prescriptions;
         const {isFetching} = this.state;
-        if (this.state.first === "undefined") {
+        if (this.state.first === 'undefined') {
             this.state.validPatient = false;
         }
         const validPatient = this.state.validPatient;

@@ -13,7 +13,7 @@ class Dispenser extends Component {
     location: "",
     prescriptions: [], // prescriptions are all the prescriptions given a dispenser id
     isFetching: true,
-    validDispenser: true //TODO
+    validDispenser: true
     };
 
     // Fetch the prescription on first mount
@@ -50,7 +50,7 @@ class Dispenser extends Component {
         axios
             .get(`api/v1/dispensers/single/${dispenserID}`)
             .then(results => results.data)
-            .then(dispenserInfo => this.setState({ name: dispenserInfo['name'], phone: dispenserInfo['phone'], location: dispenserInfo['location'] }));
+            .then(dispenserInfo => this.setState({ name: dispenserInfo['name'] !== undefined ? dispenserInfo['name'] : 'undefined', phone: dispenserInfo['phone'], location: dispenserInfo['location'] }));
     }
 
     // Filters the prescriptions based on onClick of 'open', 'historical', or 'all' tab
@@ -154,9 +154,13 @@ class Dispenser extends Component {
         const user = this.props.role; 
         const prescriptions = this.state.prescriptions;
         const isFetching = this.state.isFetching;
+        if (this.state.name === 'undefined') {
+            this.state.validDispenser= false;
+        }
+        const validDispenser = this.state.validDispenser;
             return (
             <div>
-            {(user === 'Dispenser' && this.state.validDispenser) || user === 'Government' || user === 'Admin' ?
+            {(user === 'Dispenser' || user === 'Government' || user === 'Admin') && validDispenser ?
             <div>
             { isFetching ? ""
                 :
