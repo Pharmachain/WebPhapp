@@ -103,7 +103,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
             data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
             data.isCancelled, data.cancelDate, data.daysBetween);
-        uint redeem = p.redeemPrescription(index, 1, true 10);
+        uint redeem = p.redeemPrescription(index, 1, true, 10);
 
  
         uint256 patientID;
