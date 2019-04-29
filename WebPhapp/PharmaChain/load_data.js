@@ -17,11 +17,10 @@ async function loadPrescriptions(){
 	if(conn.MySQL) {
 		await mysql.PrescriptionIDsByPatientIndex.reset(connection);
 		connection.close();
-https://github.com/Pharmachain/WebPhapp/pull/77/conflict?name=WebPhapp%252Fbackend%252Fserver.js&ancestor_oid=a972ed704ef3d6f6d5c1ac4ea9fb33dde8c1cbdc&base_oid=c0f5b0338b06e7baa94dd472d3bf83c5ee079f34&head_oid=3216a244390e19f630b1dcc35eddaefb638fb92f		console.log('index table in MySQL reset.');
 	}
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
-	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
+    let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
 
     // Get account information
     let account = await web3.eth.personal.getAccounts();
