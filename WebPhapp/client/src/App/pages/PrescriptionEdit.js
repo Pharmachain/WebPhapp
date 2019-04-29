@@ -137,16 +137,15 @@ class PrescriptionEdit extends Component {
                 editSuccessModal.style.display = "none";
                 window.location.href = "./patient?ID=" + this.state.patientID;
             })
-        } else {
-            editModal.style.display = "none";
-            document.getElementById('edit-error').click(); 
-            sleep(4000).then(() => {
-                editErrorModal.style.display = "none";
-                window.location.href = "./patient?ID=" + this.state.patientID;
-            })
         }
     }).catch(error => {
         // Prescription not edited because...
+        editModal.style.display = "none";
+        document.getElementById('edit-error').click(); 
+        sleep(4000).then(() => {
+            editErrorModal.style.display = "none";
+            window.location.href = "./patient?ID=" + this.state.patientID;
+        })
     });
     // Edit request is loading on blockchain
     this.setState({isLoading: true});

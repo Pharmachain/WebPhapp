@@ -132,16 +132,15 @@ class Prescription extends Component {
                     redeemSuccessModal.style.display = "none";
                     window.location.reload()
                 })
-            } else {
-                redeemModal.style.display = "none";
-                document.getElementById('redeem-error').click(); 
-                sleep(3000).then(() => {
-                    redeemErrorModal.style.display = "none";
-                    window.location.reload()
-                })
-            }
+            } 
         }).catch(error => {
-            // Prescription not redeemed because....
+            // Prescription not redeemed because...
+            redeemModal.style.display = "none";
+            document.getElementById('redeem-error').click(); 
+            sleep(3000).then(() => {
+                redeemErrorModal.style.display = "none";
+                window.location.reload()
+            })
         });
         // Redeem request is loading on blockchain
         this.setState({isLoading: true});
@@ -172,16 +171,15 @@ class Prescription extends Component {
                     cancelSuccessModal.style.display = "none";
                     window.location.reload()
                 })
-            } else {
-                cancelModal.style.display = "none";
-                document.getElementById('cancel-error').click(); 
-                sleep(3000).then(() => {
-                    cancelErrorModal.style.display = "none";
-                    window.location.reload()
-                })
             }
         }).catch(error => {
-            // Prescription not cancelled because....
+            // Prescription not cancelled because...
+            cancelModal.style.display = "none";
+            document.getElementById('cancel-error').click(); 
+            sleep(3000).then(() => {
+                cancelErrorModal.style.display = "none";
+                window.location.reload()
+            })
         });
         // Cancel request is loading on blockchain
         this.setState({isLoading: true});
@@ -738,7 +736,7 @@ class Prescription extends Component {
                                 <div className="col-auto"><i className="fas fa-capsules">&nbsp;</i> Drug ID: {(prescription && prescription.drugID) || ""}</div>
                                 <div className="col-auto"><i className="fas fa-user">&nbsp;</i> Patient ID: {(prescription && prescription.patientID) || ""}</div>
                                 <div className="col-auto"><i className="fas fa-user-md">&nbsp;</i> Prescriber ID: {(prescription && prescription.prescriberID) || ""}</div>
-                                <div className="col-auto"><i className="fas fa-hospital">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
+                                <div className="col-auto"><i className="fas fa-hospital-alt">&nbsp;</i> Dispenser ID: {(prescription && prescription.dispenserID) || ""}</div>
                             </div>
                         </div>
 
