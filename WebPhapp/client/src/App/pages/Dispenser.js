@@ -4,7 +4,7 @@ import Prescription from "../components/Prescription";
 import qs from 'qs';
 import Error from './Error';
 
-class PrescriptionDispenser extends Component {
+class Dispenser extends Component {
     // Initialize the state
     state = {
     dispenserID: 0,
@@ -13,7 +13,7 @@ class PrescriptionDispenser extends Component {
     location: "",
     prescriptions: [], // prescriptions are all the prescriptions given a dispenser id
     isFetching: true,
-    validDispenser: true //TODO
+    validDispenser: true
     };
 
     // Fetch the prescription on first mount
@@ -50,7 +50,7 @@ class PrescriptionDispenser extends Component {
         axios
             .get(`api/v1/dispensers/single/${dispenserID}`)
             .then(results => results.data)
-            .then(dispenserInfo => this.setState({ name: dispenserInfo['name'], phone: dispenserInfo['phone'], location: dispenserInfo['location'] }));
+            .then(dispenserInfo => this.setState({ name: dispenserInfo['name'] !== undefined ? dispenserInfo['name'] : 'undefined', phone: dispenserInfo['phone'], location: dispenserInfo['location'] }));
     }
 
     // Filters the prescriptions based on onClick of 'open', 'historical', or 'all' tab
@@ -86,7 +86,7 @@ class PrescriptionDispenser extends Component {
     // @return: returns all prescriptions for a patient id
     displayPrescriptions = () => {
         return(    
-            <div className="card-body"> 
+            <div className="card-body px-0"> 
                 <div className="nav-wrapper">
                     <ul className="nav nav-tabs nav-justified flex-column flex-md-row justify-content-center" id="prescription" role="tablist">
                         <li className="nav-item">
@@ -154,9 +154,13 @@ class PrescriptionDispenser extends Component {
         const user = this.props.role; 
         const prescriptions = this.state.prescriptions;
         const isFetching = this.state.isFetching;
+        if (this.state.name === 'undefined') {
+            this.state.validDispenser= false;
+        }
+        const validDispenser = this.state.validDispenser;
             return (
             <div>
-            {(user === 'Dispenser' && this.state.validDispenser) || user === 'Government' || user === 'Admin' ?
+            {(user === 'Dispenser' || user === 'Government' || user === 'Admin') && validDispenser ?
             <div>
             { isFetching ? ""
                 :
@@ -178,7 +182,7 @@ class PrescriptionDispenser extends Component {
                         <div className="col-lg-6">
                             <div className="card-body py-2">
                             <div className="icon icon-shape icon-shape-warning rounded-circle mb-4">
-                                <i className="fas fa-hospital"></i>
+                                <i className="fas fa-hospital-alt"></i>
                             </div>
                             <h4 className="text-warning text-uppercase">Dispenser Information: </h4>
                             <hr className="my-1"></hr>
@@ -236,4 +240,4 @@ class PrescriptionDispenser extends Component {
     }
 };
 
-export default PrescriptionDispenser;
+export default Dispenser;

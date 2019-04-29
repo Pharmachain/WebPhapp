@@ -147,6 +147,12 @@ class PrescriptionEdit extends Component {
         }
     }).catch(error => {
         // Prescription not edited because...
+        editModal.style.display = "none";
+        document.getElementById('edit-error').click(); 
+        sleep(4000).then(() => {
+            editErrorModal.style.display = "none";
+            window.location.href = "./patient?ID=" + this.state.patientID;
+        })
     });
     // Edit request is loading on blockchain
     this.setState({isLoading: true});
