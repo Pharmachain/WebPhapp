@@ -17,7 +17,8 @@ var valuesToPrescription = function(values, prescriptionID) {
         writtenDate:    parseInt(values['6']),
         daysFor:        parseInt(values['7']),
         refillsLeft:    parseInt(values['8']),
-        cancelDate:     parseInt(values['10'])
+        cancelDate:     parseInt(values['10']),
+        daysBetween:    parseInt(values['11'])
     };
 };
 
@@ -110,7 +111,8 @@ module.exports = {
                 6:daysValid,
                 7:refillsLeft,
                 8:isCancelled,
-                9:cancelDate
+                9:cancelDate,
+                10:daysbetween
     Returns:
         list of prescriptions that satisfy the query
     Example:
@@ -151,13 +153,13 @@ module.exports = {
     Args:
         patientID, prescriberID, dispenserID, drugID,
         quantity, fillDates, writtenDate, daysValid,
-        refills, isCancelled, cancelDate
+        refills, isCancelled, cancelDate, daysBetween
     Returns:
         Transaction object
     Example: 
-        write(0, 1, 2, 14, '300MG', 1542357074, 200, 8, false, 0)  
+        write(0, 1, 2, 14, '300MG', 1542357074, 200, 8, false, 0, 30)  
     */
-    write: async function(patientID, prescriberID, dispenserID, drugID, quantity, fillDates, writtenDate, daysValid, refills, isCancelled, cancelDate) {
+    write: async function(patientID, prescriberID, dispenserID, drugID, quantity, fillDates, writtenDate, daysValid, refills, isCancelled, cancelDate, daysBetween) {
         var blockchain = await connectToChain();
         let currentChainLength = await getChainLength();
 
@@ -173,7 +175,8 @@ module.exports = {
             daysValid,
             refills,
             isCancelled,
-            cancelDate
+            cancelDate,
+            daysBetween
         );
 
         // Submitting prescription transaction.
@@ -288,14 +291,16 @@ module.exports = {
         quantity (string)
         daysFor (int)
         refillsLeft (int)
+        daysBetween (int)
     Returns:
         Transaction Object.
     Example:
-        update(0, 1, True, 2, '300MG', 16, 1)
+        update(0, 1, true, 2, '300MG', 16, 1, 15)
     Note:
         we have a daysFor vs daysValid problem here
     */
-    update: async function(chainIndex, senderID, isPrescriber, dispenserID, quantity, daysValid, refillsLeft) {
+    update: async function(chainIndex, senderID, isPrescriber, dispenserID, quantity, daysValid, refillsLeft, daysBetween) {
+
         var blockchain = await connectToChain();
         var error;
         var block;
@@ -318,7 +323,8 @@ module.exports = {
                     dispenserID,
                     quantity,
                     daysValid,
-                    refillsLeft
+                    refillsLeft,
+                    daysBetween
                 );
     
                 let encodedTransaction = transaction.encodeABI();

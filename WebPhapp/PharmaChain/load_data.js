@@ -17,11 +17,10 @@ async function loadPrescriptions(){
 	if(conn.MySQL) {
 		await mysql.PrescriptionIDsByPatientIndex.reset(connection);
 		connection.close();
-		console.log('index table in MySQL reset.');
 	}
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
-	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
+    let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
 
     // Get account information
     let account = await web3.eth.personal.getAccounts();
@@ -65,19 +64,20 @@ async function loadPrescriptions(){
 			p.isCancelled = true;
 		}
 
-		let transaction = await Patient.methods.addPrescription(
-			p.patientID,
-			p.prescriberID,
-			p.dispenserID,
-			p.drugID,
-			p.quantity,
-			fillDates,
-			p.writtenDate,
-			p.daysFor,
-			p.refillsLeft,
-			p.isCancelled,
-			p.cancelDate
-		);
+	    let transaction = await Patient.methods.addPrescription(
+		p.patientID,
+		p.prescriberID,
+		p.dispenserID,
+		p.drugID,
+		p.quantity,
+		fillDates,
+		p.writtenDate,
+		p.daysFor,
+		p.refillsLeft,
+		p.isCancelled,
+		p.cancelDate,
+		p.daysBetween
+	    );
 	
 		let encoded_transaction = transaction.encodeABI();
 		await web3.eth.sendTransaction({

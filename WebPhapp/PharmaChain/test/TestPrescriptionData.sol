@@ -25,14 +25,15 @@ contract TestPrescriptionData is PrescriptionBase{
         daysValid: 200,
         refillsLeft: 8,
         isCancelled: false,
-        cancelDate: 0
+        cancelDate: 0,
+        daysBetween: 0
     });
 
     // Test the ability to add a prescription
     function testAddingPrescription() public {
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
-        data.isCancelled, data.cancelDate);
+        data.isCancelled, data.cancelDate, data.daysBetween);
         Assert.equal(0, index, "index return error");
 
         uint256 patientID;
@@ -44,7 +45,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint64 dateWritten;
 
         //Max local args is 16, limit reached. So last 4 values are not compared
-        (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , ) = p.getPatientPrescription(index);
+        (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , , ) = p.getPatientPrescription(index);
 
         Assert.equal(uint(patientID), uint(data.patientID), "PatientID error....");
         Assert.equal(uint(prescriberID), uint(data.prescriberID), "PrescriberID error....");
@@ -64,7 +65,8 @@ contract TestPrescriptionData is PrescriptionBase{
             data.daysValid,
             data.refillsLeft,
             data.isCancelled,
-            data.cancelDate
+            data.cancelDate,
+            data.daysBetween
         );
 
         p.updatePrescription(
@@ -74,7 +76,8 @@ contract TestPrescriptionData is PrescriptionBase{
             3,
             data.drugQuantity,
             data.daysValid,
-            data.refillsLeft
+            data.refillsLeft,
+            data.daysBetween
         );
 
         uint256 patientID;
@@ -82,7 +85,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint128 dispenserID;
 
          //Max local args is 16, limit reached. So last values are not compared
-        (patientID, prescriberID, dispenserID, , , , , , , , ) = p.getPrescription(index);
+        (patientID, prescriberID, dispenserID, , , , , , , , , ) = p.getPrescription(index);
         Assert.equal(uint (dispenserID), uint (data.dispenserID + 1), "dispenserID not updated error....");
     }
 
@@ -90,7 +93,7 @@ contract TestPrescriptionData is PrescriptionBase{
     function testCancel() public{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
-        data.isCancelled, data.cancelDate);
+        data.isCancelled, data.cancelDate, data.daysBetween);
         uint256 canceled = p.cancelPrescription(index, data.prescriberID, true, 10);
         Assert.equal(uint256(canceled),uint64(0), "Prescription not cancelled...");
     }
@@ -99,8 +102,9 @@ contract TestPrescriptionData is PrescriptionBase{
     function testRedeem() public{
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
             data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
-            data.isCancelled, data.cancelDate);
+            data.isCancelled, data.cancelDate, data.daysBetween);
         uint redeem = p.redeemPrescription(index, 1, true, 10);
+
  
         uint256 patientID;
         uint128 prescriberID;
@@ -108,7 +112,7 @@ contract TestPrescriptionData is PrescriptionBase{
         uint128 refillsLeft;
 
          //Max local args is 16, limit reached. So last values are not compared
-        (patientID, prescriberID, dispenserID, , , , , , refillsLeft, , ) = p.getPrescription(index);
+        (patientID, prescriberID, dispenserID, , , , , , refillsLeft, , , ) = p.getPrescription(index);
         Assert.equal(uint(0), uint(redeem), "Unsucessful redemption");
         Assert.equal(uint(refillsLeft), uint(data.refillsLeft - 1), "Refills not decremented");
     }

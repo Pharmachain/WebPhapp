@@ -23,7 +23,8 @@ contract TestPatient is PrescriptionBase{
         daysValid: 200,
         refillsLeft: 8,
         isCancelled: false,
-        cancelDate: 0
+        cancelDate: 0,
+        daysBetween: 30
     });
 
 
@@ -31,7 +32,7 @@ contract TestPatient is PrescriptionBase{
     function testAdding() public {
         uint index = p.addPrescription(data.patientID, data.prescriberID, data.dispenserID, data.drugID,
         data.drugQuantity, data.fulfillmentDates, data.dateWritten, data.daysValid, data.refillsLeft,
-        data.isCancelled, data.cancelDate);
+        data.isCancelled, data.cancelDate, data.daysBetween);
         Assert.equal(0, index, "index return error");
 
         uint256 patientID;
@@ -43,7 +44,7 @@ contract TestPatient is PrescriptionBase{
         uint64 dateWritten;
 
         //Max local args is 16, limit reached. So last 4 values are not compared
-        (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , ) = p.getPatientPrescription(index);
+        (patientID, prescriberID, dispenserID, drugID, drugQuantity, fulfillmentDates, dateWritten, , , , , ) = p.getPatientPrescription(index);
 
         Assert.equal(uint(patientID), uint(data.patientID), "PatientID error....");
         Assert.equal(uint(prescriberID), uint(data.prescriberID), "PrescriberID error....");

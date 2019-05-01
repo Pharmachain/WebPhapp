@@ -19,7 +19,8 @@ contract PrescriptionData is PrescriptionBase {
             uint16,
             uint8,
             bool,
-            uint64) {
+            uint64,
+            uint8) {
         
         Prescription memory p = drugChain[chainIndex];
         return (
@@ -33,7 +34,8 @@ contract PrescriptionData is PrescriptionBase {
             p.daysValid,
             p.refillsLeft,
             p.isCancelled,
-            p.cancelDate
+            p.cancelDate,
+            p.daysBetween
         );
     }
 
@@ -56,7 +58,8 @@ contract PrescriptionData is PrescriptionBase {
         uint128 dispenserID,
         string memory drugQuantity,
         uint16 daysValid,
-        uint8 refillsLeft) public returns(uint) {
+        uint8 refillsLeft,
+        uint8 daysBetween) public returns(uint) {
     	
         Prescription storage p = drugChain[chainIndex];
 
@@ -82,6 +85,7 @@ contract PrescriptionData is PrescriptionBase {
         p.drugQuantity = drugQuantity;
         p.daysValid = daysValid;
         p.refillsLeft = refillsLeft;
+        p.daysBetween = daysBetween;
 
         return 0;
     }
@@ -97,7 +101,8 @@ contract PrescriptionData is PrescriptionBase {
         uint16 daysValid,
         uint8 refillsLeft,
         bool isCancelled,
-        uint64 cancelDate) public returns (uint) {
+        uint64 cancelDate,
+        uint8 daysBetween) public returns (uint) {
             
         Prescription memory p = Prescription(
             patientID,
@@ -110,7 +115,8 @@ contract PrescriptionData is PrescriptionBase {
             daysValid,
             refillsLeft,
             bool(isCancelled),
-            cancelDate
+            cancelDate,
+            daysBetween
         );
 
         drugChain.push(p);

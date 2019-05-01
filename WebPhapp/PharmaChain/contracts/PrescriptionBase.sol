@@ -50,6 +50,8 @@ contract PrescriptionBase {
         bool isCancelled; 
         // The date of the cancellation of the prescription request
         uint64 cancelDate;
+        // The number of days between prescription redemption
+        uint8 daysBetween;
     }
     
 }

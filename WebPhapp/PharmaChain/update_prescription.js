@@ -13,11 +13,12 @@ Args:
     drugQuantity (string)
     daysValid (int)
     refillsLeft (int)
+    daysBetween (int)
 Example: 
-    >>> sudo node update_prescription.js 0 1 true 1 "1 mg" 4 8
+    >>> sudo node update_prescription.js 0 1 true 1 "1 mg" 4 8 14
 */
 
-async function update( drugChainIndex, senderID, isPrescriber, dispenserID, drugQuantity, daysValid, refillsLeft){
+async function update( drugChainIndex, senderID, isPrescriber, dispenserID, drugQuantity, daysValid, refillsLeft, daysBetween){
 
     // Connecting to the node 1. Will want to change to IPC connection eventually. 
 	let web3 = new Web3( new Web3.providers.HttpProvider("http://10.50.0.2:22000", net));
@@ -37,7 +38,9 @@ async function update( drugChainIndex, senderID, isPrescriber, dispenserID, drug
 
     // Set up prescription data to be sent.
     Patient.options.address = fs.readFileSync("./patient_contract_address.txt").toString('ascii');
-    let transaction = await Patient.methods.updatePrescription(drugChainIndex, senderID, isPrescriber, dispenserID, drugQuantity, daysValid, refillsLeft);
+
+    let transaction = await Patient.methods.updatePrescription(drugChainIndex, senderID, isPrescriber, dispenserID, drugQuantity, daysValid, refillsLeft, daysBetween);
+
     
     // Submitting prescription transaction.
     let encoded_transaction = transaction.encodeABI();
@@ -61,5 +64,6 @@ let dispenserID = args[5];
 let drugQuantity = args[6]; 
 let daysValid = args[7];
 let refillsLeft = args[8];
+let daysBetween = args[9];
 
-update(drugChainIndex, senderID, isPrescriber, dispenserID, drugQuantity, daysValid, refillsLeft);
+update(drugChainIndex, senderID, isPrescriber dispenserID, drugQuantity, daysValid, refillsLeft, daysBetween);

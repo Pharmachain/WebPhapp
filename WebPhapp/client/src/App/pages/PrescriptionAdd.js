@@ -12,6 +12,7 @@ class PrescriptionAdd extends Component {
     refillsLeft: 0,
     prescriberID: 0,
     dispenserID: 0,
+    daysBetween: 0,
     message: '',
 
     isLoading: false,
@@ -39,6 +40,11 @@ class PrescriptionAdd extends Component {
     this.setState({daysFor: event.target.value});
   }
 
+  // Updating value in the daysBetween state
+  onKeyDownDaysBetween = event => {
+    this.setState({daysBetween: event.target.value});
+  }
+  
   // Updating value in the refillsLeft state
   onKeyDownRefillsLeft = event => {
     this.setState({refillsLeft: event.target.value});
@@ -131,8 +137,9 @@ class PrescriptionAdd extends Component {
         "quantity": this.state.quantity,
         "daysFor": this.state.daysFor,
         "refillsLeft": this.state.refillsLeft,
-        "prescriberID": this.state.prescriberID,
-        "dispenserID": this.state.dispenserID
+        "prescriberID": this.props.id,
+        "dispenserID": this.state.dispenserID,
+        "daysBetween": this.state.daysBetween
     })
     .then(response => {
       // Add request is finished from backend and has a response
@@ -303,12 +310,23 @@ class PrescriptionAdd extends Component {
 
               <div className="col-md-6">
                 <div className="form-group focused">
-                <label className="form-control-label">Days For:</label>
+                <label className="form-control-label">Total Days Valid:</label>
                   <input
                   type="p"
                   className="form-control"
-                  placeholder="Enter the number of days for"
+                  placeholder="Enter the number of days"
                   onChange={this.onKeyDownDaysFor}/>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-group focused">
+                <label className="form-control-label">Days Until Next Refill:</label>
+                  <input
+                  type="p"
+                  className="form-control"
+                  placeholder="Enter the number of days"
+                  onChange={this.onKeyDownDaysBetween}/>
                 </div>
               </div>
 

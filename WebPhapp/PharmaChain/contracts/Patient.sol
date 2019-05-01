@@ -23,7 +23,8 @@ contract Patient is PrescriptionData, PrescriptionAccessControl{
         uint16 daysValid,
         uint8 refillsLeft,
         bool isCancelled, 
-        uint64 cancelDate
+        uint64 cancelDate,
+        uint8 daysBetween
     ){
         require(prescriptionIndex < drugChain.length, "Index greater than the length");
 
@@ -41,6 +42,7 @@ contract Patient is PrescriptionData, PrescriptionAccessControl{
         refillsLeft = patient.refillsLeft;
         isCancelled = patient.isCancelled;
         cancelDate = patient.cancelDate; 
+        daysBetween = patient.daysBetween;
     }
     
 }

@@ -179,18 +179,20 @@ app.get('/api/v1/prescriptions/cancel/:prescriptionID', auth.checkAuth([Role.Pre
 
 /*
 Edits a prescription for a given prescriptionID. The prescriptionID indexes the prescription on the blockchain.
-Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int)
+Editable fields: quantity (string), daysValid (int), refillsLeft (int), dispenserID (int), daysBetween (int)
 Takes an object of shape:
     {
         prescriptionID,
         quantity,
         daysValid,
         refillsLeft,
-        dispenserID
+        dispenserID,
+        daysBetween
     }
 Examples:
     Directly in terminal:
-         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":2,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":1,"dispenserID":1}'
+
+         >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":2,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":1,"dispenserID":1, "daysBetween":30}'
              To be used in an axios call:
         .post("/api/v1/prescription/edit",{
             prescriptionID: 0,
@@ -216,7 +218,8 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
         changedPrescription.quantity,
         changedPrescription.daysFor,
         changedPrescription.refillsLeft,
-        changedPrescription.dispenserID
+        changedPrescription.dispenserID,
+        changedPrescription.daysBetween
     ]);
     if(fields.has(undefined) || fields.has(null)) {
         return finish('/api/v1/prescriptions/edit: One of the mandatory prescription fields is null or undefined.', false);
@@ -228,6 +231,7 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
     }
 
     if(conn.Blockchain){
+
          // check length of blockchain to see if prescriptionID is valid (prescriptions are indexed by ID)
          block_helper.verifyChainIndex(changedPrescription.prescriptionID)
          .then((_) => {
@@ -242,7 +246,8 @@ app.post('/api/v1/prescriptions/edit', auth.checkAuth([Role.Prescriber, Role.Dis
                 changedPrescription.dispenserID,
                 changedPrescription.quantity,
                 changedPrescription.daysFor,
-                changedPrescription.refillsLeft
+                changedPrescription.refillsLeft,
+                changedPrescription.daysBetween
             ).then((_) => {
                 return finish('/api/v1/prescriptions/edit: edited prescription with ID ' + changedPrescription.prescriptionID.toString(), true);
             })
@@ -276,11 +281,13 @@ About:
         daysFor,
         refillsLeft,
         prescriberID,
-        dispensorID
+        dispensorID,
+        daysBetween
     }
 Examples:
     Directly in terminal:
-        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Type: application/json;charset=utf-8' --data '{"patientID":1,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":3,"dispenserID":3}'
+        >>> curl 'http://localhost:5000/api/v1/prescriptions/add' -H 'Accept: application/json, text/plain, /*' -H 'Content-Typplication/json;charset=utf-8' --data '{"patientID":0,"drugID":13,"quantity":"1mg","daysFor":0,"refillsLeft":0,"prescriberID":0,
+        "dispenserID":0,"daysBetween":30}'
     To be used in Axois call:
         .post("/api/v1/prescription/add",{
             patientID: 0,
@@ -313,10 +320,12 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
         prescription.daysFor,
         prescription.refillsLeft,
         prescription.prescriberID,
-        prescription.dispenserID
+        prescription.dispenserID,
+        prescription.daysBetween
     ];
     fieldsSet = new Set(fields);
     if(fieldsSet.has(undefined) || fieldsSet.has(null)){
+        console.log(fieldsSet)
         return finish('Required prescription field(s) are null or undefined.', false)
     }
 
@@ -328,6 +337,7 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
         prescription.refillsLeft = parseInt(prescription.refillsLeft);
         prescription.prescriberID = parseInt(prescription.prescriberID);
         prescription.dispenserID = parseInt(prescription.dispenserID);
+        prescription.daysBetween = parseInt(prescription.daysBetween);
     } catch(error) {
         finish("Error casting fields to int: " + error.toString(), false);
     }
@@ -377,7 +387,8 @@ app.post('/api/v1/prescriptions/add', auth.checkAuth([Role.Prescriber]), async (
             prescription.daysFor,
             prescription.refillsLeft,
             prescription.isCancelled,
-            prescription.cancelDate
+            prescription.cancelDate,
+          prescription.daysBetween
         ).then((prescriptionID) => {
             // add index in MySQL for faster lookups if MySQL connection exists
             if(conn.MySQL && settings.indexPrescriptions) {
@@ -413,7 +424,7 @@ Returns:
     A list of prescription objects each with fields: [
         prescriptionID, patientID, drugID, fillDates,
         writtenDate, quantity, daysFor, refillsLeft,
-        prescriberID, dispenserID, cancelDate, drugName
+        prescriberID, dispenserID, cancelDate, daysBetween, drugName
     ]
 */
 app.get('/api/v1/prescriptions/:patientID', auth.checkAuth([Role.Patient, Role.Prescriber, Role.Dispenser, Role.Government]), (req,res) => {
@@ -629,6 +640,7 @@ Returns:
         prescriberID,
         dispenserID,
         cancelDate,
+        daysBetween,
         drugName
     ]
 */
