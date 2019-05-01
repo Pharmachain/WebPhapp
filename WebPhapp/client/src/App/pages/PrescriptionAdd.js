@@ -138,7 +138,7 @@ class PrescriptionAdd extends Component {
         "quantity": this.state.quantity,
         "daysFor": this.state.daysFor,
         "refillsLeft": this.state.refillsLeft,
-        "prescriberID": this.state.prescriberID,
+        "prescriberID": this.props.id,
         "dispenserID": this.state.dispenserID,
         "daysBetween": this.state.daysBetween
     })
