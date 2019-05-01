@@ -587,7 +587,7 @@ class Prescription extends Component {
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col">
-                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Days Until Next Refill:</h5>
+                                                <h5 className="card-title text-uppercase text-muted mb-0 text-left">Days Between Refills:</h5>
                                                 <span className="h3 font-weight-bold mb-0 offset-1">{daysBetween}</span>
                                             </div>
                                             <div className="col-auto">

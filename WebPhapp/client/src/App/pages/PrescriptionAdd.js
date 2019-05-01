@@ -321,7 +321,7 @@ class PrescriptionAdd extends Component {
 
               <div className="col-md-6">
                 <div className="form-group focused">
-                <label className="form-control-label">Days Until Next Refill:</label>
+                <label className="form-control-label">Days Between Refills:</label>
                   <input
                   type="p"
                   className="form-control"
